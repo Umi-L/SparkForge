@@ -1,0 +1,93 @@
+:root {
+  /* CSS HSL */
+  --pale-dogwood: hsla(15, 87%, 85%, 1);
+  --almond: hsla(32, 42%, 83%, 1);
+  --honeydew: hsla(139, 27%, 82%, 1);
+  --aquamarine: hsla(156, 61%, 77%, 1);
+  --outer-space: hsla(210, 10%, 32%, 1);
+
+  --background-color: #222222;
+  --text-color: #aaaaaa;
+  --semi-light-text-color: #cccccc;
+
+  --primary-color: var(--pale-dogwood);
+  --secondary-color: var(--almond);
+
+  --midground-color: #333333;
+  --foreground-color: #393939;
+
+  --general-border-radius: 5px;
+  --general-padding: 5px;
+}
+
+/* Customize website's scrollbar like Mac OS
+Not supports in Firefox and IE */
+
+/* total width */
+body::-webkit-scrollbar {
+  background-color: #fff;
+  width: 16px;
+}
+
+/* background of the scrollbar except button or resizer */
+body::-webkit-scrollbar-track {
+  background-color: #fff;
+}
+
+/* scrollbar itself */
+body::-webkit-scrollbar-thumb {
+  background-color: #babac0;
+  border-radius: 16px;
+  border: 4px solid #fff;
+}
+
+/* set button(top and bottom of the scrollbar) */
+body::-webkit-scrollbar-button {
+  display:none;
+}
+
+
+
+*{
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body{
+  /* background-color: var(--background-color); */
+  font-family: 'JetBrains Mono', monospace;  
+  font-size: 1.2em;
+  margin: 0;
+  padding: 0;
+
+  background-color: var(--background-color);
+
+  width: 100vw;
+  height: 100vh;
+}
+
+.body{
+  --grid-gap: 10px;
+
+  position: absolute;
+
+  /* account for gap using calc */
+  width: calc(100vw - 2*var(--grid-gap));
+  height: calc(100vh - (var(--general-padding) + 30px));
+
+  /* grid */
+  display: grid;
+
+  /* grid with 3 rows and 3 cols */
+  /* the cols should have widths of 20% 60% 20% */
+  grid-template-columns: 20% 60% 20%;
+  grid-template-rows: 1fr 1fr 20%;
+
+  padding: var(--general-padding);
+
+  gap: var(--grid-gap) var(--grid-gap);
+
+  bottom: 0;
+
+}
