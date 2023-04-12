@@ -79,6 +79,8 @@
         width: 100%;
         height: 100%;
         overflow: auto;
+
+        user-select: none;
     }
 
     .panel-container {
@@ -91,6 +93,8 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 
         overflow: hidden;
+
+        user-select: none;
     }
 
     .panel-header{
@@ -101,6 +105,8 @@
         padding: 5px;
         background-color: var(--foreground-color);
         border-radius: var(--general-border-radius);
+
+        user-select: none;
     }
     .panel-header h1 {
         color: var(--text-color);

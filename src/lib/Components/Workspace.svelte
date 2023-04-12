@@ -1,13 +1,16 @@
 <script lang="ts">
     import Panel from "../Panel.svelte";
     import { panelGridPositions } from "../../main";
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
 
     let panelExtender:HTMLDivElement;
     let workfield:HTMLDivElement;
 
     let colStyle = "1 / 2";
     let rowStyle = "1 / 2";
+
+    let dragging = false;
+    let currentViewPos = {x: 0, y: 0};
 
     const panelExtenderDistance = 500;
 
@@ -20,6 +23,16 @@
 
     onMount(() => {
         update();
+
+        // add event listeners
+        window.addEventListener("mouseup", globalOnMouseUp);
+        workfield.addEventListener("mousedown", workfieldMouseDown);
+        workfield.addEventListener("mousemove", workfieldMouseMove);
+        workfield.addEventListener("scroll", workfieldOnScroll);
+
+        // // start at 50% scroll
+        // workfield.scrollLeft = workfield.scrollWidth / 2;
+        // workfield.scrollTop = workfield.scrollHeight / 2;
     });
 
     function update() {
@@ -29,6 +42,38 @@
         panelExtender.style.top = elementsBox.height + (panelExtenderDistance*2) + "px";
         panelExtender.style.left = elementsBox.width + (panelExtenderDistance*2) + "px";
 
+    }
+
+    function globalOnMouseUp(event) {
+        if (dragging) {
+            dragging = false;
+
+            event.preventDefault();
+        }
+    }
+
+    function workfieldMouseDown(event){
+        dragging = true;
+
+        event.preventDefault();
+    }
+
+    function workfieldMouseMove(event){
+        if (dragging) {
+            // move the workfield the same amount as the mouse moved
+            workfield.scrollLeft -= event.movementX;
+            workfield.scrollTop -= event.movementY;
+        }
+    }
+
+    function workfieldOnScroll(event) {
+        // update current view position
+        currentViewPos.x = workfield.scrollLeft;
+        currentViewPos.y = workfield.scrollTop;
+
+        // update background x and y but keep the direction of scroll
+        workfield.style.backgroundPositionX = -currentViewPos.x + "px";
+        workfield.style.backgroundPositionY = -currentViewPos.y + "px";
     }
 
     function getElementsBox(): DOMRect {
@@ -79,7 +124,7 @@
         width: 100%;
         height: 100%;
         background-image: url("/dotbg.png");
-        background-size: 20px 20px;
+        background-size: 30px 30px;
         overflow: scroll;
     }
 
