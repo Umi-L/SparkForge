@@ -23,7 +23,7 @@
         <!-- for every NodeType draw it -->
         {#each Object.values(NodeTypes) as node}
             <div class="node-wrapper">
-                <Node shape={node.name} inputPoints={node.inputs} outputPoints={node.outputs}></Node>
+                <Node shape={node.name} inputPoints={node.inputs} outputPoints={node.outputs} factory={true}></Node>
             </div>
         {/each}
     </div>
@@ -47,9 +47,9 @@
         overflow: scroll;
     }
 
-    .node-wrapper{
+    /* .node-wrapper{
         max-width: 80%;
         max-height: 85px;
-    }
+    } */
 
 </style>

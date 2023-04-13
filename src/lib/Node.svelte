@@ -1,21 +1,37 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { NodeType, Point } from "../Types";
+    import Node from "./Node.svelte";
 
-  
 
     //set up props
     export let shape: string;
     export let inputPoints: Array<Point>;
     export let outputPoints: Array<Point>;
     export let factory: boolean = false;
+    export let dragging = false;
+    export let justCreatedByFactory = false;
 
-    let dragging = false;
+    let scale = 1;
 
     let nodeBody: HTMLDivElement;
 
+
     function globalOnMouseUp(event){
         if (dragging) {
+
+            // get all elements the mouse is over
+            let elements = document.elementsFromPoint(event.clientX, event.clientY);
+
+            elements.forEach(element => {
+                if (element.classList.contains("workfield")){
+                    // if the mouse is over the workfield, add the node to the workfield
+                    element.appendChild(nodeBody);
+                }
+            });
+
+
+
             dragging = false;
 
             event.preventDefault();
@@ -25,8 +41,19 @@
     function nodeBodyMouseDown(event){
 
         if (factory){
-            // create clone of node
-            let clone = nodeBody.cloneNode(true) as HTMLDivElement;
+
+            // create a duplicate of the node
+            let newNode = new Node({
+                target: document.body,
+                props: {
+                    shape: shape,
+                    inputPoints: inputPoints,
+                    outputPoints: outputPoints,
+                    factory: false,
+                    dragging: true,
+                    justCreatedByFactory: true
+                }
+            })
         }else{
             dragging = true;
         }
@@ -101,18 +128,27 @@
 
     .node-body {
         position: relative;
-        width: 100%;
-        height: 100%;
 
         /* show grabbable */
         cursor: grab;
 
         outline: 1px solid black;
+
+        /* take up as little width as possible */
+        width: fit-content;
+
+        max-height: 65px;
     }
 
     .node-body :global(img) {
+        /* fill parent */
         width: 100%;
         height: 100%;
+
+        max-height: 65px;
+
+        /* keep aspect ratio */
+        object-fit: contain;
     }
 
     .io-point{
@@ -146,6 +182,19 @@
 
     .dragging{
         cursor: grabbing;
+        opacity: 0.8;
+
+        /* repeat wigle animation */
+        animation: wiggle 0.2s infinite;
+    }
+
+    /* wiggleing keyframes */
+    @keyframes wiggle {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(2deg); }
+        50% { transform: rotate(0deg); }
+        75% { transform: rotate(-2deg); }
+        100% { transform: rotate(0deg); }
     }
 
 </style>
