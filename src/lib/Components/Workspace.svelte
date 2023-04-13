@@ -53,6 +53,12 @@
     }
 
     function workfieldMouseDown(event){
+
+        // if the mouse is not over only the workspace then don't drag
+        if (event.target != workfield) {
+            return;
+        }
+
         dragging = true;
 
         event.preventDefault();
@@ -126,10 +132,12 @@
         background-image: url("/dotbg.png");
         background-size: 30px 30px;
         overflow: scroll;
+
+        position: relative;
     }
 
     .extender{
-        position: relative;
+        position: absolute;
 
         width:1px;
         height:1px;

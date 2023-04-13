@@ -10,12 +10,31 @@
     export let outputPoints: Array<Point>;
     export let factory: boolean = false;
     export let dragging = false;
-    export let justCreatedByFactory = false;
+
+    export let position: {x: number, y: number} = {x: 0, y: 0};
 
     let scale = 1;
 
-    let nodeBody: HTMLDivElement;
+    export let nodeBody: HTMLDivElement = null;
 
+    function globalMousePosToWorkfieldPos(workfield: Element, mousePos: {x: number, y: number}): {x: number, y: number} {
+        let workfieldPos = {x: 0, y: 0};
+
+        // current scroll position of the workfield
+        let scrollPos = {
+            x: workfield.scrollLeft,
+            y: workfield.scrollTop
+        }
+
+        workfieldPos.x = mousePos.x - workfield.getBoundingClientRect().x;
+        workfieldPos.y = mousePos.y - workfield.getBoundingClientRect().y;
+
+        // add the scroll position to the position
+        workfieldPos.x += scrollPos.x;
+        workfieldPos.y += scrollPos.y;
+
+        return workfieldPos;
+    }
 
     function globalOnMouseUp(event){
         if (dragging) {
@@ -23,12 +42,41 @@
             // get all elements the mouse is over
             let elements = document.elementsFromPoint(event.clientX, event.clientY);
 
+            let wasUsed = false;
+
             elements.forEach(element => {
                 if (element.classList.contains("workfield")){
                     // if the mouse is over the workfield, add the node to the workfield
                     element.appendChild(nodeBody);
+
+                    // get reference to the workspace component
+                    let workspace = element.parentElement;
+
+                    // get the centre of the node
+                    let boundingBox = nodeBody.getBoundingClientRect();
+
+                    let nodeCentre = {
+                        x: boundingBox.width / 2,
+                        y: boundingBox.height / 2
+                    }
+
+                    // call the globalMousePosToWorkfieldPos function on the workspace component
+                    let pos = globalMousePosToWorkfieldPos(element, {x: event.clientX - nodeCentre.x, y: event.clientY - nodeCentre.y});
+
+                    console.log(pos);
+
+                    // set the node position to the position returned by the function
+                    nodeBody.style.left = pos.x + "px";
+                    nodeBody.style.top = pos.y + "px";
+
+                    wasUsed = true;
                 }
             });
+
+            if (!wasUsed){
+                // if the mouse is not over the workfield, remove the node
+                nodeBody.remove();
+            }
 
 
 
@@ -51,9 +99,19 @@
                     outputPoints: outputPoints,
                     factory: false,
                     dragging: true,
-                    justCreatedByFactory: true
                 }
             })
+
+            // set new node position to factory position
+            let boundingBox = nodeBody.getBoundingClientRect();
+
+            newNode.$set({
+                position: {
+                    x: boundingBox.left,
+                    y: boundingBox.top
+                }
+            })
+
         }else{
             dragging = true;
         }
@@ -98,6 +156,10 @@
         nodeBody.addEventListener("mousedown", nodeBodyMouseDown);
         window.addEventListener("mouseup", globalOnMouseUp);
         window.addEventListener("mousemove", globalMouseMove);
+
+        // set initial position
+        nodeBody.style.left = position.x + "px";
+        nodeBody.style.top = position.y + "px";
     })
 </script>
 
@@ -112,13 +174,13 @@
     <!-- for each input attachment point -->
     {#each inputPoints as point}
         <!-- draw a circle -->
-        <div class="input-point io-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
+        <div class="io-point input-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
     {/each}
 
     <!-- for each output attachment point -->
     {#each outputPoints as point}
         <!-- draw a circle -->
-        <div class="output-point io-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
+        <div class="io-point output-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
     {/each}
 </div>
 
@@ -127,22 +189,22 @@
 <style>
 
     .node-body {
-        position: relative;
+        position: absolute;
 
         /* show grabbable */
         cursor: grab;
 
-        outline: 1px solid black;
+        /* outline: 1px solid black; */
 
         /* take up as little width as possible */
-        width: fit-content;
+        /* width: fit-content; */
 
         max-height: 65px;
     }
 
     .node-body :global(img) {
         /* fill parent */
-        width: 100%;
+        /* width: 100%; */
         height: 100%;
 
         max-height: 65px;
