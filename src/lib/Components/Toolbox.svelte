@@ -1,9 +1,9 @@
 <script lang="ts">
     import Panel from "../Panel.svelte";
     import { panelGridPositions } from "../../main";
-    import { NodeType, NodeTypes } from "../../Types";
+    import { NodeTypes } from "../../Types";
     import Node from "../Node.svelte";
-    import { onMount } from "svelte";
+    import { afterUpdate, onMount } from "svelte";
 
     let colStyle = "1 / 2";
     let rowStyle = "1 / 2";
@@ -26,9 +26,38 @@
         // for every children node
         childrenNodes.forEach(node => {
             // get first child
-            let nodeBody = node.$$.props["nodeBody"];
+            let nodeBody = node.getRoot();
 
-            console.log(nodeBody);
+            // console.log(nodeBody);
+
+            // get the centre of the node
+            let boundingBox = nodeBody.getBoundingClientRect();
+
+            console.log(boundingBox);
+
+            // get the centre of the node
+            let centre = {
+                x: boundingBox.width / 2,
+                y: boundingBox.height / 2
+            }
+
+            console.log(centre);
+
+            // get the width of the menu
+            let menuWidth = nodeBody.parentElement.getBoundingClientRect().width;
+
+            console.log(menuWidth);
+
+            // set the position of the node
+            nodeBody.style.left = (menuWidth / 2 - centre.x) + "px";
+            nodeBody.style.top = (runningHeight) + "px";
+
+            console.log(nodeBody.style.left)
+            
+            // add the height of the node to the running height
+            runningHeight += boundingBox.height + nodeGap;
+
+            console.log(runningHeight)
         });
     });
 

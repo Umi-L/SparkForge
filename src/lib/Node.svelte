@@ -15,7 +15,11 @@
 
     let scale = 1;
 
-    export let nodeBody: HTMLDivElement = null;
+    let nodeBody: HTMLDivElement = null;
+
+    export function getRoot(): HTMLDivElement {
+        return nodeBody;
+    }
 
     function globalMousePosToWorkfieldPos(workfield: Element, mousePos: {x: number, y: number}): {x: number, y: number} {
         let workfieldPos = {x: 0, y: 0};
@@ -167,7 +171,7 @@
 
 
 <!-- draw the svg -->
-<div class="node-body" bind:this={nodeBody} class:dragging={dragging} >
+<div class="node-body" bind:this={nodeBody} class:dragging={dragging}>
     <!-- draw the shape -->
     {@html `<img class="node-image" src="/shapes/${shape + ".svg"}"></img>`}
 
