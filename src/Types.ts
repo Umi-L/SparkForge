@@ -1,6 +1,8 @@
 export interface Point {
     x: number
     y: number
+
+    name?: string
 }
 
 export interface NodeInterface {
@@ -20,7 +22,7 @@ export const NodeTypes = {
     Start: { name: 'start', inputs: [], outputs: [{ x: 0.5, y: 1 }] },
 
     // Logic
-    If: { name: 'if', inputs: [{ x: 0, y: 0 }], outputs: [{ x: 0, y: 0 }, { x: 0, y: 0 }] },
-    Elseif: { name: 'elseif', inputs: [{ x: 0, y: 0 }], outputs: [{ x: 0, y: 0 }, { x: 0, y: 0 }] },
-    Else: { name: 'else', inputs: [{ x: 0, y: 0 }], outputs: [{ x: 0, y: 0 }] },
+    If: { name: 'if', inputs: [{ x: 0.5, y: 0}], outputs: [{ x: 1, y: 0.5, name: "true" }, { x: 0.5, y: 1, name: "false" }] },
+    Elseif: { name: 'elseif', inputs: [{ x: 0, y: 0}], outputs: [{ x: 0, y: 0 }, { x: 0, y: 0 }] },
+    Else: { name: 'else', inputs: [{ x: 0, y: 0}], outputs: [{ x: 0, y: 0 }] },
 }

@@ -8,7 +8,7 @@
     let colStyle = "1 / 2";
     let rowStyle = "1 / 2";
 
-    const nodeGap = 20;
+    const nodeGap = 40;
 
     panelGridPositions.forEach(element => {
         if (element.name == "toolbox") {
@@ -20,18 +20,21 @@
     let childrenNodes:Array<Node> = [];
 
     onMount(() => {
+    });
 
-        let runningHeight = 0;
+    function positionElements(){
+        // start with "padding"
+        let runningHeight = nodeGap/2;
 
         // for every children node
         childrenNodes.forEach(node => {
             // get first child
             let nodeBody = node.getRoot();
 
-            // console.log(nodeBody);
+            console.log(nodeBody);
 
-            // get the centre of the node
-            let boundingBox = nodeBody.getBoundingClientRect();
+            // get the centre of the node's image
+            let boundingBox = nodeBody.children[0].getBoundingClientRect();
 
             console.log(boundingBox);
 
@@ -59,7 +62,7 @@
 
             console.log(runningHeight)
         });
-    });
+    }
 
 </script>
 
@@ -70,7 +73,7 @@
         <!-- for every NodeType draw it -->
         {#each Object.values(NodeTypes) as node, i}
             
-            <Node bind:this={childrenNodes[i]} shape={node.name} inputPoints={node.inputs} outputPoints={node.outputs} factory={true}></Node>
+            <Node bind:this={childrenNodes[i]} shape={node.name} inputPoints={node.inputs} outputPoints={node.outputs} factory={true} on:reposition={positionElements}></Node>
             
         {/each}
     </div>

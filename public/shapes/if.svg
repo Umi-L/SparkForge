@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="121.88805mm"
+   height="121.89325mm"
+   viewBox="0 0 121.88805 121.89325"
+   version="1.1"
+   id="svg308"
+   inkscape:version="1.2.2 (b0a8486, 2022-12-01)"
+   sodipodi:docname="if.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview310"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.56567968"
+     inkscape:cx="110.48656"
+     inkscape:cy="233.34761"
+     inkscape:window-width="1440"
+     inkscape:window-height="900"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs305" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-44.055977,-87.553377)">
+    <rect
+       style="fill:#f6f6f6;stroke:#000000;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect535"
+       width="84.658478"
+       height="84.190758"
+       x="137.15839"
+       y="-12.745008"
+       transform="rotate(45.45)" />
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       x="98.85051"
+       y="153.89502"
+       id="text1145"><tspan
+         sodipodi:role="line"
+         id="tspan1143"
+         style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.5"
+         x="98.85051"
+         y="153.89502">If</tspan></text>
+  </g>
+</svg>

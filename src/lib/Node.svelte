@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
     import type { NodeType, Point } from "../Types";
     import Node from "./Node.svelte";
-
 
     //set up props
     export let shape: string;
@@ -10,6 +9,8 @@
     export let outputPoints: Array<Point>;
     export let factory: boolean = false;
     export let dragging = false;
+
+    const dispatch = createEventDispatcher();
 
     export let position: {x: number, y: number} = {x: 0, y: 0};
 
@@ -165,6 +166,12 @@
         nodeBody.style.left = position.x + "px";
         nodeBody.style.top = position.y + "px";
     })
+
+    function onImageLoad(){
+        console.log("image loaded")
+
+        dispatch('reposition');
+    }
 </script>
 
 
@@ -173,7 +180,7 @@
 <!-- draw the svg -->
 <div class="node-body" bind:this={nodeBody} class:dragging={dragging}>
     <!-- draw the shape -->
-    {@html `<img class="node-image" src="/shapes/${shape + ".svg"}"></img>`}
+    <img class="node-image" src="/shapes/{shape}.svg" alt={shape} on:load={onImageLoad}>
 
     <!-- for each input attachment point -->
     {#each inputPoints as point}
@@ -220,30 +227,30 @@
     .io-point{
         position: absolute;
 
-        width: 10px;
-        height: 10px;
+        width: 15px;
+        height: 15px;
         border-radius: 50%;
 
         transform: translate(-50%, -50%);
+
+        border: 1px solid var(--midground-color);
 
         transition-duration: 0.1s;
     }
 
     .input-point {
-        background-color: green;
+        background-color: var(--aquamarine);
     }
 
     .output-point{
-        background-color: red;
+        background-color: var(--pale-dogwood);
     }
 
     .io-point:hover{
         cursor: pointer;
 
-        width: 20px;
-        height: 20px;
-
-        border: 1px solid white;
+        width: 25px;
+        height: 25px;
     }
 
     .dragging{
