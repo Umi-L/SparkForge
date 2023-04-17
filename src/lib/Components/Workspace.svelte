@@ -20,7 +20,7 @@
     let dragging = false;
     let currentViewPos = {x: 0, y: 0};
 
-    const panelExtenderDistance = 500;
+    const panelExtenderDistance = 200;
 
     panelGridPositions.forEach(element => {
         if (element.name == "workspace") {
@@ -75,6 +75,8 @@
         nodeBody.style.top = pos.y + "px";
 
         node.setPosition(pos.x, pos.y);
+
+        update();
     }
 
 
