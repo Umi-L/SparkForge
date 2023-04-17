@@ -1,10 +1,18 @@
 <script lang="ts">
     import Panel from "../Panel.svelte";
-    import { panelGridPositions } from "../../main";
+    import { panelGridPositions, registerElement } from "../../main";
     import { onMount } from "svelte";
+    import { get_current_component } from "svelte/internal";
+    import type Node from "../Node.svelte";
+
+    let myself = get_current_component();
 
     let panelExtender:HTMLDivElement;
     let workfield:HTMLDivElement;
+    let connectionsSvg:SVGSVGElement;
+
+    let nodes = [];
+    let connections = [];
 
     let colStyle = "1 / 2";
     let rowStyle = "1 / 2";
@@ -33,7 +41,42 @@
         // // start at 50% scroll
         // workfield.scrollLeft = workfield.scrollWidth / 2;
         // workfield.scrollTop = workfield.scrollHeight / 2;
+
+        console.log(myself)
+
+        // register the workfield as the workspace
+        registerElement(workfield, myself);
     });
+
+    export function addNode(node:Node, mouseX:number, mouseY:number) {
+
+        // add node to nodes
+        nodes.push(node);
+
+        let nodeBody = node.getRoot();
+
+
+        console.log("adding node");
+        workfield.appendChild(nodeBody);
+
+        // get the centre of the node
+        let boundingBox = nodeBody.getBoundingClientRect();
+
+        let nodeCentre = {
+            x: boundingBox.width / 2,
+            y: boundingBox.height / 2
+        }
+
+        // call the globalMousePosToWorkfieldPos function on the workspace component
+        let pos = globalMousePosToWorkfieldPos({x: mouseX - nodeCentre.x, y: mouseY - nodeCentre.y});
+
+        // set the node position to the position returned by the function
+        nodeBody.style.left = pos.x + "px";
+        nodeBody.style.top = pos.y + "px";
+
+        node.setPosition(pos.x, pos.y);
+    }
+
 
     function update() {
 
@@ -82,6 +125,26 @@
         workfield.style.backgroundPositionY = -currentViewPos.y + "px";
     }
 
+    function globalMousePosToWorkfieldPos(mousePos: {x: number, y: number}): {x: number, y: number} {
+        let workfieldPos = {x: 0, y: 0};
+
+        // current scroll position of the workfield
+        let scrollPos = {
+            x: workfield.scrollLeft,
+            y: workfield.scrollTop
+        }
+
+        workfieldPos.x = mousePos.x - workfield.getBoundingClientRect().x;
+        workfieldPos.y = mousePos.y - workfield.getBoundingClientRect().y;
+
+        // add the scroll position to the position
+        workfieldPos.x += scrollPos.x;
+        workfieldPos.y += scrollPos.y;
+
+        return workfieldPos;
+    }
+
+
     function getElementsBox(): DOMRect {
         // get the bounding box of the elements that are in the workfield but not the extender
         let elements = workfield.children;
@@ -119,6 +182,7 @@
 
 <Panel name="Workspace" rowstyle={rowStyle} colstyle={colStyle}>
     <div class="workfield" bind:this={workfield}>
+        <svg class="connections" bind:this={connectionsSvg}></svg>
         <div class="extender" bind:this={panelExtender}></div>
     </div>
 </Panel>

@@ -20,11 +20,33 @@ export let panelGridPositions = [
     "row": "1/4",
   },
   {
+    "name": "explorer",
+    "col": "3",
+    "row": "2/4",
+  },
+  {
     "name": "properties",
     "col": "3",
-    "row": "1/4",
+    "row": "1/2",
   },
 ]
+
+// hashmap of HTML elements and their parent components
+export let elementReferenceTable = new Map<Element, any>();
+
+export function registerElement(domElement: Element, element: any) {
+
+  console.log("registering element: " + domElement + " to " + element)
+
+  elementReferenceTable.set(domElement, element);
+}
+
+export function getElementFromDomElement(domElement: Element) {
+
+  console.log("getting element from dom element: " + domElement)
+
+  return elementReferenceTable.get(domElement);
+}
 
 const app = new App({
   target: document.getElementById('app'),

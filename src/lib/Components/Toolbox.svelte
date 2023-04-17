@@ -20,6 +20,7 @@
     let childrenNodes:Array<Node> = [];
 
     onMount(() => {
+        window.onresize = positionElements;
     });
 
     function positionElements(){
@@ -31,36 +32,28 @@
             // get first child
             let nodeBody = node.getRoot();
 
-            console.log(nodeBody);
-
             // get the centre of the node's image
             let boundingBox = nodeBody.children[0].getBoundingClientRect();
 
-            console.log(boundingBox);
-
-            // get the centre of the node
-            let centre = {
-                x: boundingBox.width / 2,
-                y: boundingBox.height / 2
-            }
-
-            console.log(centre);
+            // // get the centre of the node
+            // let centre = {
+            //     x: boundingBox.width / 2,
+            //     y: boundingBox.height / 2
+            // }
 
             // get the width of the menu
             let menuWidth = nodeBody.parentElement.getBoundingClientRect().width;
 
-            console.log(menuWidth);
+            // set the position of the node to the centre
+            // nodeBody.style.left = (menuWidth / 2 - centre.x) + "px";
 
-            // set the position of the node
-            nodeBody.style.left = (menuWidth / 2 - centre.x) + "px";
+            // justify right but leave a gap
+            nodeBody.style.left = (menuWidth - boundingBox.width - nodeGap) + "px";
+
             nodeBody.style.top = (runningHeight) + "px";
-
-            console.log(nodeBody.style.left)
             
             // add the height of the node to the running height
             runningHeight += boundingBox.height + nodeGap;
-
-            console.log(runningHeight)
         });
     }
 

@@ -2,6 +2,11 @@
     import { createEventDispatcher, onMount } from "svelte";
     import type { NodeType, Point } from "../Types";
     import Node from "./Node.svelte";
+    import { getElementFromDomElement } from "../main";
+    import type Workspace from "./Components/Workspace.svelte";
+    import { get_current_component } from "svelte/internal";
+
+    let myself = get_current_component() as Node;
 
     //set up props
     export let shape: string;
@@ -22,24 +27,10 @@
         return nodeBody;
     }
 
-    function globalMousePosToWorkfieldPos(workfield: Element, mousePos: {x: number, y: number}): {x: number, y: number} {
-        let workfieldPos = {x: 0, y: 0};
-
-        // current scroll position of the workfield
-        let scrollPos = {
-            x: workfield.scrollLeft,
-            y: workfield.scrollTop
-        }
-
-        workfieldPos.x = mousePos.x - workfield.getBoundingClientRect().x;
-        workfieldPos.y = mousePos.y - workfield.getBoundingClientRect().y;
-
-        // add the scroll position to the position
-        workfieldPos.x += scrollPos.x;
-        workfieldPos.y += scrollPos.y;
-
-        return workfieldPos;
+    export function setPosition(x: number, y: number){
+        position = {x: x, y: y};
     }
+
 
     function globalOnMouseUp(event){
         if (dragging) {
@@ -51,28 +42,10 @@
 
             elements.forEach(element => {
                 if (element.classList.contains("workfield")){
-                    // if the mouse is over the workfield, add the node to the workfield
-                    element.appendChild(nodeBody);
 
-                    // get reference to the workspace component
-                    let workspace = element.parentElement;
+                    let workspace = getElementFromDomElement(element) as Workspace;
 
-                    // get the centre of the node
-                    let boundingBox = nodeBody.getBoundingClientRect();
-
-                    let nodeCentre = {
-                        x: boundingBox.width / 2,
-                        y: boundingBox.height / 2
-                    }
-
-                    // call the globalMousePosToWorkfieldPos function on the workspace component
-                    let pos = globalMousePosToWorkfieldPos(element, {x: event.clientX - nodeCentre.x, y: event.clientY - nodeCentre.y});
-
-                    console.log(pos);
-
-                    // set the node position to the position returned by the function
-                    nodeBody.style.left = pos.x + "px";
-                    nodeBody.style.top = pos.y + "px";
+                    workspace.addNode(myself, event.clientX, event.clientY);                    
 
                     wasUsed = true;
                 }
@@ -210,7 +183,7 @@
         /* take up as little width as possible */
         /* width: fit-content; */
 
-        max-height: 65px;
+        max-height: 10vh;
     }
 
     .node-body :global(img) {
@@ -218,7 +191,7 @@
         /* width: 100%; */
         height: 100%;
 
-        max-height: 65px;
+        max-height: 10vh;
 
         /* keep aspect ratio */
         object-fit: contain;

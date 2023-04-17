@@ -5,6 +5,7 @@
   import Toolbox from "./lib/Components/Toolbox.svelte";
   import Output from "./lib/Components/Output.svelte";
   import Properties from "./lib/Components/Properties.svelte";
+    import Explorerer from "./lib/Components/Explorerer.svelte";
 </script>
 
 
@@ -17,6 +18,7 @@
 
     <Workspace></Workspace>
     <Toolbox></Toolbox>
+    <Explorerer></Explorerer>
     <Output></Output>
     <Properties></Properties>
   </div>
