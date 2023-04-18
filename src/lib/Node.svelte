@@ -31,6 +31,10 @@
         position = {x: x, y: y};
     }
 
+    export function getPosition(): {x: number, y: number} {
+        return position;
+    }
+
 
     function globalOnMouseUp(event){
         if (dragging) {
@@ -90,7 +94,8 @@
                 }
             })
 
-        }else{
+        }
+        else if (event.target.classList.contains("node-image")){
             dragging = true;
         }
 
@@ -145,6 +150,54 @@
 
         dispatch('reposition');
     }
+
+    export function getOutputOffset(index: number){
+        let boundingBox = nodeBody.getBoundingClientRect();
+
+        let outputPoint = outputPoints[index];
+
+        let x = boundingBox.left + (boundingBox.width * outputPoint.x);
+        let y = boundingBox.top + (boundingBox.height * outputPoint.y);
+
+        return {x: x, y: y};
+    }
+
+    export function getInputOffset(index: number){
+        let boundingBox = nodeBody.getBoundingClientRect();
+
+        let inputPoint = inputPoints[index];
+
+        let x = boundingBox.left + (boundingBox.width * inputPoint.x);
+        let y = boundingBox.top + (boundingBox.height * inputPoint.y);
+
+        return {x: x, y: y};
+    }
+
+    function onInputNodeMouseDown(event, index){
+        console.log("input node mouse down", index);
+
+        dispatch('inputNodeMouseDown', index);
+    }
+
+    function onOutputNodeMouseDown(event, index){
+        console.log("output node mouse down", index);
+
+        dispatch('outputNodeMouseDown', index);
+    }
+
+
+
+    function onInputNodeMouseUp(event, index){
+        console.log("input node released on top of", index);
+
+        dispatch('inputNodeMouseUp', index);
+    }
+
+    function onOutputNodeMouseUp(event, index){
+        console.log("output node released on top of", index);
+
+        dispatch('outputNodeMouseUp', index);
+    }
 </script>
 
 
@@ -156,15 +209,17 @@
     <img class="node-image" src="/shapes/{shape}.svg" alt={shape} on:load={onImageLoad}>
 
     <!-- for each input attachment point -->
-    {#each inputPoints as point}
+    {#each inputPoints as point, i}
         <!-- draw a circle -->
-        <div class="io-point input-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div on:mousedown={(e)=>{onInputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onInputNodeMouseUp(e, i)}} class="io-point input-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
     {/each}
 
     <!-- for each output attachment point -->
-    {#each outputPoints as point}
+    {#each outputPoints as point, i}
         <!-- draw a circle -->
-        <div class="io-point output-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div on:mousedown={(e)=>{onOutputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onOutputNodeMouseUp(e, i)}} class="io-point output-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
     {/each}
 </div>
 

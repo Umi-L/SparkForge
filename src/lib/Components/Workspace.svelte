@@ -5,6 +5,14 @@
     import { get_current_component } from "svelte/internal";
     import type Node from "../Node.svelte";
 
+
+    interface Connection {
+        inputNode: Node,
+        inputNumber: number,
+        outputNode: Node,
+        outputNumber: number
+    }
+
     let myself = get_current_component();
 
     let panelExtender:HTMLDivElement;
@@ -12,7 +20,11 @@
     let connectionsSvg:SVGSVGElement;
 
     let nodes = [];
-    let connections = [];
+    let connections: Array<Connection> = [];
+
+    let currentDraggingNode:Node|undefined;
+    let currentDraggingInputNumber:number|undefined;
+    let currentDraggingOutputNumber:number|undefined;
 
     let colStyle = "1 / 2";
     let rowStyle = "1 / 2";
@@ -55,7 +67,6 @@
 
         let nodeBody = node.getRoot();
 
-
         console.log("adding node");
         workfield.appendChild(nodeBody);
 
@@ -76,7 +87,119 @@
 
         node.setPosition(pos.x, pos.y);
 
+
+        // register for the node's i/o mousedown event
+        node.$on("inputNodeMouseDown", (event) => {
+            // console.log("started dragging input");
+            // console.log(event);
+
+            currentDraggingNode = node;
+            currentDraggingInputNumber = event.detail;
+        });
+
+        node.$on("outputNodeMouseDown", (event) => {
+            // console.log("started dragging output");
+            // console.log(event);
+
+            currentDraggingNode = node;
+            currentDraggingOutputNumber = event.detail;
+        });
+
+        // register for the node's i/o mouseup event
+        node.$on("inputNodeMouseUp", (event) => {
+            // console.log("stopped dragging on input");
+            // console.log(event);
+
+            // if the current dragging nodeNumber is not undefined
+            if (currentDraggingNode != undefined) {
+
+                console.log("current dragging node is not undefined");
+
+                // if the current dragging node is not the same as the node that the input was dragged on
+                if (currentDraggingNode != node) {
+
+                    console.log("current dragging node is not the same as the node that the input was dragged on");
+
+                    // if the current dragging outputNumber is not undefined
+                    if (currentDraggingOutputNumber != undefined) {
+
+                        console.log("current dragging outputNumber is not undefined");
+
+                        // create a connection
+                        createConnection(currentDraggingNode, currentDraggingOutputNumber, node, event.detail);
+                    }
+                }
+            }
+        });
+
+        node.$on("outputNodeMouseUp", (event) => {
+            // console.log("stopped dragging on output");
+            // console.log(event);
+
+            // if the current dragging nodeNumber is not undefined
+            if (currentDraggingNode != undefined) {
+
+                console.log("current dragging node is not undefined");
+
+                // if the current dragging node is not the same as the node that the input was dragged on
+                if (currentDraggingNode != node) {
+
+                    console.log("current dragging node is not the same as the node that the input was dragged on");
+
+                    // if the current dragging inputNumber is not undefined
+                    if (currentDraggingInputNumber != undefined) {
+
+                        console.log("current dragging inputNumber is not undefined");
+
+                        // create a connection
+                        createConnection(currentDraggingNode, currentDraggingInputNumber, node, event.detail);
+                    }
+                }
+            }
+        });
+
+        // update positions
         update();
+    }
+
+    function createConnection(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number) {
+
+        console.log("creating connection with params: " + startNode + ", " + startOutputNumber + ", " + endNode + ", " + endInputNumber + "");
+
+        // create a connection object
+        let connection:Connection = {
+            inputNode: endNode,
+            inputNumber: endInputNumber,
+            outputNode: startNode,
+            outputNumber: startOutputNumber
+        }
+        
+        // add the connection to the connections array
+        connections.push(connection);
+
+        // create a line element
+        let line = document.createElement("line");
+
+        // get inputNode position offset
+        let inputNodePos = endNode.getPosition();
+        let inputNodeOffset = endNode.getInputOffset(endInputNumber);
+
+        // get outputNode position offset
+        let outputNodePos = startNode.getPosition();
+        let outputNodeOffset = startNode.getOutputOffset(startOutputNumber);
+
+        // set the line's start position
+        line.setAttribute("x1", (outputNodePos.x + outputNodeOffset.x) + "");
+        line.setAttribute("y1", (outputNodePos.y + outputNodeOffset.y) + "");
+
+        // set the line's end position
+        line.setAttribute("x2", (inputNodePos.x + inputNodeOffset.x) + "");
+        line.setAttribute("y2", (inputNodePos.y + inputNodeOffset.y) + "");
+
+        line.setAttribute("stroke", "black");
+
+        // add the line to the workfield
+        connectionsSvg.appendChild(line);
     }
 
 
@@ -94,6 +217,12 @@
             dragging = false;
 
             event.preventDefault();
+        }
+
+        if (currentDraggingNode != undefined) {
+            currentDraggingNode = undefined;
+            currentDraggingInputNumber = undefined;
+            currentDraggingOutputNumber = undefined;
         }
     }
 
@@ -184,7 +313,9 @@
 
 <Panel name="Workspace" rowstyle={rowStyle} colstyle={colStyle}>
     <div class="workfield" bind:this={workfield}>
-        <svg class="connections" bind:this={connectionsSvg}></svg>
+        <svg class="connections" bind:this={connectionsSvg}>
+            <line x1="0" y1="80" x2="100" y2="20" stroke="black" />
+        </svg>
         <div class="extender" bind:this={panelExtender}></div>
     </div>
 </Panel>
@@ -209,5 +340,18 @@
         height:1px;
 
         background-color: transparent;
+    }
+
+    .connections {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .connection {
+        stroke-width: 2px;
+        stroke: #000;
     }
 </style>
