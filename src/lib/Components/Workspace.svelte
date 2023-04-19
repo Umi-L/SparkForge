@@ -177,29 +177,44 @@
         // add the connection to the connections array
         connections.push(connection);
 
-        // create a line element
-        let line = document.createElement("line");
+        // create a bezier curve
+        let curve = createBezierCurve(startNode, startOutputNumber, endNode, endInputNumber);
 
-        // get inputNode position offset
-        let inputNodePos = endNode.getPosition();
-        let inputNodeOffset = endNode.getInputOffset(endInputNumber);
+        // add the curve to the svg
+        connectionsSvg.appendChild(curve);
+    }
 
-        // get outputNode position offset
-        let outputNodePos = startNode.getPosition();
-        let outputNodeOffset = startNode.getOutputOffset(startOutputNumber);
+    // create bezier curve between two nodes
+    function createBezierCurve(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number): HTMLElement {
 
-        // set the line's start position
-        line.setAttribute("x1", (outputNodePos.x + outputNodeOffset.x) + "");
-        line.setAttribute("y1", (outputNodePos.y + outputNodeOffset.y) + "");
+        // get the start and end positions of the curve
+        let startPos = startNode.getOutputOffset(startOutputNumber);
+        let endPos = endNode.getInputOffset(endInputNumber);
 
-        // set the line's end position
-        line.setAttribute("x2", (inputNodePos.x + inputNodeOffset.x) + "");
-        line.setAttribute("y2", (inputNodePos.y + inputNodeOffset.y) + "");
+        // get the start and end nodes
+        let startNodeBody = startNode.getRoot();
+        let endNodeBody = endNode.getRoot();
 
-        line.setAttribute("stroke", "black");
+        // make the bezier path
+        let path = document.createElement("path");
 
-        // add the line to the workfield
-        connectionsSvg.appendChild(line);
+        // set the path's d attribute
+        path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 100) + " " + startPos.y + " " + (endPos.x - 100) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
+
+        // set the path's stroke
+        path.setAttribute("stroke", "black");
+
+        // set the path's stroke width
+        path.setAttribute("stroke-width", "2");
+
+        // set width and height to 100%
+        path.setAttribute("width", "100px");
+        path.setAttribute("height", "100px");
+
+        // set the path's fill
+        // path.setAttribute("fill", "none");
+
+        return path;
     }
 
 
@@ -314,7 +329,7 @@
 <Panel name="Workspace" rowstyle={rowStyle} colstyle={colStyle}>
     <div class="workfield" bind:this={workfield}>
         <svg class="connections" bind:this={connectionsSvg}>
-            <line x1="0" y1="80" x2="100" y2="20" stroke="black" />
+            <!-- <line x1="0" y1="80" x2="100" y2="20" stroke="black" /> -->
         </svg>
         <div class="extender" bind:this={panelExtender}></div>
     </div>
@@ -348,10 +363,5 @@
         left: 0;
         width: 100%;
         height: 100%;
-    }
-
-    .connection {
-        stroke-width: 2px;
-        stroke: #000;
     }
 </style>
