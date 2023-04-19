@@ -156,8 +156,18 @@
 
         let outputPoint = outputPoints[index];
 
-        let x = boundingBox.left + (boundingBox.width * outputPoint.x);
-        let y = boundingBox.top + (boundingBox.height * outputPoint.y);
+        let styleLeft = nodeBody.style.left;
+        let styleTop = nodeBody.style.top;
+
+        styleLeft = styleLeft.replace("px", "");
+        styleTop = styleTop.replace("px", "");
+
+        // cast to float
+        let left = parseFloat(styleLeft);
+        let top = parseFloat(styleTop);
+
+        let x = left + (boundingBox.width * outputPoint.x);
+        let y = top + (boundingBox.height * outputPoint.y);
 
         return {x: x, y: y};
     }
@@ -167,8 +177,18 @@
 
         let inputPoint = inputPoints[index];
 
-        let x = boundingBox.left + (boundingBox.width * inputPoint.x);
-        let y = boundingBox.top + (boundingBox.height * inputPoint.y);
+        let styleLeft = nodeBody.style.left;
+        let styleTop = nodeBody.style.top;
+
+        styleLeft = styleLeft.replace("px", "");
+        styleTop = styleTop.replace("px", "");
+
+        // cast to float
+        let left = parseFloat(styleLeft);
+        let top = parseFloat(styleTop);
+
+        let x = left + (boundingBox.width * inputPoint.x);
+        let y = top + (boundingBox.height * inputPoint.y);
 
         return {x: x, y: y};
     }

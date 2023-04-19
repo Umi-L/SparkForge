@@ -13,6 +13,8 @@
         outputNumber: number
     }
 
+    const svgns = "http://www.w3.org/2000/svg";
+
     let myself = get_current_component();
 
     let panelExtender:HTMLDivElement;
@@ -185,34 +187,50 @@
     }
 
     // create bezier curve between two nodes
-    function createBezierCurve(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number): HTMLElement {
+    function createBezierCurve(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number): SVGPathElement {
 
         // get the start and end positions of the curve
+        // let startPos = startNode.getOutputOffset(startOutputNumber);
+
         let startPos = startNode.getOutputOffset(startOutputNumber);
         let endPos = endNode.getInputOffset(endInputNumber);
 
-        // get the start and end nodes
-        let startNodeBody = startNode.getRoot();
-        let endNodeBody = endNode.getRoot();
+        // draw point at start position
+        let startCircle = document.createElementNS(svgns, "circle");
+        startCircle.setAttribute("cx", startPos.x + "");
+        startCircle.setAttribute("cy", startPos.y + "");
+        startCircle.setAttribute("r", "5");
+        startCircle.setAttribute("fill", "blue");
+        startCircle.setAttribute("stroke", "black");
+
+        // draw point at end position
+        let endCircle = document.createElementNS(svgns, "circle");
+        endCircle.setAttribute("cx", endPos.x + "");
+        endCircle.setAttribute("cy", endPos.y + "");
+        endCircle.setAttribute("r", "5");
+        endCircle.setAttribute("fill", "blue");
+        endCircle.setAttribute("stroke", "black");
+
+        // add the points to the svg
+        connectionsSvg.appendChild(startCircle);
+        connectionsSvg.appendChild(endCircle);
+
+        console.log("startPos: " + startPos.x + ", " + startPos.y);
 
         // make the bezier path
-        let path = document.createElement("path");
+        let path = document.createElementNS(svgns, "path");
 
         // set the path's d attribute
-        path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 100) + " " + startPos.y + " " + (endPos.x - 100) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
+        path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 10) + " " + startPos.y + " " + (endPos.x - 10) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
 
         // set the path's stroke
-        path.setAttribute("stroke", "black");
+        path.setAttribute("stroke", "white");
 
         // set the path's stroke width
         path.setAttribute("stroke-width", "2");
 
-        // set width and height to 100%
-        path.setAttribute("width", "100px");
-        path.setAttribute("height", "100px");
-
         // set the path's fill
-        // path.setAttribute("fill", "none");
+        path.setAttribute("fill", "none");
 
         return path;
     }
@@ -224,6 +242,10 @@
 
         panelExtender.style.top = elementsBox.height + (panelExtenderDistance*2) + "px";
         panelExtender.style.left = elementsBox.width + (panelExtenderDistance*2) + "px";
+
+        // set width and height of the connections svg
+        connectionsSvg.setAttribute("width", elementsBox.width + (panelExtenderDistance*2) + "px");
+        connectionsSvg.setAttribute("height", elementsBox.height + (panelExtenderDistance*2) + "px");
 
     }
 
@@ -299,25 +321,32 @@
         for (let i = 0; i < elements.length; i++) {
             let element = elements[i] as HTMLElement;
 
-            if (element != panelExtender) {
-                let elementBox = element.getBoundingClientRect();
+            // if the element is the panel extender then skip it
+            if (element == panelExtender)
+                continue;
+            
+            // if the element is the connections svg then skip it
+            if (element == connectionsSvg as Element)
+                continue;
 
-                if (elementBox.x < elementsBox.x) {
-                    elementsBox.x = elementBox.x;
-                }
+            let elementBox = element.getBoundingClientRect();
 
-                if (elementBox.y < elementsBox.y) {
-                    elementsBox.y = elementBox.y;
-                }
-
-                if (elementBox.x + elementBox.width > elementsBox.x + elementsBox.width) {
-                    elementsBox.width = elementBox.x + elementBox.width - elementsBox.x;
-                }
-
-                if (elementBox.y + elementBox.height > elementsBox.y + elementsBox.height) {
-                    elementsBox.height = elementBox.y + elementBox.height - elementsBox.y;
-                }
+            if (elementBox.x < elementsBox.x) {
+                elementsBox.x = elementBox.x;
             }
+
+            if (elementBox.y < elementsBox.y) {
+                elementsBox.y = elementBox.y;
+            }
+
+            if (elementBox.x + elementBox.width > elementsBox.x + elementsBox.width) {
+                elementsBox.width = elementBox.x + elementBox.width - elementsBox.x;
+            }
+
+            if (elementBox.y + elementBox.height > elementsBox.y + elementsBox.height) {
+                elementsBox.height = elementBox.y + elementBox.height - elementsBox.y;
+            }
+            
         }
 
         return elementsBox;
@@ -357,11 +386,16 @@
         background-color: transparent;
     }
 
+    .connections-wrapper {
+        position: relative;
+        height: 100%;
+        width: 100%;
+    }
+
     .connections {
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        
     }
 </style>
