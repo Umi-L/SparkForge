@@ -4,6 +4,7 @@
     import { onMount } from "svelte";
     import { get_current_component } from "svelte/internal";
     import type Node from "../Node.svelte";
+  import type { Point } from "../../Types";
 
 
     interface Connection {
@@ -180,14 +181,66 @@
         connections.push(connection);
 
         // create a bezier curve
-        let curve = createBezierCurve(startNode, startOutputNumber, endNode, endInputNumber);
+        let curve = createBezierCurveBetweenNodes(startNode, startOutputNumber, endNode, endInputNumber);
 
         // add the curve to the svg
         connectionsSvg.appendChild(curve);
     }
 
+    function drawLineToMouse(node:Node, isOutput:boolean, index:number, mouseX:number, mouseY:number){
+
+        // delete previous line
+        let previousLine = document.getElementById("mouseLine");
+        if (previousLine != null) {
+            previousLine.remove();
+        }
+
+        // get the mouse position
+        let mousePos = globalMousePosToWorkfieldPos({x: mouseX, y: mouseY});
+
+        // get the node position
+        let nodePos = node.getPosition();
+
+        // get the offset of the input/output
+        let offset = isOutput ? node.getOutputOffset(index) : node.getInputOffset(index);
+
+        // get the position of the input/output
+        let pos = {
+            x: nodePos.x + offset.x,
+            y: nodePos.y + offset.y
+        }
+
+        // draw a line from the input/output to the mouse
+        let line = createBezierCurve(pos, mousePos);
+
+        line.id = "mouseLine";
+        
+        // add the line to the svg
+        connectionsSvg.appendChild(line);
+    }
+
+    // create bezier curve
+    function createBezierCurve(startPos:Point, endPos:Point){
+        // make the bezier path
+        let path = document.createElementNS(svgns, "path");
+
+        // set the path's d attribute
+        path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 10) + " " + startPos.y + " " + (endPos.x - 10) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
+
+        // set the path's stroke
+        path.setAttribute("stroke", "white");
+
+        // set the path's stroke width
+        path.setAttribute("stroke-width", "2");
+
+        // set the path's fill
+        path.setAttribute("fill", "none");
+
+        return path;
+    }
+
     // create bezier curve between two nodes
-    function createBezierCurve(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number): SVGPathElement {
+    function createBezierCurveBetweenNodes(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number): SVGPathElement {
 
         // get the start and end positions of the curve
         // let startPos = startNode.getOutputOffset(startOutputNumber);
@@ -215,24 +268,9 @@
         connectionsSvg.appendChild(startCircle);
         connectionsSvg.appendChild(endCircle);
 
-        console.log("startPos: " + startPos.x + ", " + startPos.y);
+        let curve = createBezierCurve(startPos, endPos);
 
-        // make the bezier path
-        let path = document.createElementNS(svgns, "path");
-
-        // set the path's d attribute
-        path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 10) + " " + startPos.y + " " + (endPos.x - 10) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
-
-        // set the path's stroke
-        path.setAttribute("stroke", "white");
-
-        // set the path's stroke width
-        path.setAttribute("stroke-width", "2");
-
-        // set the path's fill
-        path.setAttribute("fill", "none");
-
-        return path;
+        return curve;
     }
 
 
@@ -370,11 +408,24 @@
     .workfield {
         width: 100%;
         height: 100%;
-        background-image: url("/dotbg.png");
+        
         background-size: 30px 30px;
         overflow: scroll;
 
+        background-color: var(--midground-color);
+
         position: relative;
+    }
+
+    @media (prefers-color-scheme: dark){
+        .workfield{
+            background-image: url("/dot-dark.svg");
+        }
+    }
+    @media (prefers-color-scheme: light){
+        .workfield{
+            background-image: url("/dot-light.svg");
+        }
     }
 
     .extender{

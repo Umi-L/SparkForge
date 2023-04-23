@@ -1,24 +1,53 @@
-:root {
-  /* CSS HSL */
-  --pale-dogwood: hsla(15, 87%, 85%, 1);
-  --almond: hsla(32, 42%, 83%, 1);
-  --honeydew: hsla(139, 27%, 82%, 1);
-  --aquamarine: hsla(156, 61%, 77%, 1);
-  --outer-space: hsla(210, 10%, 32%, 1);
-
-  --background-color: #222222;
-  --text-color: #aaaaaa;
-  --semi-light-text-color: #cccccc;
-
-  --primary-color: var(--pale-dogwood);
-  --secondary-color: var(--almond);
-
-  --midground-color: #333333;
-  --foreground-color: #393939;
-
-  --general-border-radius: 5px;
-  --general-padding: 5px;
+@media (prefers-color-scheme: dark) { 
+  :root {
+    /* CSS HSL */
+    --pale-dogwood: hsla(15, 87%, 85%, 1);
+    --almond: hsla(32, 42%, 83%, 1);
+    --honeydew: hsla(139, 27%, 82%, 1);
+    --aquamarine: hsla(156, 61%, 77%, 1);
+    --outer-space: hsla(210, 10%, 32%, 1);
+  
+    --background-color: #222222;
+    --text-color: #aaaaaa;
+    --semi-light-text-color: #cccccc;
+  
+    --primary-color: var(--pale-dogwood);
+    --secondary-color: var(--almond);
+  
+    --midground-color: #333333;
+    --foreground-color: #393939;
+  
+    --general-border-radius: 5px;
+    --general-padding: 5px;
+  }
 }
+
+@media (prefers-color-scheme: light){
+  :root {
+    /* CSS HSL */
+    --pale-dogwood: hsla(15, 50%, 90%, 1);
+    --almond: hsla(32, 25%, 85%, 1);
+    --honeydew: hsla(139, 20%, 85%, 1);
+    --aquamarine: hsla(156, 45%, 80%, 1);
+    --outer-space: hsla(210, 10%, 80%, 1);
+  
+    --background-color: #f7f7f7;
+    --text-color: #666666;
+    --semi-light-text-color: #999999;
+  
+    --primary-color: var(--pale-dogwood);
+    --secondary-color: var(--almond);
+  
+    --midground-color: #f2f2f2;
+    --foreground-color: #ffffff;
+  
+    --general-border-radius: 5px;
+    --general-padding: 5px;
+  }  
+}
+
+
+
 
 /* Customize website's scrollbar like Mac OS
 Not supports in Firefox and IE */

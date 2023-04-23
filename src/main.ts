@@ -48,6 +48,8 @@ export function getElementFromDomElement(domElement: Element) {
   return elementReferenceTable.get(domElement);
 }
 
+// detect user color preference
+
 const app = new App({
   target: document.getElementById('app'),
 })
