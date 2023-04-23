@@ -11,7 +11,9 @@
         inputNode: Node,
         inputNumber: number,
         outputNode: Node,
-        outputNumber: number
+        outputNumber: number,
+        
+        element: SVGPathElement
     }
 
     const svgns = "http://www.w3.org/2000/svg";
@@ -169,22 +171,24 @@
 
         console.log("creating connection with params: " + startNode + ", " + startOutputNumber + ", " + endNode + ", " + endInputNumber + "");
 
-        // create a connection object
-        let connection:Connection = {
-            inputNode: endNode,
-            inputNumber: endInputNumber,
-            outputNode: startNode,
-            outputNumber: startOutputNumber
-        }
-        
-        // add the connection to the connections array
-        connections.push(connection);
-
         // create a bezier curve
         let curve = createBezierCurveBetweenNodes(startNode, startOutputNumber, endNode, endInputNumber);
 
         // add the curve to the svg
         connectionsSvg.appendChild(curve);
+
+        // create a connection object
+        let connection:Connection = {
+            inputNode: endNode,
+            inputNumber: endInputNumber,
+            outputNode: startNode,
+            outputNumber: startOutputNumber,
+
+            element: curve,
+        }
+        
+        // add the connection to the connections array
+        connections.push(connection);
     }
 
     function drawLineToMouse(node:Node, isOutput:boolean, index:number, mouseX:number, mouseY:number){
@@ -448,5 +452,6 @@
         top: 0;
         left: 0;
         
+        pointer-events: none;
     }
 </style>
