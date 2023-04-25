@@ -1,30 +1,34 @@
 <script lang="ts">
-
-    import { panels } from "../main";
+    import { get_current_component } from "svelte/internal";
+    import { register_panel } from "../WindowManager";
     import { onMount } from "svelte";
+    import type Panel from "./Panel.svelte";
 
-    export let rowstyle:string;
-    export let colstyle:string;
+    // export let rowstyle:string;
+    // export let colstyle:string;
     export let name:string;
+
+    let myself = get_current_component() as Panel;
 
     let panelHeader:HTMLDivElement;
     
     let panelContainer:HTMLDivElement;
     let dragging = false;
 
-    let currentSize = {width: 0, height: 0};
+    export let size = {width: 0, height: 0};
+    export let position = {x: 0, y: 0};
     
 
     onMount(() => {
         // add panel to the panels array
-        panels.push(panelContainer);
+        register_panel(myself)
 
         // set style of the panel
-        panelContainer.style.gridColumn = colstyle;
-        panelContainer.style.gridRow = rowstyle;
+        // panelContainer.style.gridColumn = colstyle;
+        // panelContainer.style.gridRow = rowstyle;
 
-        // update the position of the panel
-        updatePosition();
+        // update the transform of the panel
+        updateTransform();
 
         // add event listeners
         window.addEventListener("mousemove", onGlobalMouseMove);
@@ -38,24 +42,14 @@
         if (!dragging)
             return
 
-        
-        // set the panel size to the current size
-        panelContainer.style.width = currentSize.width + "px";
-        panelContainer.style.height = currentSize.height + "px";
+        updateDragging(event.clientX, event.clientY)
     }
 
     function onHandleMouseDown(event){
         dragging = true;
 
-        // get the current size of the panel using the bounding box
-        let boundingBox = panelContainer.getBoundingClientRect();
-
-        currentSize.width = boundingBox.width;
-        currentSize.height = boundingBox.height;
-
-        // set the panel size to the current size
-        panelContainer.style.width = currentSize.width + "px";
-        panelContainer.style.height = currentSize.height + "px";
+        // update the dragging
+        updateDragging(event.clientX, event.clientY);
     }
 
     function globalMouseUp(){
@@ -63,29 +57,50 @@
     }
 
     // function that determines the position of the panel in the grid based on the other elements the same column
-    function updatePosition(){
+    export function updateTransform(){
 
-        let panelsInSameColumn = [];
+        // set top and left to position
+        panelContainer.style.left = position.x + "px";
+        panelContainer.style.top = position.y + "px";
 
-        // look at all panels
-        for (let i = 0; i < panels.length; i++) {
-            // if the panel is the same as the current panel
-            if (panels[i] == panelContainer) 
-                continue;
-            
-            // determine the panel's position in the grid
-            let panelPosition = panels[i].getBoundingClientRect();
-            // determine the current panel's position in the grid
-            let currentPanelPosition = panelContainer.getBoundingClientRect();
+        // set width and height to size
+        panelContainer.style.width = size.width + "px";
+        panelContainer.style.height = size.height + "px";
+    }
 
-            // if the panel is in the same column as the current panel
-            if (panelPosition.left == currentPanelPosition.left) {
-                // add the panel to the array
-                panelsInSameColumn.push(panels[i]);
-            }
-        }
+    function updateDragging(mouseX, mouseY){        
 
-        
+        // move the panel centre to the mouse position
+        panelContainer.style.left = mouseX + "px";
+        panelContainer.style.top = mouseY + "px";
+    }
+
+    // getters
+    export function getName(){
+        return name;
+    }
+
+    export function getPosition(){
+        return position;
+    }
+
+    export function getSize(){
+        return size;
+    }
+
+    // setters
+    export function setPosition(x, y){
+        position.x = x;
+        position.y = y;
+
+        updateTransform();
+    }
+
+    export function setSize(width, height){
+        size.width = width;
+        size.height = height;
+
+        updateTransform();
     }
     
 
@@ -124,6 +139,9 @@
     }
 
     .panel-container {
+
+        position: absolute;
+
         display: flex;
         flex-direction: column;
         width: 100%;

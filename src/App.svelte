@@ -14,14 +14,16 @@
   <Topbar></Topbar>
 
   <!-- make body div -->
-  <div class="body">
-
+  <div class="body" id="body">
     <Workspace></Workspace>
     <Toolbox></Toolbox>
     <Explorerer></Explorerer>
     <Output></Output>
     <Properties></Properties>
+    
   </div>
+
+  
 
 </main>
 

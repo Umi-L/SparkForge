@@ -5,17 +5,7 @@
     import Node from "../Node.svelte";
     import { afterUpdate, onMount } from "svelte";
 
-    let colStyle = "1 / 2";
-    let rowStyle = "1 / 2";
-
     const nodeGap = 40;
-
-    panelGridPositions.forEach(element => {
-        if (element.name == "toolbox") {
-            colStyle = element["col"];
-            rowStyle = element["row"];   
-        }
-    });
 
     let childrenNodes:Array<Node> = [];
 
@@ -61,7 +51,7 @@
 
 
 
-<Panel name="Toolbox" rowstyle={rowStyle} colstyle={colStyle}>
+<Panel name="Toolbox">
     <div class="node-menu">
         <!-- for every NodeType draw it -->
         {#each Object.values(NodeTypes) as node, i}

@@ -15,7 +15,7 @@
     export let factory: boolean = false;
     export let dragging = false;
 
-    export let uuid: string = generateUUID();
+    // export let uuid: string = generateUUID();
 
     const dispatch = createEventDispatcher();
 
@@ -102,7 +102,7 @@
             let boundingBox = nodeBody.getBoundingClientRect();
 
             // set new node position to factory position
-            newNode.setPosition(boundingBox.left, boundingBox.top);
+            newNode.setPosition(event.clientX - (boundingBox.width / 2), event.clientY - (boundingBox.height / 2));
 
         }
         else if (event.target.classList.contains("node-image")){

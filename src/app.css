@@ -105,20 +105,8 @@ body{
   position: absolute;
 
   /* account for gap using calc */
-  width: calc(100vw - 2*var(--grid-gap));
+  width: 100vw;
   height: calc(100vh - (var(--general-padding) + 30px));
-
-  /* grid */
-  display: grid;
-
-  /* grid with 3 rows and 3 cols */
-  /* the cols should have widths of 20% 60% 20% */
-  grid-template-columns: 20% 60% 20%;
-  grid-template-rows: 1fr 1fr 20%;
-
-  padding: var(--general-padding);
-
-  gap: var(--grid-gap) var(--grid-gap);
 
   bottom: 0;
 

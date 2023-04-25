@@ -30,21 +30,10 @@
     let currentDraggingNode:Node|undefined;
     let currentDraggingInputNumber:number|undefined;
     let currentDraggingOutputNumber:number|undefined;
-
-    let colStyle = "1 / 2";
-    let rowStyle = "1 / 2";
-
     let dragging = false;
     let currentViewPos = {x: 0, y: 0};
 
     const panelExtenderDistance = 200;
-
-    panelGridPositions.forEach(element => {
-        if (element.name == "workspace") {
-            colStyle = element["col"];
-            rowStyle = element["row"];   
-        }
-    });
 
     onMount(() => {
         update();
@@ -399,7 +388,7 @@
 
 
 
-<Panel name="Workspace" rowstyle={rowStyle} colstyle={colStyle}>
+<Panel name="Workspace">
     <div class="workfield" bind:this={workfield}>
         <svg class="connections" bind:this={connectionsSvg}>
             <!-- <line x1="0" y1="80" x2="100" y2="20" stroke="black" /> -->
