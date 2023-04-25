@@ -6,8 +6,13 @@
     export let rowstyle:string;
     export let colstyle:string;
     export let name:string;
+
+    let panelHeader:HTMLDivElement;
     
     let panelContainer:HTMLDivElement;
+    let dragging = false;
+
+    let currentSize = {width: 0, height: 0};
     
 
     onMount(() => {
@@ -20,7 +25,42 @@
 
         // update the position of the panel
         updatePosition();
+
+        // add event listeners
+        window.addEventListener("mousemove", onGlobalMouseMove);
+        window.addEventListener("mouseup", globalMouseUp);
+
+        // add event listeners to the panel's header
+        panelHeader.addEventListener("mousedown", onHandleMouseDown);
     });
+
+    function onGlobalMouseMove(event){
+        if (!dragging)
+            return
+
+        
+        // set the panel size to the current size
+        panelContainer.style.width = currentSize.width + "px";
+        panelContainer.style.height = currentSize.height + "px";
+    }
+
+    function onHandleMouseDown(event){
+        dragging = true;
+
+        // get the current size of the panel using the bounding box
+        let boundingBox = panelContainer.getBoundingClientRect();
+
+        currentSize.width = boundingBox.width;
+        currentSize.height = boundingBox.height;
+
+        // set the panel size to the current size
+        panelContainer.style.width = currentSize.width + "px";
+        panelContainer.style.height = currentSize.height + "px";
+    }
+
+    function globalMouseUp(){
+        dragging = false;
+    }
 
     // function that determines the position of the panel in the grid based on the other elements the same column
     function updatePosition(){
@@ -53,8 +93,8 @@
 
 
 
-<div class="panel-container" bind:this={panelContainer}>
-    <div class="panel-header">
+<div class="panel-container" bind:this={panelContainer} class:dragging={dragging}>
+    <div class="panel-header" bind:this={panelHeader}>
         <div class="panel-title">
             <h1>{name}</h1>
         </div>
@@ -135,6 +175,12 @@
 
     .min-close-button:hover{
         color: var(--primary-color);
+    }
+
+    .dragging{
+        opacity: 0.8;
+
+        position: absolute;
     }
 
 </style>

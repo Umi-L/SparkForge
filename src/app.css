@@ -25,11 +25,11 @@
 @media (prefers-color-scheme: light){
   :root {
     /* CSS HSL */
-    --pale-dogwood: hsla(15, 50%, 90%, 1);
-    --almond: hsla(32, 25%, 85%, 1);
-    --honeydew: hsla(139, 20%, 85%, 1);
-    --aquamarine: hsla(156, 45%, 80%, 1);
-    --outer-space: hsla(210, 10%, 80%, 1);
+    --pale-dogwood: hsla(15, 50%, 70%, 1);
+    --almond: hsla(32, 25%, 60%, 1);
+    --honeydew: hsla(139, 20%, 60%, 1);
+    --aquamarine: hsla(156, 45%, 50%, 1);
+    --outer-space: hsla(210, 10%, 50%, 1);
   
     --background-color: #f7f7f7;
     --text-color: #666666;
@@ -39,7 +39,7 @@
     --secondary-color: var(--almond);
   
     --midground-color: #f2f2f2;
-    --foreground-color: #ffffff;
+    --foreground-color: #f7f7f7;
   
     --general-border-radius: 5px;
     --general-padding: 5px;

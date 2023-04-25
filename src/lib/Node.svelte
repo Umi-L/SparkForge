@@ -31,6 +31,8 @@
 
     export function setPosition(x: number, y: number){
         position = {x: x, y: y};
+        nodeBody.style.left = x + "px";
+        nodeBody.style.top = y + "px";
     }
 
     export function getPosition(): {x: number, y: number} {
@@ -96,15 +98,11 @@
                 }
             })
 
-            // set new node position to factory position
+            // get bounding box of the node
             let boundingBox = nodeBody.getBoundingClientRect();
 
-            newNode.$set({
-                position: {
-                    x: boundingBox.left,
-                    y: boundingBox.top
-                }
-            })
+            // set new node position to factory position
+            newNode.setPosition(boundingBox.left, boundingBox.top);
 
         }
         else if (event.target.classList.contains("node-image")){

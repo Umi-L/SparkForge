@@ -232,13 +232,15 @@
         path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 10) + " " + startPos.y + " " + (endPos.x - 10) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
 
         // set the path's stroke
-        path.setAttribute("stroke", "white");
+        // path.setAttribute("stroke", "white");
 
         // set the path's stroke width
-        path.setAttribute("stroke-width", "2");
+        // path.setAttribute("stroke-width", "2");
+
+        path.classList.add("connection")
 
         // set the path's fill
-        path.setAttribute("fill", "none");
+        // path.setAttribute("fill", "none");
 
         return path;
     }
@@ -441,10 +443,11 @@
         background-color: transparent;
     }
 
-    .connections-wrapper {
-        position: relative;
-        height: 100%;
-        width: 100%;
+    :global(.connection){
+        color: var(--text-color);
+        stroke: var(--text-color);
+        stroke-width: 2px;
+        fill: none;
     }
 
     .connections {
