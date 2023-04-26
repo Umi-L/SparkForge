@@ -1,6 +1,6 @@
 <script lang="ts">
     import { get_current_component } from "svelte/internal";
-    import { register_panel } from "../WindowManager";
+    import { onPanelDragEnd, register_panel, onPanelDrag } from "../WindowManager";
     import { onMount } from "svelte";
     import type Panel from "./Panel.svelte";
 
@@ -17,6 +17,8 @@
 
     export let size = {width: 0, height: 0};
     export let position = {x: 0, y: 0};
+    export let relativePosition = {x: 0, y: 0};
+    export let relativeSize = {width: 0, height: 0};
     
 
     onMount(() => {
@@ -52,8 +54,12 @@
         updateDragging(event.clientX, event.clientY);
     }
 
-    function globalMouseUp(){
-        dragging = false;
+    function globalMouseUp(event){
+        if (dragging){
+            onPanelDragEnd(event.clientX, event.clientY);
+
+            dragging = false;
+        }
     }
 
     // function that determines the position of the panel in the grid based on the other elements the same column
@@ -73,6 +79,8 @@
         // move the panel centre to the mouse position
         panelContainer.style.left = mouseX + "px";
         panelContainer.style.top = mouseY + "px";
+
+        onPanelDrag(mouseX, mouseY);
     }
 
     // getters
@@ -86,6 +94,18 @@
 
     export function getSize(){
         return size;
+    }
+
+    export function getRelativePosition(){
+        return relativePosition;
+    }
+
+    export function getRelativeSize(){
+        return relativeSize;
+    }
+
+    export function isDragging(){
+        return dragging;
     }
 
     // setters
@@ -102,8 +122,16 @@
 
         updateTransform();
     }
-    
 
+    export function setRelativePosition(x, y){
+        relativePosition.x = x;
+        relativePosition.y = y;
+    }
+
+    export function setRelativeSize(width, height){
+        relativeSize.width = width;
+        relativeSize.height = height;
+    }
 </script>
 
 
@@ -199,6 +227,8 @@
         opacity: 0.8;
 
         position: absolute;
+
+        z-index: 1000;
     }
 
 </style>

@@ -15,6 +15,9 @@
 
   <!-- make body div -->
   <div class="body" id="body">
+
+    <div id="panel_indicator"></div>
+
     <Workspace></Workspace>
     <Toolbox></Toolbox>
     <Explorerer></Explorerer>
@@ -30,5 +33,13 @@
 
 
 <style>
-  
+  #panel_indicator{
+    position: absolute;
+    
+    background-color: rgba(0, 0, 0, 0.2);
+
+    z-index: 500;
+
+    border-radius: var(--general-border-radius);
+  }
 </style>
