@@ -23,6 +23,11 @@
     <Explorerer></Explorerer>
     <Output></Output>
     <Properties></Properties>
+
+    <div class="debug-space-check"></div>
+    <div class="debug-space-check"></div>
+    <div class="debug-space-check"></div>
+    <div class="debug-space-check"></div>
     
   </div>
 

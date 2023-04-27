@@ -4,12 +4,11 @@ window.addEventListener("resize", update_all_panel_positions);
 
 let panels = [];
 
-// enup of up, down, left, right
-enum Direction {
-    TOP,
-    BOTTOM,
-    LEFT,
-    RIGHT,
+interface Rect {
+    x: number,
+    y: number,
+    width: number,
+    height: number,
 }
 
 let defaultPanelPositions = [
@@ -58,7 +57,7 @@ export function setPanelDefaults(panel: Panel) {
     );
 
     if (defaultPanelPosition) {
-        console.log("setting default panel position for " + panel.getName());
+        // console.log("setting default panel position for " + panel.getName());
 
         // set absolute position
         panel.setPosition(percent_to_px(defaultPanelPosition.left, "width"), percent_to_px(defaultPanelPosition.top, "height"));
@@ -117,7 +116,7 @@ function fetchBodyDiv() {
 }
 
 export function register_panel(panel: Panel) {
-    console.log("registering panel: " + panel.getName());
+    // console.log("registering panel: " + panel.getName());
     panels.push(panel);
 
     setPanelDefaults(panel);
@@ -126,7 +125,7 @@ export function register_panel(panel: Panel) {
 }
 
 export function update_panels() {
-    console.log("updating panels");
+    // console.log("updating panels");
 
     panels.forEach((panel) => {
         panel.updateTransform();
@@ -159,6 +158,13 @@ export function onPanelDragEnd(mouseX: number, mouseY: number){
             return panel.isDragging();
         });
 
+        let oldPanelPosition = panel.getRelativePosition();
+        let oldPanelSize = panel.getRelativeSize();
+
+        // clone old position and size because they are references?
+        oldPanelPosition = {x: oldPanelPosition.x, y: oldPanelPosition.y};
+        oldPanelSize = {width: oldPanelSize.width, height: oldPanelSize.height};
+
         // set the panel's relative position
         panel.setRelativePosition(indicatorTransform.position.x, indicatorTransform.position.y);
         panel.setRelativeSize(indicatorTransform.size.width, indicatorTransform.size.height);
@@ -171,6 +177,9 @@ export function onPanelDragEnd(mouseX: number, mouseY: number){
         
             // update the offset panel's transform
             update_panel_position(indicatorTransform.otherPanel);
+
+            // fill the remaining space
+            fill_remaining_space(oldPanelPosition.x, oldPanelPosition.y, oldPanelSize.width, oldPanelSize.height);
         }
 
         // update the panel's transform
@@ -186,15 +195,240 @@ export function onPanelDragEnd(mouseX: number, mouseY: number){
     hide_panel_indicator();
 }
 
-export function fill_remaining_space(){
-    // for every panel
-    panels.forEach((panel) => {
-        // check if the panel has space above it
-        let panel_relative_position = panel.getRelativePosition();
-        let panel_relative_size = panel.getRelativeSize();
+export function fill_remaining_space(x: number, y: number, width: number, height: number){
 
+    console.log("filling remaining space");
+    console.log("x: " + x);
+    console.log("y: " + y);
+    console.log("width: " + width);
+    console.log("height: " + height);
 
+    // the rect of the horizontal space to the left of the panel
+    let left_rect = {
+        x: 0,
+        y: y,
+        width: x,
+        height: height,
+    };
+
+    // the rect of the horizontal space to the right of the panel
+    let right_rect = {
+        x: x + width,
+        y: y,
+        width: 1 - (x + width),
+        height: height,
+    };
+
+    // the rect of the vertical space above the panel
+    let top_rect = {
+        x: x,
+        y: 0,
+        width: width,
+        height: y,
+    };
+
+    // the rect of the vertical space below the panel
+    let bottom_rect = {
+        x: x,
+        y: y + height,
+        width: width,
+        height: 1 - (y + height),
+    };
+
+    // display debug rects
+    // display_panel_debug_space_check(left_rect, right_rect, top_rect, bottom_rect);
+
+    let topAvalable = panels_in_rect(top_rect);
+    let bottomAvalable = panels_in_rect(bottom_rect);
+    let leftAvalable = panels_in_rect(left_rect);
+    let rightAvalable = panels_in_rect(right_rect);
+
+    console.log("topAvalable: " + topAvalable);
+    console.log("bottomAvalable: " + bottomAvalable);
+    console.log("leftAvalable: " + leftAvalable);
+    console.log("rightAvalable: " + rightAvalable);
+
+    if (topAvalable && bottomAvalable){
+        console.log("top and bottom available");
+
+        //split the space vertically on all panels that are on the edge
+        let panels_in_rect = get_panels_in_rect(top_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().y + panel.getRelativeSize().height == y){
+                // stretch the panel to fill half the empty space vertically
+                panel.setRelativeSize(panel.getRelativeSize().width, y+height/2 - panel.getRelativePosition().y);
+            }
+        });
+
+        panels_in_rect = get_panels_in_rect(bottom_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().y == y + height){
+                // stretch the panel to fill half the empty space vertically
+                panel.setRelativeSize(panel.getRelativeSize().width, panel.getRelativePosition().y - y);
+                panel.setRelativePosition(panel.getRelativePosition().x, y + height/2);
+            }
+        });
+    } else if (topAvalable){
+        console.log("top available");
+
+        // stretch all panels in the top rect to fill the empty space
+        let panels_in_rect = get_panels_in_rect(top_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().y + panel.getRelativeSize().height == y){
+                // stretch the panel to fill half the empty space vertically
+                panel.setRelativeSize(panel.getRelativeSize().width, y+height - panel.getRelativePosition().y);
+            }
+        });
+    } else if (bottomAvalable){
+        console.log("bottom available");
+
+        // stretch all panels in the bottom rect to fill the empty space
+        let panels_in_rect = get_panels_in_rect(bottom_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().y == y + height){
+                // stretch the panel to fill the entire empty space vertically
+                panel.setRelativeSize(panel.getRelativeSize().width, panel.getRelativeSize().height + height);
+                panel.setRelativePosition(panel.getRelativePosition().x, y);
+            }
+        });
+    } else if (leftAvalable && rightAvalable){
+        console.log("left and right available");
+
+        //split the space horizontally on all panels that are on the edge
+        let panels_in_rect = get_panels_in_rect(left_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().x + panel.getRelativeSize().width == x){
+                // stretch the panel to fill half the empty space vertically
+                panel.setRelativeSize(x+width/2 - panel.getRelativePosition().x, panel.getRelativeSize().height);
+            }
+        });
+
+        panels_in_rect = get_panels_in_rect(right_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().x == x + width){
+                // stretch the panel to fill half the empty space vertically
+                panel.setRelativeSize(panel.getRelativePosition().x - x, panel.getRelativeSize().height);
+                panel.setRelativePosition(x + width/2, panel.getRelativePosition().y);
+            }
+        });
+    }else if (leftAvalable) {
+        console.log("left available");
+
+        // stretch all panels in the left rect to fill the empty space
+        let panels_in_rect = get_panels_in_rect(left_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().x + panel.getRelativeSize().width == x){
+                // stretch the panel to fill the entire empty space horizontally
+                panel.setRelativeSize(x+width - panel.getRelativePosition().x, panel.getRelativeSize().height);
+            }
+        });
+    } else if (rightAvalable) {
+        console.log("right available");
+
+        // stretch all panels in the right rect to fill the empty space
+        let panels_in_rect = get_panels_in_rect(right_rect);
+
+        panels_in_rect.forEach((panel) => {
+            // if the panel is bordering the empty space
+            if (panel.getRelativePosition().x == x + width){
+                // stretch the panel to fill the entire empty space vertically
+                panel.setRelativeSize(panel.getRelativeSize().width + width, panel.getRelativeSize().height);
+                panel.setRelativePosition(x, panel.getRelativePosition().y);
+            }
+        });
+    }
+
+    
+    // update all panels
+    update_all_panel_positions();
+}
+
+function get_panels_in_rect(rect){
+    let panels_in_rect = [];
+
+    panels.forEach((panel) => {[]
+        let panel_rect = getRelativeRect(panel);
+
+        if (rect_contains_other(rect, panel_rect)){
+            panels_in_rect.push(panel);
+        }
     });
+
+    return panels_in_rect;
+}
+
+function panels_in_rect(rect: Rect){
+    let panels_in_rect = get_panels_in_rect(rect);
+    if (panels_in_rect.length > 0)
+        return true;
+    else
+        return false;
+}
+
+function panels_intersect_rect(rect: Rect) {
+    panels.forEach((panel) => {
+        let panel_rect = getRelativeRect(panel);
+
+        if (rect_intersects_with_other(rect, panel_rect)) {
+            console.log("panels with rect: ", rect, " intersects", panel_rect);
+            return true
+        }
+    });
+
+    return false
+}
+
+function display_panel_debug_space_check(rect1: Rect, rect2: Rect, rect3: Rect, rect4: Rect){
+    let divs = document.getElementsByClassName("debug-space-check");
+
+    divs[0].setAttribute("style", "left: " + rect1.x*100 + "%; top: " + rect1.y*100 + "%; width: " + rect1.width*100 + "%; height: " + rect1.height*100 + "%;");
+    divs[1].setAttribute("style", "left: " + rect2.x*100 + "%; top: " + rect2.y*100 + "%; width: " + rect2.width*100 + "%; height: " + rect2.height*100 + "%;");
+    divs[2].setAttribute("style", "left: " + rect3.x*100 + "%; top: " + rect3.y*100 + "%; width: " + rect3.width*100 + "%; height: " + rect3.height*100 + "%;");
+    divs[3].setAttribute("style", "left: " + rect4.x*100 + "%; top: " + rect4.y*100 + "%; width: " + rect4.width*100 + "%; height: " + rect4.height*100 + "%;");
+}
+
+function getRelativeRect(panel:Panel){
+    let panel_position = panel.getRelativePosition();
+    let panel_size = panel.getRelativeSize();
+
+    return {
+        x: panel_position.x,
+        y: panel_position.y,
+        width: panel_size.width,
+        height: panel_size.height,
+    };
+}
+
+function rect_contains_other(rect: Rect, other: Rect){
+    return (
+        rect.x <= other.x &&
+        rect.y <= other.y &&
+        rect.x + rect.width >= other.x + other.width &&
+        rect.y + rect.height >= other.y + other.height
+    );
+}
+
+function rect_intersects_with_other(rect: Rect, other: Rect){
+    return (
+        rect.x < other.x + other.width &&
+        rect.x + rect.width > other.x &&
+        rect.y < other.y + other.height &&
+        rect.y + rect.height > other.y
+    );
 }
 
 export function update_panel_position(panel: Panel){
@@ -226,7 +460,7 @@ export function update_panel_position(panel: Panel){
 
 export function display_panel_indicator(x:number, y:number, width:number, height:number){
 
-    console.log("displaying panel indicator", x*100, y*100, width*100, height*100);
+    // console.log("displaying panel indicator", x*100, y*100, width*100, height*100);
 
     let indicator = document.getElementById("panel_indicator");
     indicator.style.display = "block";
@@ -341,7 +575,7 @@ export function get_snap_position(mouseX: number, mouseY: number){
         panels.forEach((panel) => {
             if (panel.isDragging()) {
                 draggingPannel = panel;
-                console.log("dragging panel: " + panel.getName());
+                // console.log("dragging panel: " + panel.getName());
             }
         });
 

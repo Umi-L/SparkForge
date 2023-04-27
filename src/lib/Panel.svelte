@@ -50,8 +50,16 @@
     function onHandleMouseDown(event){
         dragging = true;
 
-        // update the dragging
-        updateDragging(event.clientX, event.clientY);
+        // get global mouse position
+        let mouse = {
+            x: event.clientX,
+            y: event.clientY
+        }
+
+
+
+        // set relative position
+        updateDragging(mouse.x, mouse.y);
     }
 
     function globalMouseUp(event){
@@ -76,9 +84,20 @@
 
     function updateDragging(mouseX, mouseY){        
 
-        // move the panel centre to the mouse position
-        panelContainer.style.left = mouseX + "px";
-        panelContainer.style.top = mouseY + "px";
+        // move the panel centre to the mouse position accounting for the offset
+        let boundingBox = panelContainer.getBoundingClientRect();
+
+        let centre = {
+            x: boundingBox.left + (boundingBox.width / 2),
+            y: boundingBox.top + (boundingBox.height / 2)
+        }
+        let diff = {
+            x: mouseX - centre.x,
+            y: mouseY - centre.y
+        }
+
+        panelContainer.style.left = (panelContainer.offsetLeft + diff.x) + "px";
+        panelContainer.style.top = (panelContainer.offsetTop + diff.y) + "px";
 
         onPanelDrag(mouseX, mouseY);
     }
@@ -229,6 +248,9 @@
         position: absolute;
 
         z-index: 1000;
+
+        max-width: 8em;
+        max-height: 10em;
     }
 
 </style>
