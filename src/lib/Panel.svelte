@@ -7,6 +7,7 @@
     // export let rowstyle:string;
     // export let colstyle:string;
     export let name:string;
+    export let resizeFuncs:Array<Function> = [];
 
     let myself = get_current_component() as Panel;
 
@@ -48,6 +49,11 @@
     }
 
     function onHandleMouseDown(event){
+
+        // if not left click, return
+        if (event.button != 0)
+            return
+
         dragging = true;
 
         // get global mouse position
@@ -138,6 +144,10 @@
     export function setSize(width, height){
         size.width = width;
         size.height = height;
+
+        resizeFuncs.forEach(func => {
+            func(width, height);
+        });
 
         updateTransform();
     }

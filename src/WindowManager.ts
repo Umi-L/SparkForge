@@ -121,16 +121,16 @@ export function register_panel(panel: Panel) {
 
     setPanelDefaults(panel);
     apply_gap(5, panel);
-    update_panels();
+    // update_panels();
 }
 
-export function update_panels() {
-    // console.log("updating panels");
+// export function update_panels() {
+//     // console.log("updating panels");
 
-    panels.forEach((panel) => {
-        panel.updateTransform();
-    });
-}
+//     panels.forEach((panel) => {
+//         panel.updateTransform();
+//     });
+// }
 
 export function onPanelDrag(mouseX: number, mouseY: number){
     let indicatorTransform = get_snap_position(mouseX, mouseY);
@@ -178,8 +178,10 @@ export function onPanelDragEnd(mouseX: number, mouseY: number){
             // update the offset panel's transform
             update_panel_position(indicatorTransform.otherPanel);
 
-            // fill the remaining space
-            fill_remaining_space(oldPanelPosition.x, oldPanelPosition.y, oldPanelSize.width, oldPanelSize.height);
+            if (indicatorTransform.fill){
+                // fill the remaining space
+                fill_remaining_space(oldPanelPosition.x, oldPanelPosition.y, oldPanelSize.width, oldPanelSize.height);
+            }
         }
 
         // update the panel's transform
@@ -515,11 +517,12 @@ export function get_snap_position(mouseX: number, mouseY: number){
                 otherPanel: panel,
                 otherPanelNewPosition: {x: panel_relative_position.x, y: panel_relative_position.y + panel_relative_size.height/2},
                 otherPanelNewSize: {width: panel_relative_size.width, height: panel_relative_size.height/2},
+                fill: true,
             };
         }
 
         // if the mouse is in the lower fifth of the panel, snap to the bottom
-        if (mouseY > panel_position.y + panel_size.height * 4 / 5) {
+        else if (mouseY > panel_position.y + panel_size.height * 4 / 5) {
             return {
                 position:{
                     x: panel_relative_position.x,
@@ -532,11 +535,47 @@ export function get_snap_position(mouseX: number, mouseY: number){
                 otherPanel: panel,
                 otherPanelNewPosition: {x: panel_relative_position.x, y: panel_relative_position.y},
                 otherPanelNewSize: {width: panel_relative_size.width, height: panel_relative_size.height/2},
+                fill: true,
             };
         }
 
+        // there is a pretend rectangle in the center of the panel of the panel that is the same size as the panel but smaller
+        // when the mouse is over this rectangle, snap to the center
+        else if (mouseX > panel_position.x + panel_size.width / 5 && mouseX < panel_position.x + panel_size.width * 4 / 5) {
+
+            let draggingPannel = undefined;
+
+            // get dragging panel
+            panels.forEach((panel) => {
+                if (panel.isDragging()) {
+                    draggingPannel = panel;
+                    // console.log("dragging panel: " + panel.getName());
+                }
+            });
+
+
+            // if there is no dragging panel, skip
+            if (draggingPannel == undefined) console.error("no dragging panel! FATAL? WHAT?");
+
+            return {
+                position:{
+                    x: panel_relative_position.x,
+                    y: panel_relative_position.y,
+                },
+                size:{
+                    width: panel_relative_size.width,
+                    height: panel_relative_size.height,
+                },
+                otherPanel: panel,
+                otherPanelNewPosition: {x: draggingPannel.getRelativePosition().x, y: draggingPannel.getRelativePosition().y},
+                otherPanelNewSize: {width: draggingPannel.getRelativeSize().width, height: draggingPannel.getRelativeSize().height},
+                fill: false,
+            };
+        }
+        
+
         // if the mouse is on the left side of the panel, snap to the left
-        if (mouseX < panel_position.x + panel_size.width / 2) {
+        else if (mouseX < panel_position.x + panel_size.width / 2) {
             return {
                 position:{
                     x: panel_relative_position.x,
@@ -549,11 +588,12 @@ export function get_snap_position(mouseX: number, mouseY: number){
                 otherPanel: panel,
                 otherPanelNewPosition: {x: panel_relative_position.x + panel_relative_size.width/2, y: panel_relative_position.y},
                 otherPanelNewSize: {width: panel_relative_size.width/2, height: panel_relative_size.height},
+                fill: true,
             };
         }
 
         // if the mouse is on the right side of the panel, snap to the right
-        if (mouseX > panel_position.x + panel_size.width / 2) {
+        else if (mouseX > panel_position.x + panel_size.width / 2) {
             return {
                 position:{
                     x: panel_relative_position.x + panel_relative_size.width/2,
@@ -566,38 +606,40 @@ export function get_snap_position(mouseX: number, mouseY: number){
                 otherPanel: panel,
                 otherPanelNewPosition: {x: panel_relative_position.x, y: panel_relative_position.y},
                 otherPanelNewSize: {width: panel_relative_size.width/2, height: panel_relative_size.height},
+                fill: true,
             };
         }
     }
     let draggingPannel = undefined;
 
-        // get dragging panel
-        panels.forEach((panel) => {
-            if (panel.isDragging()) {
-                draggingPannel = panel;
-                // console.log("dragging panel: " + panel.getName());
-            }
-        });
-
-        if (draggingPannel) {
-            // return the panel's position and size
-            return {
-                position:{
-                    x: draggingPannel.getRelativePosition().x,
-                    y: draggingPannel.getRelativePosition().y,
-
-                },
-
-                size:{
-                    width: draggingPannel.getRelativeSize().width,
-                    height: draggingPannel.getRelativeSize().height,
-                },
-                otherPanel: undefined,
-                otherPanelNewPosition: undefined,
-                otherPanelNewSize: undefined,
-            };
+    // get dragging panel
+    panels.forEach((panel) => {
+        if (panel.isDragging()) {
+            draggingPannel = panel;
+            // console.log("dragging panel: " + panel.getName());
         }
+    });
 
-        // erorr
-        console.error("error getting snap position");
+    if (draggingPannel) {
+        // return the panel's position and size
+        return {
+            position:{
+                x: draggingPannel.getRelativePosition().x,
+                y: draggingPannel.getRelativePosition().y,
+
+            },
+
+            size:{
+                width: draggingPannel.getRelativeSize().width,
+                height: draggingPannel.getRelativeSize().height,
+            },
+            otherPanel: undefined,
+            otherPanelNewPosition: undefined,
+            otherPanelNewSize: undefined,
+            fill: false,
+        };
+    }
+
+    // erorr
+    console.error("error getting snap position");
 }

@@ -2,7 +2,7 @@
     import Panel from "../Panel.svelte";
     import { panelGridPositions, registerElement } from "../../main";
     import { onMount } from "svelte";
-    import { get_current_component } from "svelte/internal";
+    import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import type Node from "../Node.svelte";
   import type { Point } from "../../Types";
 
@@ -146,9 +146,29 @@
                         console.log("current dragging inputNumber is not undefined");
 
                         // create a connection
-                        createConnection(currentDraggingNode, currentDraggingInputNumber, node, event.detail);
+                        createConnection(node, currentDraggingInputNumber, currentDraggingNode, event.detail);
                     }
                 }
+            }
+        });
+
+        // dragend event
+        node.$on("dragend", (event) => {
+            console.log("dragend");
+        });
+
+        // move event
+        node.$on("drag", (event) => {
+            // move all connections that are connected to this node
+            for (let connection of connections) {
+                // if (connection.inputNode == node) {
+                //     // move the curve
+                //     moveBezierCurve(connection.element, connection.outputNode, connection.outputNumber, node, connection.inputNumber);
+                // } else if (connection.outputNode == node) {
+                //     // move the curve
+                //     moveBezierCurve(connection.element, node, connection.inputNumber, connection.inputNode, connection.outputNumber);
+                // }
+                
             }
         });
 
@@ -183,25 +203,15 @@
     function drawLineToMouse(node:Node, isOutput:boolean, index:number, mouseX:number, mouseY:number){
 
         // delete previous line
-        let previousLine = document.getElementById("mouseLine");
-        if (previousLine != null) {
-            previousLine.remove();
-        }
+        removeMouseLine()
 
         // get the mouse position
         let mousePos = globalMousePosToWorkfieldPos({x: mouseX, y: mouseY});
 
-        // get the node position
-        let nodePos = node.getPosition();
-
         // get the offset of the input/output
-        let offset = isOutput ? node.getOutputOffset(index) : node.getInputOffset(index);
+        let pos = isOutput ? node.getOutputOffset(index) : node.getInputOffset(index);
 
         // get the position of the input/output
-        let pos = {
-            x: nodePos.x + offset.x,
-            y: nodePos.y + offset.y
-        }
 
         // draw a line from the input/output to the mouse
         let line = createBezierCurve(pos, mousePos);
@@ -212,6 +222,13 @@
         connectionsSvg.appendChild(line);
     }
 
+    function removeMouseLine(){
+        let previousLine = document.getElementById("mouseLine");
+        if (previousLine != null) {
+            previousLine.remove();
+        }
+    }
+
     // create bezier curve
     function createBezierCurve(startPos:Point, endPos:Point){
         // make the bezier path
@@ -220,16 +237,8 @@
         // set the path's d attribute
         path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 10) + " " + startPos.y + " " + (endPos.x - 10) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
 
-        // set the path's stroke
-        // path.setAttribute("stroke", "white");
-
-        // set the path's stroke width
-        // path.setAttribute("stroke-width", "2");
-
+        // set the path's style
         path.classList.add("connection")
-
-        // set the path's fill
-        // path.setAttribute("fill", "none");
 
         return path;
     }
@@ -293,6 +302,8 @@
             currentDraggingNode = undefined;
             currentDraggingInputNumber = undefined;
             currentDraggingOutputNumber = undefined;
+
+            removeMouseLine();
         }
     }
 
@@ -313,6 +324,15 @@
             // move the workfield the same amount as the mouse moved
             workfield.scrollLeft -= event.movementX;
             workfield.scrollTop -= event.movementY;
+        }
+
+        if (currentDraggingNode != undefined) {
+
+            let isOutput = currentDraggingOutputNumber != undefined;
+
+            let index = isOutput ? currentDraggingOutputNumber : currentDraggingInputNumber;
+
+            drawLineToMouse(currentDraggingNode, isOutput, index, event.clientX, event.clientY);
         }
     }
 

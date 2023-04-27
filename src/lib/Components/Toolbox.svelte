@@ -8,12 +8,18 @@
     const nodeGap = 40;
 
     let childrenNodes:Array<Node> = [];
+    
+    let nodeMenu:HTMLDivElement;
 
     onMount(() => {
         window.onresize = positionElements;
+        // nodeMenu.onresize = positionElements;
     });
 
     function positionElements(){
+
+        // console.log("positioning elements");
+
         // start with "padding"
         let runningHeight = nodeGap/2;
 
@@ -51,8 +57,8 @@
 
 
 
-<Panel name="Toolbox">
-    <div class="node-menu">
+<Panel name="Toolbox" resizeFuncs={[positionElements]}>
+    <div class="node-menu" bind:this={nodeMenu}>
         <!-- for every NodeType draw it -->
         {#each Object.values(NodeTypes) as node, i}
             

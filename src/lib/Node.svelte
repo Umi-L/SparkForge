@@ -5,6 +5,7 @@
     import { getElementFromDomElement } from "../main";
     import type Workspace from "./Components/Workspace.svelte";
     import { get_current_component } from "svelte/internal";
+  import { genUUID } from "../uuid";
 
     let myself = get_current_component() as Node;
 
@@ -15,13 +16,13 @@
     export let factory: boolean = false;
     export let dragging = false;
 
-    // export let uuid: string = generateUUID();
+    export let uuid: number = genUUID();
+
+    let inWorkspace = false;
 
     const dispatch = createEventDispatcher();
 
     export let position: {x: number, y: number} = {x: 0, y: 0};
-
-    let scale = 1;
 
     let nodeBody: HTMLDivElement = null;
 
@@ -39,17 +40,6 @@
         return position;
     }
 
-    export function generateUUID(){
-        let d = new Date().getTime();
-        let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            let r = (d + Math.random()*16)%16 | 0;
-            d = Math.floor(d/16);
-            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-        });
-        return uuid;
-    }
-
-
     function globalOnMouseUp(event){
         if (dragging) {
 
@@ -61,9 +51,14 @@
             elements.forEach(element => {
                 if (element.classList.contains("workfield")){
 
+                    // get the workspace; kinda hacky but it works.
                     let workspace = getElementFromDomElement(element) as Workspace;
 
-                    workspace.addNode(myself, event.clientX, event.clientY);                    
+                    // if the node is already in the workspace don't bother re-registering.
+                    if (!inWorkspace){
+                        workspace.addNode(myself, event.clientX, event.clientY);
+                        inWorkspace = true;  
+                    }                
 
                     wasUsed = true;
                 }
@@ -78,11 +73,17 @@
 
             dragging = false;
 
+            dispatch("dragend", {uuid: uuid, x: position.x, y: position.y, destroyed: !wasUsed});
+
             event.preventDefault();
         }
     }
 
     function nodeBodyMouseDown(event){
+
+        // if not left click, return
+        if (event.button != 0)
+            return
 
         if (factory){
 
@@ -138,8 +139,9 @@
             nodeBody.style.left = (nodeBody.offsetLeft + diff.x) + "px";
             nodeBody.style.top = (nodeBody.offsetTop + diff.y) + "px";
 
-
-
+            // dispatch event
+            dispatch("drag", {uuid: uuid, x: nodeBody.offsetLeft, y: nodeBody.offsetTop});
+        
             event.preventDefault();
         }
     }
