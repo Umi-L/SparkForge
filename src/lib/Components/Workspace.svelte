@@ -251,8 +251,26 @@
         // make the bezier path
         let path = document.createElementNS(svgns, "path");
 
+        // get difference between start and end position
+        let diff = {
+            x: endPos.x - startPos.x,
+            y: endPos.y - startPos.y,
+        }
+
+        // generate start control point
+        let startControlPoint = {
+            x: startPos.x + diff.x,
+            y: startPos.y,
+        }
+
+        // generate end control point
+        let endControlPoint = {
+            x: endPos.x - diff.x,
+            y: endPos.y,
+        }
+
         // set the path's d attribute
-        path.setAttribute("d", "M" + startPos.x + " " + startPos.y + " C" + (startPos.x + 10) + " " + startPos.y + " " + (endPos.x - 10) + " " + endPos.y + " " + endPos.x + " " + endPos.y);
+        path.setAttribute("d", "M" + startPos.x + "," + startPos.y + " C" + startControlPoint.x + "," + startControlPoint.y + " " + endControlPoint.x + "," + endControlPoint.y + " " + endPos.x + "," + endPos.y);
 
         // set the path's style
         path.classList.add("connection")
