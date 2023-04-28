@@ -41,8 +41,12 @@ export enum NodeType {
     Log = 'log',
 }
 
-export interface NodeData {
+export interface NodeDefs {
     [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[] }
+}
+
+export interface NodeData {
+  name: string, inputs: IOPoint[], outputs: IOPoint[]
 }
 
 export interface IOPoint {
@@ -50,7 +54,7 @@ export interface IOPoint {
     type: FlowDataType
 }
 
-export const NodeTypes: NodeData = {
+export const NodeTypes: NodeDefs = {
   Start: {
     name: "start",
     inputs: [],

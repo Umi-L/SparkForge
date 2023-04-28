@@ -1,11 +1,11 @@
 <script lang="ts">
-    import Panel from "../Panel.svelte";
     import { panelGridPositions } from "../../main";
     import { NodeTypes } from "../../Types";
     import Node from "../Node.svelte";
     import { afterUpdate, onMount } from "svelte";
+    import Panel from "../Panel.svelte";
 
-    const nodeGap = 40;
+    const nodeGap = 20;
 
     let childrenNodes:Array<Node> = [];
     
@@ -14,6 +14,11 @@
     onMount(() => {
         window.onresize = positionElements;
         // nodeMenu.onresize = positionElements;
+
+        // on font load, position elements
+        document.fonts.ready.then(() => {
+            positionElements();
+        });
     });
 
     function positionElements(){
@@ -29,13 +34,13 @@
             let nodeBody = node.getRoot();
 
             // get the centre of the node's image
-            let boundingBox = nodeBody.children[0].getBoundingClientRect();
+            let boundingBox = nodeBody.getBoundingClientRect();
 
-            // // get the centre of the node
-            // let centre = {
-            //     x: boundingBox.width / 2,
-            //     y: boundingBox.height / 2
-            // }
+            // get the centre of the node
+            let centre = {
+                x: boundingBox.width / 2,
+                y: boundingBox.height / 2
+            }
 
             // get the width of the menu
             let menuWidth = nodeBody.parentElement.getBoundingClientRect().width;
@@ -60,9 +65,9 @@
 <Panel name="Toolbox" resizeFuncs={[positionElements]}>
     <div class="node-menu" bind:this={nodeMenu}>
         <!-- for every NodeType draw it -->
-        {#each Object.values(NodeTypes) as node, i}
+        {#each Object.values(NodeTypes) as nodeType, i}
             
-            <Node bind:this={childrenNodes[i]} shape={node.name} inputs={node.inputs} outputs={node.outputs} factory={true} on:reposition={positionElements}></Node>
+            <Node bind:this={childrenNodes[i]} type={nodeType} factory={true} on:reposition={positionElements}></Node>
             
         {/each}
     </div>

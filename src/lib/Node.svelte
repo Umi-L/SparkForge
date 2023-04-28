@@ -1,20 +1,26 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
-    import type { IOPoint, NodeType, Point } from "../Types";
+    import type { IOPoint, NodeData, NodeType, Point } from "../Types";
     import Node from "./Node.svelte";
     import { getElementFromDomElement } from "../main";
     import type Workspace from "./Components/Workspace.svelte";
     import { get_current_component } from "svelte/internal";
     import { genUUID } from "../uuid";
+    import Output from "./Components/Output.svelte";
 
     let myself = get_current_component() as Node;
 
     //set up props
-    export let shape: string;
-    export let inputs: Array<IOPoint>;
-    export let outputs: Array<IOPoint>;
+    export let type: NodeData;
     export let factory: boolean = false;
     export let dragging = false;
+
+    let inputs = type.inputs;
+    let outputs = type.outputs;
+
+    let inputElements: Array<HTMLDivElement> = [];
+    let outputElements: Array<HTMLDivElement> = [];
+
 
     export let uuid: number = genUUID();
 
@@ -91,9 +97,7 @@
             let newNode = new Node({
                 target: document.body,
                 props: {
-                    shape: shape,
-                    inputs: inputs,
-                    outputs: outputs,
+                    type: type,
                     factory: false,
                     dragging: true,
                 }
@@ -106,7 +110,7 @@
             newNode.setPosition(event.clientX - (boundingBox.width / 2), event.clientY - (boundingBox.height / 2));
 
         }
-        else if (event.target.classList.contains("node-image")){
+        else if (event.target.classList.contains("node-body") || event.target.classList.contains("node-header")){
             dragging = true;
         }
 
@@ -164,10 +168,6 @@
     }
 
     export function getOutputOffset(index: number){
-        let boundingBox = nodeBody.getBoundingClientRect();
-
-        let outputPoint = outputs[index];
-
         let styleLeft = nodeBody.style.left;
         let styleTop = nodeBody.style.top;
 
@@ -178,17 +178,15 @@
         let left = parseFloat(styleLeft);
         let top = parseFloat(styleTop);
 
-        let x = left + (boundingBox.width * outputPoint.x);
-        let y = top + (boundingBox.height * outputPoint.y);
+        // get output point
+        let outputPoint = outputElements[index];
+        let offsets = recursivelyGetOffset(outputPoint, nodeBody);
 
-        return {x: x, y: y};
+        // get position of inputPoint relative to the node
+        return {x: left + offsets.x, y: top + offsets.y};
     }
 
     export function getInputOffset(index: number){
-        let boundingBox = nodeBody.getBoundingClientRect();
-
-        let inputPoint = inputs[index];
-
         let styleLeft = nodeBody.style.left;
         let styleTop = nodeBody.style.top;
 
@@ -199,10 +197,26 @@
         let left = parseFloat(styleLeft);
         let top = parseFloat(styleTop);
 
-        let x = left + (boundingBox.width * inputPoint.x);
-        let y = top + (boundingBox.height * inputPoint.y);
+        // get inputPoint element
+        let inputPoint = inputElements[index];
 
-        return {x: x, y: y};
+        let offsets = recursivelyGetOffset(inputPoint, nodeBody);
+
+        // get position of inputPoint relative to the node
+        return {x: left + offsets.x, y: top + offsets.y};
+    }
+
+    function recursivelyGetOffset(element: HTMLElement, finalElement: HTMLElement){
+        let offset = {x: 0, y: 0};
+
+        while (element.parentElement != finalElement){
+            offset.x += element.offsetLeft;
+            offset.y += element.offsetTop;
+
+            element = element.parentElement;
+        }
+
+        return offset;
     }
 
     function onInputNodeMouseDown(event, index){
@@ -237,23 +251,44 @@
 
 <!-- draw the svg -->
 <div class="node-body" bind:this={nodeBody} class:dragging={dragging}>
-    <!-- draw the shape -->
-    <div class="input-points">
-        <!-- for each input attachment point -->
-        {#each inputs as point, i}
-            <!-- draw a circle -->
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div on:mousedown={(e)=>{onInputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onInputNodeMouseUp(e, i)}} class="io-point input-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
-        {/each}
+
+    <div class="node-header">
+        {type.name}
     </div>
 
-    <div class="output-points">
-        <!-- for each output attachment point -->
-        {#each outputs as point, i}
-            <!-- draw a circle -->
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div on:mousedown={(e)=>{onOutputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onOutputNodeMouseUp(e, i)}} class="io-point output-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
-        {/each}
+    <div class="node-content">
+
+        <!-- draw the shape -->
+        <div class="io-points-container input-points">
+            <!-- for each input attachment point -->
+            {#each inputs as point, i}
+                <div class="point-wrapper">
+
+                    <!-- draw a circle -->
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <div on:mousedown={(e)=>{onInputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onInputNodeMouseUp(e, i)}} class="io-point input-point" bind:this={inputElements[i]}></div>
+
+                    <p class="description-text">{point.label}</p>
+                </div>
+
+            {/each}
+        </div>
+
+        <div class="io-points-container output-points">
+            <!-- for each output attachment point -->
+            {#each outputs as point, i}
+                <div class="point-wrapper">
+
+                    <!-- draw a circle -->
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <p class="description-text">{point.label}</p>
+
+                    <div on:mousedown={(e)=>{onOutputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onOutputNodeMouseUp(e, i)}} class="io-point output-point" bind:this={outputElements[i]}></div>
+
+                </div>
+            {/each}
+        </div>
+
     </div>
 </div>
 
@@ -261,21 +296,58 @@
 
 <style>
 
+    .node-header{
+        background-color: var(--foreground-color-2);
+        width: 100%;
+
+        font-size: 0.8em;
+        padding-left: 5px;
+
+        border-radius: var(--general-border-radius);
+
+        color: var(--text-color);
+    }
+
+    .point-wrapper{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .description-text{
+        font-size: 0.8em;
+        color: var(--text-color);
+    }
+
     .node-body {
+
         position: absolute;
 
         /* show grabbable */
         cursor: grab;
 
-        /* outline: 1px solid black; */
-
-        /* take up as little width as possible */
-        /* width: fit-content; */
-
         background-color: var(--foreground-color);
 
-        min-width: 4em;
-        min-height: 4em;
+        border-radius: var(--general-border-radius);
+
+        /* box-shadow */
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+
+        opacity: 0.9;
+    }
+
+    .node-content{
+        display: flex;
+        flex-direction: row;
+    
+        justify-content: space-between;
+
+        gap: 20px;
+
+        pointer-events: none;
+
     }
 
     .io-point{
@@ -283,11 +355,14 @@
         height: 15px;
         border-radius: 50%;
 
-        transform: translate(-50%, -50%);
+
+        /* transform: translate(-50%, -50%); */
 
         border: 1px solid var(--midground-color);
 
         transition-duration: 0.1s;
+
+        pointer-events: all;
     }
 
     .input-point {
@@ -301,8 +376,7 @@
     .io-point:hover{
         cursor: pointer;
 
-        width: 25px;
-        height: 25px;
+        scale: 1.7;
     }
 
     .dragging{
@@ -313,30 +387,35 @@
         animation: wiggle 0.2s infinite;
     }
 
-    .input-points{
+    .io-points-container{
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        align-items: center;
         height: 100%;
 
-        position: absolute;
-        left: 0%;
-        top: 0%;
+        gap: 10px;
+
+        position: relative;
+
+        padding: 5px;
+
+        width: fit-content;
+
+        /* pointer-events: none; */
+
+
+    }
+
+    .input-points{
+        align-items: start;
+
+
     }
 
     .output-points{
+        align-items: end;
 
-        display: flex;
-        flex-direction: column;
-        align-items: center;
 
-        justify-content: space-between;
-        height: 100%;
-
-        position: absolute;
-        right: 0%;
-        top: 0%;
     }
 
     /* wiggleing keyframes */
