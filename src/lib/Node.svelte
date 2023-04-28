@@ -1,18 +1,18 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
-    import type { NodeType, Point } from "../Types";
+    import type { IOPoint, NodeType, Point } from "../Types";
     import Node from "./Node.svelte";
     import { getElementFromDomElement } from "../main";
     import type Workspace from "./Components/Workspace.svelte";
     import { get_current_component } from "svelte/internal";
-  import { genUUID } from "../uuid";
+    import { genUUID } from "../uuid";
 
     let myself = get_current_component() as Node;
 
     //set up props
     export let shape: string;
-    export let inputPoints: Array<Point>;
-    export let outputPoints: Array<Point>;
+    export let inputs: Array<IOPoint>;
+    export let outputs: Array<IOPoint>;
     export let factory: boolean = false;
     export let dragging = false;
 
@@ -92,8 +92,8 @@
                 target: document.body,
                 props: {
                     shape: shape,
-                    inputPoints: inputPoints,
-                    outputPoints: outputPoints,
+                    inputs: inputs,
+                    outputs: outputs,
                     factory: false,
                     dragging: true,
                 }
@@ -166,7 +166,7 @@
     export function getOutputOffset(index: number){
         let boundingBox = nodeBody.getBoundingClientRect();
 
-        let outputPoint = outputPoints[index];
+        let outputPoint = outputs[index];
 
         let styleLeft = nodeBody.style.left;
         let styleTop = nodeBody.style.top;
@@ -187,7 +187,7 @@
     export function getInputOffset(index: number){
         let boundingBox = nodeBody.getBoundingClientRect();
 
-        let inputPoint = inputPoints[index];
+        let inputPoint = inputs[index];
 
         let styleLeft = nodeBody.style.left;
         let styleTop = nodeBody.style.top;
@@ -238,21 +238,23 @@
 <!-- draw the svg -->
 <div class="node-body" bind:this={nodeBody} class:dragging={dragging}>
     <!-- draw the shape -->
-    <img class="node-image" src="/shapes/{shape}.svg" alt={shape} on:load={onImageLoad}>
+    <div class="input-points">
+        <!-- for each input attachment point -->
+        {#each inputs as point, i}
+            <!-- draw a circle -->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div on:mousedown={(e)=>{onInputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onInputNodeMouseUp(e, i)}} class="io-point input-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
+        {/each}
+    </div>
 
-    <!-- for each input attachment point -->
-    {#each inputPoints as point, i}
-        <!-- draw a circle -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div on:mousedown={(e)=>{onInputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onInputNodeMouseUp(e, i)}} class="io-point input-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
-    {/each}
-
-    <!-- for each output attachment point -->
-    {#each outputPoints as point, i}
-        <!-- draw a circle -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div on:mousedown={(e)=>{onOutputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onOutputNodeMouseUp(e, i)}} class="io-point output-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
-    {/each}
+    <div class="output-points">
+        <!-- for each output attachment point -->
+        {#each outputs as point, i}
+            <!-- draw a circle -->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div on:mousedown={(e)=>{onOutputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onOutputNodeMouseUp(e, i)}} class="io-point output-point" style="left: {point.x*100}%; top: {point.y*100}%;"></div>
+        {/each}
+    </div>
 </div>
 
 
@@ -270,23 +272,13 @@
         /* take up as little width as possible */
         /* width: fit-content; */
 
-        max-height: 10vh;
-    }
+        background-color: var(--foreground-color);
 
-    .node-body :global(img) {
-        /* fill parent */
-        /* width: 100%; */
-        height: 100%;
-
-        max-height: 10vh;
-
-        /* keep aspect ratio */
-        object-fit: contain;
+        min-width: 4em;
+        min-height: 4em;
     }
 
     .io-point{
-        position: absolute;
-
         width: 15px;
         height: 15px;
         border-radius: 50%;
@@ -319,6 +311,32 @@
 
         /* repeat wigle animation */
         animation: wiggle 0.2s infinite;
+    }
+
+    .input-points{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        height: 100%;
+
+        position: absolute;
+        left: 0%;
+        top: 0%;
+    }
+
+    .output-points{
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        justify-content: space-between;
+        height: 100%;
+
+        position: absolute;
+        right: 0%;
+        top: 0%;
     }
 
     /* wiggleing keyframes */

@@ -62,7 +62,7 @@
         <!-- for every NodeType draw it -->
         {#each Object.values(NodeTypes) as node, i}
             
-            <Node bind:this={childrenNodes[i]} shape={node.name} inputPoints={node.inputs} outputPoints={node.outputs} factory={true} on:reposition={positionElements}></Node>
+            <Node bind:this={childrenNodes[i]} shape={node.name} inputs={node.inputs} outputs={node.outputs} factory={true} on:reposition={positionElements}></Node>
             
         {/each}
     </div>

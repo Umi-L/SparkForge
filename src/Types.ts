@@ -11,13 +11,6 @@ export interface NodeInterface {
     outputs: Point[]
 }
 
-export enum NodeType {
-    Start = 'start',
-    If = 'if',
-    Elseif = 'elseif',
-    Else = 'else',
-}
-
 export enum ToastType {
     Success = 'success',
     Error = 'error',
@@ -25,19 +18,64 @@ export enum ToastType {
     Warning = 'warning',
 }
 
-export enum ToastPosition{
+export enum ToastPosition {
     TopLeft = 'top-left',
     TopRight = 'top-right',
     BottomLeft = 'bottom-left',
     BottomRight = 'bottom-right',
 }
 
-export const NodeTypes = {
-    Start: { name: 'start', inputs: [], outputs: [{ x: 0.5, y: 1 }] },
-
-    // Logic
-    If: { name: 'if', inputs: [{ x: 0.5, y: 0}], outputs: [{ x: 1, y: 0.5, name: "true" }, { x: 0.5, y: 1, name: "false" }] },
-    Elseif: { name: 'elseif', inputs: [{ x: 0, y: 0}], outputs: [{ x: 0, y: 0 }, { x: 0, y: 0 }] },
-    Else: { name: 'else', inputs: [{ x: 0, y: 0}], outputs: [{ x: 0, y: 0 }] },
+export enum FlowDataType {
+    Flow = 'flow',
+    String = 'string',
+    Number = 'number',
+    Boolean = 'boolean',
+    Object = 'object',
+    Array = 'array',
+    Any = 'any',
 }
+
+export enum NodeType {
+    Start = 'start',
+    If = 'if',
+    Log = 'log',
+}
+
+export interface NodeData {
+    [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[] }
+}
+
+export interface IOPoint {
+    label: string
+    type: FlowDataType
+}
+
+export const NodeTypes: NodeData = {
+  Start: {
+    name: "start",
+    inputs: [],
+    outputs: [{ label: "out", type: FlowDataType.Flow }],
+  },
+
+  If: {
+    name: "if",
+    inputs: [
+      { label: "in", type: FlowDataType.Flow },
+      { label: "condition", type: FlowDataType.Boolean },
+    ],
+    outputs: [
+      { label: "true", type: FlowDataType.Flow },
+      { label: "false", type: FlowDataType.Flow },
+    ],
+  },
+
+  Log: {
+    name: "log",
+    inputs: [
+      { label: "in", type: FlowDataType.Flow },
+      { label: "message", type: FlowDataType.String },
+    ],
+    outputs: [{ label: "out", type: FlowDataType.Flow }],
+  },
+};
 
