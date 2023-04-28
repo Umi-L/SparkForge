@@ -62,6 +62,10 @@
         appearing = false;
     }
 
+    export function getDuration(){
+        return duration;
+    }
+
     
 
 </script>

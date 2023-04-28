@@ -3,13 +3,11 @@ import type { ToastPosition, ToastType } from "./Types";
 import Toast from "./lib/Toast.svelte";
 import { genUUID } from "./uuid";
 
-let toasts = {};
+let toasts = [];
 
 export function createToast(text: string, type: ToastType, position: ToastPosition, duration: number = 3000) {
 
-    let id = genUUID()
-
-    let toast = new Toast({
+    let toast = {
         target: document.getElementById('toasts'),
         props: {
             text: text, 
@@ -17,12 +15,38 @@ export function createToast(text: string, type: ToastType, position: ToastPositi
             type: type, 
             duration: duration,
         }
-    });
+    };
 
-    toasts[id] = toast;
+    // add toast to toasts
+    toasts.push(toast)
 
-    setTimeout(() => {
-        toast.Destroy();
-        delete toasts[id];
-    }, duration);
+    // if this is the only toast, run it
+    if(toasts.length == 1){
+
+        // create toast
+        let toastElement = new Toast(toast);
+
+        setTimeout(() => {
+            toastElement.Destroy();
+            runNextToast();
+        }, duration);
+    }
+}
+
+function runNextToast(){
+    // pop first
+    toasts.shift();
+
+    // if there is a next toast, run it
+    if(toasts.length > 0){
+
+        // create toast
+        let toastElement = new Toast(toasts[0]);
+
+        setTimeout(() => {
+            toastElement.Destroy();
+            runNextToast();
+        }, toasts[0].props.duration);
+    }
+    
 }
