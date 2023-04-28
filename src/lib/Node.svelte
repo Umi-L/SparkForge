@@ -242,6 +242,19 @@
 
         dispatch('outputNodeMouseUp', index);
     }
+
+    // function that capitalises the first letter of each word
+    function toTitle(string){
+        let words = string.split(" ");
+
+        let newWords = [];
+
+        for (let word of words){
+            newWords.push(word.charAt(0).toUpperCase() + word.slice(1));
+        }
+
+        return newWords.join(" ");
+    }
 </script>
 
 
@@ -251,7 +264,7 @@
 <div class:node-body={!factory} class:node-body-factory={factory} bind:this={nodeBody} class:dragging={dragging}>
 
     <div class="node-header">
-        {type.name}
+        {toTitle(type.name)}
     </div>
 
     <div class="node-content">
@@ -298,7 +311,7 @@
         background-color: var(--foreground-color-2);
         width: 100%;
 
-        font-size: 0.8em;
+        font-size: 0.85em;
         padding-left: 5px;
 
         border-radius: var(--general-border-radius);
