@@ -9,11 +9,15 @@
     import Output from "./Components/Output.svelte";
 
     let myself = get_current_component() as Node;
+    const dispatch = createEventDispatcher();
 
     //set up props
     export let type: NodeData;
     export let factory: boolean = false;
     export let dragging = false;
+
+    let uuid: number = genUUID();
+    let position: {x: number, y: number} = {x: 0, y: 0};
 
     let inputs = type.inputs;
     let outputs = type.outputs;
@@ -21,16 +25,10 @@
     let inputElements: Array<HTMLDivElement> = [];
     let outputElements: Array<HTMLDivElement> = [];
 
-
-    export let uuid: number = genUUID();
+    let nodeBody: HTMLDivElement;
 
     let inWorkspace = false;
 
-    const dispatch = createEventDispatcher();
-
-    export let position: {x: number, y: number} = {x: 0, y: 0};
-
-    let nodeBody: HTMLDivElement = null;
 
     export function getRoot(): HTMLDivElement {
         return nodeBody;
@@ -250,7 +248,7 @@
 
 
 <!-- draw the svg -->
-<div class="node-body" bind:this={nodeBody} class:dragging={dragging}>
+<div class:node-body={!factory} class:node-body-factory={factory} bind:this={nodeBody} class:dragging={dragging}>
 
     <div class="node-header">
         {type.name}
@@ -336,6 +334,20 @@
         box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 
         opacity: 0.9;
+    }
+
+    .node-body-factory{
+        position: relative;
+
+        /* show grabbable */
+        cursor: grab;
+
+        background-color: var(--foreground-color);
+
+        border-radius: var(--general-border-radius);
+
+        /* box-shadow */
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
     }
 
     .node-content{

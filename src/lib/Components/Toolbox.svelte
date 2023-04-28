@@ -5,69 +5,16 @@
     import { afterUpdate, onMount } from "svelte";
     import Panel from "../Panel.svelte";
 
-    const nodeGap = 20;
-
-    let childrenNodes:Array<Node> = [];
-    
-    let nodeMenu:HTMLDivElement;
-
-    onMount(() => {
-        window.onresize = positionElements;
-        // nodeMenu.onresize = positionElements;
-
-        // on font load, position elements
-        document.fonts.ready.then(() => {
-            positionElements();
-        });
-    });
-
-    function positionElements(){
-
-        // console.log("positioning elements");
-
-        // start with "padding"
-        let runningHeight = nodeGap/2;
-
-        // for every children node
-        childrenNodes.forEach(node => {
-            // get first child
-            let nodeBody = node.getRoot();
-
-            // get the centre of the node's image
-            let boundingBox = nodeBody.getBoundingClientRect();
-
-            // get the centre of the node
-            let centre = {
-                x: boundingBox.width / 2,
-                y: boundingBox.height / 2
-            }
-
-            // get the width of the menu
-            let menuWidth = nodeBody.parentElement.getBoundingClientRect().width;
-
-            // set the position of the node to the centre
-            // nodeBody.style.left = (menuWidth / 2 - centre.x) + "px";
-
-            // justify right but leave a gap
-            nodeBody.style.left = (menuWidth - boundingBox.width - nodeGap) + "px";
-
-            nodeBody.style.top = (runningHeight) + "px";
-            
-            // add the height of the node to the running height
-            runningHeight += boundingBox.height + nodeGap;
-        });
-    }
-
 </script>
 
 
 
-<Panel name="Toolbox" resizeFuncs={[positionElements]}>
-    <div class="node-menu" bind:this={nodeMenu}>
+<Panel name="Toolbox">
+    <div class="node-menu">
         <!-- for every NodeType draw it -->
         {#each Object.values(NodeTypes) as nodeType, i}
             
-            <Node bind:this={childrenNodes[i]} type={nodeType} factory={true} on:reposition={positionElements}></Node>
+            <Node type={nodeType} factory={true}></Node>
             
         {/each}
     </div>
@@ -78,12 +25,9 @@
 <style>
 
     .node-menu {
-
-        position: relative;
-
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: end;
         /* justify-content: center; */
         gap: 20px;
         height: 100%;
