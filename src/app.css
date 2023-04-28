@@ -19,6 +19,11 @@
   
     --general-border-radius: 5px;
     --general-padding: 5px;
+
+    --error-toast-color: #b14444;
+    --warning-toast-color: #bb8720;
+    --success-toast-color: #57b357;
+    --info-toast-color: #5598ba;
   }
 }
 
@@ -43,6 +48,11 @@
   
     --general-border-radius: 5px;
     --general-padding: 5px;
+
+    --error-toast-color: #ff8080;
+    --warning-toast-color: #ffcc66;
+    --success-toast-color: #9bff9b;
+    --info-toast-color: #72d0ff;
   }  
 }
 

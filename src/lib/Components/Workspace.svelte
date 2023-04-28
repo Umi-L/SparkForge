@@ -4,7 +4,8 @@
     import { onMount } from "svelte";
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import type Node from "../Node.svelte";
-  import type { Point } from "../../Types";
+  import { ToastType, type Point, ToastPosition } from "../../Types";
+  import { createToast } from "../../ToastManager";
 
 
     interface Connection {
@@ -107,17 +108,17 @@
             // if the current dragging nodeNumber is not undefined
             if (currentDraggingNode != undefined) {
 
-                console.log("current dragging node is not undefined");
+                // console.log("current dragging node is not undefined");
 
                 // if the current dragging node is not the same as the node that the input was dragged on
                 if (currentDraggingNode != node) {
 
-                    console.log("current dragging node is not the same as the node that the input was dragged on");
+                    // console.log("current dragging node is not the same as the node that the input was dragged on");
 
                     // if the current dragging outputNumber is not undefined
                     if (currentDraggingOutputNumber != undefined) {
 
-                        console.log("current dragging outputNumber is not undefined");
+                        // console.log("current dragging outputNumber is not undefined");
 
                         // create a connection
                         createConnection(currentDraggingNode, currentDraggingOutputNumber, node, event.detail);
@@ -161,14 +162,13 @@
         node.$on("drag", (event) => {
             // move all connections that are connected to this node
             for (let connection of connections) {
-                // if (connection.inputNode == node) {
-                //     // move the curve
-                //     moveBezierCurve(connection.element, connection.outputNode, connection.outputNumber, node, connection.inputNumber);
-                // } else if (connection.outputNode == node) {
-                //     // move the curve
-                //     moveBezierCurve(connection.element, node, connection.inputNumber, connection.inputNode, connection.outputNumber);
-                // }
-                
+                if (connection.inputNode == node) {
+                    // move the curve
+                    moveBezierCurve(connection.element, connection.outputNode, connection.outputNumber, node, connection.inputNumber);
+                } else if (connection.outputNode == node) {
+                    // move the curve
+                    moveBezierCurve(connection.element, node, connection.inputNumber, connection.inputNode, connection.outputNumber);
+                }
             }
         });
 
@@ -176,7 +176,24 @@
         update();
     }
 
+    function moveBezierCurve(element: SVGPathElement, startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number) {
+
+        // create a bezier curve
+        let curve = createBezierCurveBetweenNodes(startNode, startOutputNumber, endNode, endInputNumber);
+
+        // set the path of the element to the path of the curve
+        element.setAttribute("d", curve.getAttribute("d"));
+    }
+
     function createConnection(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number) {
+
+        // if the connection already exists, return
+        for (let connection of connections) {
+            if (connection.inputNode == endNode && connection.inputNumber == endInputNumber && connection.outputNode == startNode && connection.outputNumber == startOutputNumber) {
+                createToast("Connection already exists", ToastType.Error, ToastPosition.BottomRight, 3000);
+                return;
+            }
+        }
 
         console.log("creating connection with params: " + startNode + ", " + startOutputNumber + ", " + endNode + ", " + endInputNumber + "");
 
@@ -252,25 +269,25 @@
         let startPos = startNode.getOutputOffset(startOutputNumber);
         let endPos = endNode.getInputOffset(endInputNumber);
 
-        // draw point at start position
-        let startCircle = document.createElementNS(svgns, "circle");
-        startCircle.setAttribute("cx", startPos.x + "");
-        startCircle.setAttribute("cy", startPos.y + "");
-        startCircle.setAttribute("r", "5");
-        startCircle.setAttribute("fill", "blue");
-        startCircle.setAttribute("stroke", "black");
+        // // draw point at start position
+        // let startCircle = document.createElementNS(svgns, "circle");
+        // startCircle.setAttribute("cx", startPos.x + "");
+        // startCircle.setAttribute("cy", startPos.y + "");
+        // startCircle.setAttribute("r", "5");
+        // startCircle.setAttribute("fill", "blue");
+        // startCircle.setAttribute("stroke", "black");
 
-        // draw point at end position
-        let endCircle = document.createElementNS(svgns, "circle");
-        endCircle.setAttribute("cx", endPos.x + "");
-        endCircle.setAttribute("cy", endPos.y + "");
-        endCircle.setAttribute("r", "5");
-        endCircle.setAttribute("fill", "blue");
-        endCircle.setAttribute("stroke", "black");
+        // // draw point at end position
+        // let endCircle = document.createElementNS(svgns, "circle");
+        // endCircle.setAttribute("cx", endPos.x + "");
+        // endCircle.setAttribute("cy", endPos.y + "");
+        // endCircle.setAttribute("r", "5");
+        // endCircle.setAttribute("fill", "blue");
+        // endCircle.setAttribute("stroke", "black");
 
         // add the points to the svg
-        connectionsSvg.appendChild(startCircle);
-        connectionsSvg.appendChild(endCircle);
+        // connectionsSvg.appendChild(startCircle);
+        // connectionsSvg.appendChild(endCircle);
 
         let curve = createBezierCurve(startPos, endPos);
 

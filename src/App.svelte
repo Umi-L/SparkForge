@@ -29,6 +29,9 @@
     <div class="debug-space-check"></div>
     <div class="debug-space-check"></div>
     
+    <div id="toasts">
+
+    </div>
   </div>
 
   
@@ -46,5 +49,17 @@
     z-index: 500;
 
     border-radius: var(--general-border-radius);
+  }
+
+  #toasts{
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
   }
 </style>

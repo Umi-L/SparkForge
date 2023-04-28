@@ -18,6 +18,20 @@ export enum NodeType {
     Else = 'else',
 }
 
+export enum ToastType {
+    Success = 'success',
+    Error = 'error',
+    Info = 'info',
+    Warning = 'warning',
+}
+
+export enum ToastPosition{
+    TopLeft = 'top-left',
+    TopRight = 'top-right',
+    BottomLeft = 'bottom-left',
+    BottomRight = 'bottom-right',
+}
+
 export const NodeTypes = {
     Start: { name: 'start', inputs: [], outputs: [{ x: 0.5, y: 1 }] },
 
@@ -26,3 +40,4 @@ export const NodeTypes = {
     Elseif: { name: 'elseif', inputs: [{ x: 0, y: 0}], outputs: [{ x: 0, y: 0 }, { x: 0, y: 0 }] },
     Else: { name: 'else', inputs: [{ x: 0, y: 0}], outputs: [{ x: 0, y: 0 }] },
 }
+
