@@ -165,7 +165,7 @@
         dispatch('reposition');
     }
 
-    export function getOutputOffset(index: number){
+    export function getIOPointPosition(isOutput: boolean, index){
         let styleLeft = nodeBody.style.left;
         let styleTop = nodeBody.style.top;
 
@@ -176,29 +176,11 @@
         let left = parseFloat(styleLeft);
         let top = parseFloat(styleTop);
 
-        // get output point
-        let outputPoint = outputElements[index];
-        let offsets = recursivelyGetOffset(outputPoint, nodeBody);
+        // get point point
+        let point = isOutput ? outputElements[index] : inputElements[index];
+        let offsets = recursivelyGetOffset(point, nodeBody);
 
-        // get position of inputPoint relative to the node
-        return {x: left + offsets.x, y: top + offsets.y};
-    }
-
-    export function getInputOffset(index: number){
-        let styleLeft = nodeBody.style.left;
-        let styleTop = nodeBody.style.top;
-
-        styleLeft = styleLeft.replace("px", "");
-        styleTop = styleTop.replace("px", "");
-
-        // cast to float
-        let left = parseFloat(styleLeft);
-        let top = parseFloat(styleTop);
-
-        // get inputPoint element
-        let inputPoint = inputElements[index];
-
-        let offsets = recursivelyGetOffset(inputPoint, nodeBody);
+        console.log("offsets for node of type", isOutput ? "output" : "input", offsets)
 
         // get position of inputPoint relative to the node
         return {x: left + offsets.x, y: top + offsets.y};
@@ -207,7 +189,7 @@
     function recursivelyGetOffset(element: HTMLElement, finalElement: HTMLElement){
         let offset = {x: 0, y: 0};
 
-        while (element.parentElement != finalElement){
+        while (element != finalElement){
             offset.x += element.offsetLeft;
             offset.y += element.offsetTop;
 

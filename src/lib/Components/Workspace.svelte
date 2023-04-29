@@ -226,7 +226,7 @@
         let mousePos = globalMousePosToWorkfieldPos({x: mouseX, y: mouseY});
 
         // get the offset of the input/output
-        let pos = isOutput ? node.getOutputOffset(index) : node.getInputOffset(index);
+        let pos = node.getIOPointPosition(isOutput, index);
 
         // get the position of the input/output
 
@@ -282,10 +282,8 @@
     function createBezierCurveBetweenNodes(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number): SVGPathElement {
 
         // get the start and end positions of the curve
-        // let startPos = startNode.getOutputOffset(startOutputNumber);
-
-        let startPos = startNode.getOutputOffset(startOutputNumber);
-        let endPos = endNode.getInputOffset(endInputNumber);
+        let startPos = startNode.getIOPointPosition(true, startOutputNumber);
+        let endPos = endNode.getIOPointPosition(false, endInputNumber);
 
         // // draw point at start position
         // let startCircle = document.createElementNS(svgns, "circle");

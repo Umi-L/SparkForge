@@ -81,5 +81,18 @@ export const NodeTypes: NodeDefs = {
     ],
     outputs: [{ label: "out", type: FlowDataType.Flow }],
   },
+  Test: {
+    name: "test",
+    inputs: [
+      { label: "STUFFF", type: FlowDataType.Flow },
+      { label: "STUFFF", type: FlowDataType.Flow },
+      { label: "STUFFF", type: FlowDataType.Flow },
+      { label: "STUFFF", type: FlowDataType.Flow },
+      { label: "STUFFF", type: FlowDataType.Flow },
+      { label: "STUFFF", type: FlowDataType.Flow },
+      { label: "message", type: FlowDataType.String },
+    ],
+    outputs: [{ label: "out", type: FlowDataType.Flow }],
+  },
 };
 
