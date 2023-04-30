@@ -26,6 +26,7 @@
     let outputElements: Array<HTMLDivElement> = [];
 
     let nodeBody: HTMLDivElement;
+    let literalInputs: Array<HTMLInputElement> = [];
 
     let inWorkspace = false;
 
@@ -77,9 +78,16 @@
 
             dragging = false;
 
-            dispatch("dragend", {uuid: uuid, x: position.x, y: position.y, destroyed: !wasUsed});
+            dispatch("dragend", {x: position.x, y: position.y, destroyed: !wasUsed});
 
             event.preventDefault();
+        } 
+        else{
+            literalInputs.forEach(literalInput => {
+                if (literalInput != event.target){
+                    literalInput.blur();
+                }
+            });
         }
     }
 
@@ -111,8 +119,22 @@
         else if (event.target.classList.contains("node-body") || event.target.classList.contains("node-header")){
             dragging = true;
         }
+        else{
+            // else if none of the input elements are having the mouse up
+            let onLiteral = false;
+            literalInputs.forEach(literalInput => {
+                if (literalInput != event.target){
+                    literalInput.blur();
+                }
+                else{
+                    onLiteral = true;
+                }
+            });
 
-        event.preventDefault();
+            if (!onLiteral)
+                event.preventDefault();
+        }
+
     }
 
     function globalMouseMove(event){
@@ -275,7 +297,7 @@
 
                     <!-- draw a circle -->
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <input type={literals[i].type} class="input">
+                    <input type={literals[i].type} class="input" bind:this={literalInputs[i]}>
 
                     <p class="description-text">{literal.label}</p>
                 </div>
@@ -434,7 +456,7 @@
     }
 
     .input{
-        width: 100%;
+        /* width: 100%; */
         height: 20px;
 
         border-radius: var(--general-border-radius);
@@ -443,7 +465,7 @@
 
         background-color: var(--midground-color);
 
-        /* color: var(--text-color); */
+        color: var(--text-color);
 
         padding: 5px;
 

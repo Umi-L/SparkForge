@@ -47,11 +47,11 @@ export enum FlowLiteralType {
     Boolean = 'checkbox',
 }
 
-export enum NodeType {
-    Start = 'start',
-    If = 'if',
-    Log = 'log',
-}
+// export enum NodeType {
+//     Start = 'start',
+//     If = 'if',
+//     Log = 'log',
+// }
 
 export interface NodeDefs {
     [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[] }
@@ -96,7 +96,7 @@ export const NodeTypes: NodeDefs = {
     name: "log",
     inputs: [
       { label: "in", type: FlowDataType.Flow },
-      { label: "message", type: FlowDataType.String },
+      { label: "message", type: FlowDataType.Any },
     ],
     outputs: [{ label: "out", type: FlowDataType.Flow }],
     literals: [],

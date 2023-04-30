@@ -4,15 +4,22 @@
     import { onMount } from "svelte";
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import type Node from "../Node.svelte";
-  import { ToastType, type Point, ToastPosition, FlowDataType } from "../../Types";
-  import { createToast } from "../../ToastManager";
+    import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData } from "../../Types";
+    import { AST, ASTNode, Connection } from "../../AbstractSyntaxTree";
+    import { createToast } from "../../ToastManager";
 
 
     interface Connection {
-        inputNode: Node,
-        inputNumber: number,
-        outputNode: Node,
-        outputNumber: number,
+
+        from: {
+            node: Node,
+            outputNumber: number
+        },
+
+        to: {
+            node: Node,
+            inputNumber: number
+        },
         
         element: SVGPathElement
     }
@@ -178,7 +185,7 @@
                             // console.log("types are the same");
 
                             // create a connection
-                            createConnection(currentDraggingNode, currentDraggingOutputNumber, node, event.detail);
+                            createConnection(node, event.detail, currentDraggingNode, currentDraggingInputNumber);
                         } else {
                             // console.log("types are not the same");
 
@@ -192,25 +199,57 @@
 
         // dragend event
         node.$on("dragend", (event) => {
-            console.log("dragend");
+
+            // if the node was destroyed
+            if (event.detail.destroyed) {
+
+                // remove the node from the nodes array
+                nodes.splice(nodes.indexOf(node), 1);
+
+                let toRemove = []
+
+                // remove all connections that are connected to this node
+                for (let connection of connections) {
+
+                    if (connection.from.node == node || connection.to.node == node) {
+
+                        toRemove.push(connection);
+                    }
+                }
+
+                // kinda hacky solution... not sure why it doesn't work without this
+                for (let connection of toRemove) {
+
+                    removeConnection(connection);
+                }
+
+            }
         });
 
         // move event
         node.$on("drag", (event) => {
             // move all connections that are connected to this node
             for (let connection of connections) {
-                if (connection.inputNode == node) {
+                if (connection.to.node == node) {
                     // move the curve
-                    moveBezierCurve(connection.element, connection.outputNode, connection.outputNumber, node, connection.inputNumber);
-                } else if (connection.outputNode == node) {
+                    moveBezierCurve(connection.element, connection.from.node, connection.from.outputNumber, node, connection.to.inputNumber);
+                } else if (connection.from.node == node) {
                     // move the curve
-                    moveBezierCurve(connection.element, node, connection.outputNumber, connection.inputNode, connection.inputNumber);
+                    moveBezierCurve(connection.element, node, connection.from.outputNumber, connection.to.node, connection.to.inputNumber);
                 }
             }
         });
 
         // update positions
         update();
+    }
+
+    function removeConnection(connection:Connection) {
+        // remove the connection from the connections array
+        connections.splice(connections.indexOf(connection), 1);
+
+        // remove the connection from the workfield
+        connectionsSvg.removeChild(connection.element);
     }
 
     function moveBezierCurve(element: SVGPathElement, startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number) {
@@ -226,7 +265,7 @@
 
         // if the connection already exists, return
         for (let connection of connections) {
-            if (connection.inputNode == endNode && connection.inputNumber == endInputNumber && connection.outputNode == startNode && connection.outputNumber == startOutputNumber) {
+            if (connection.to.node == endNode && connection.to.inputNumber == endInputNumber && connection.from.node == startNode && connection.from.outputNumber == startOutputNumber) {
                 createToast("Connection already exists", ToastType.Error, ToastPosition.BottomRight, 3000);
                 return;
             }
@@ -242,10 +281,14 @@
 
         // create a connection object
         let connection:Connection = {
-            inputNode: endNode,
-            inputNumber: endInputNumber,
-            outputNode: startNode,
-            outputNumber: startOutputNumber,
+            from: {
+                node: startNode,
+                outputNumber: startOutputNumber,
+            },
+            to: {
+                node: endNode,
+                inputNumber: endInputNumber,
+            },
 
             element: curve,
         }
@@ -473,6 +516,65 @@
         }
 
         return elementsBox;
+    }
+
+    function workspaceToASTs(){
+        // get every start node by itterating over every node
+        let startNodes: Array<Node> = [];
+
+        for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+
+            if (node.type == NodeTypes.Start) {
+                startNodes.push(node);
+            }
+        }
+
+        // convert every start node to an AST
+        let asts = [];
+
+        for (let i = 0; i < startNodes.length; i++) {
+            let startNode = startNodes[i];
+
+            let nodeData = startNode.type as NodeData;
+            
+            let astNode = new ASTNode(nodeData, []);
+
+            let ast = new AST(astNode);
+
+            // traverse the tree and add every node to the ast
+            traverseTree(startNode, astNode, ast);
+
+            asts.push(ast);
+        }
+    }
+
+    function traverseTree(startElement: Node, astNode: ASTNode, ast: AST) {
+        // get the output nodes of the start element
+        let connections = getConnections(startElement);
+
+        // for every output node
+        for (let i = 0; i < connections.length; i++) {
+            let connection = connections[i];
+
+            // get the connections
+
+            // traverse the tree
+            // traverseTree(, , ast);
+        }
+    }
+
+    function getConnections(node: Node): Array<Node> {
+        let connections: Array<Node> = [];
+
+        // get every connection coming out of the node
+        connections.forEach(connection => {
+            if (connection.from.node == node) {
+                connections.push(connection);
+            }
+        });
+
+        return connections;
     }
 </script>
 

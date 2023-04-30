@@ -27,7 +27,7 @@
     .node-menu {
         display: flex;
         flex-direction: column;
-        align-items: end;
+        align-items: start;
         /* justify-content: center; */
         gap: 20px;
         height: 100%;
