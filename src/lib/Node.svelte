@@ -6,7 +6,6 @@
     import type Workspace from "./Components/Workspace.svelte";
     import { get_current_component } from "svelte/internal";
     import { genUUID } from "../uuid";
-    import Output from "./Components/Output.svelte";
 
     let myself = get_current_component() as Node;
     const dispatch = createEventDispatcher();
@@ -21,6 +20,7 @@
 
     let inputs = type.inputs;
     let outputs = type.outputs;
+    let literals = type.literals;
 
     let inputElements: Array<HTMLDivElement> = [];
     let outputElements: Array<HTMLDivElement> = [];
@@ -159,12 +159,6 @@
         nodeBody.style.top = position.y + "px";
     })
 
-    function onImageLoad(){
-        console.log("image loaded")
-
-        dispatch('reposition');
-    }
-
     export function getIOPointPosition(isOutput: boolean, index){
         let styleLeft = nodeBody.style.left;
         let styleTop = nodeBody.style.top;
@@ -178,22 +172,44 @@
 
         // get point point
         let point = isOutput ? outputElements[index] : inputElements[index];
-        let offsets = recursivelyGetOffset(point, nodeBody);
 
-        console.log("offsets for node of type", isOutput ? "output" : "input", offsets)
+        let offsets = getOffset(point, nodeBody);
+
+        // add middle of point to offset
+        offsets.x += point.offsetWidth / 2;
+        offsets.y += point.offsetHeight / 2;
+
+        // console.log("offsets for node of type", isOutput ? "output" : "input", offsets)
 
         // get position of inputPoint relative to the node
         return {x: left + offsets.x, y: top + offsets.y};
     }
 
-    function recursivelyGetOffset(element: HTMLElement, finalElement: HTMLElement){
+    export function getIOPoint(isOutput: boolean, index: number){
+        if (isOutput){
+            console.log("index", index)
+            console.log("outputs", outputs)
+            console.log("outputs of index", outputs[index])
+            return outputs[index];
+        }
+        else {
+            console.log("index", index)
+            console.log("inputs", inputs)
+            console.log("inputs of index", inputs[index])
+            return inputs[index];
+        }
+    }
+
+    function getOffset(element: any, finalElement: HTMLElement){
         let offset = {x: 0, y: 0};
 
         while (element != finalElement){
+
             offset.x += element.offsetLeft;
             offset.y += element.offsetTop;
 
-            element = element.parentElement;
+            element = element.offsetParent;
+
         }
 
         return offset;
@@ -242,7 +258,6 @@
 
 
 
-<!-- draw the svg -->
 <div class:node-body={!factory} class:node-body-factory={factory} bind:this={nodeBody} class:dragging={dragging}>
 
     <div class="node-header">
@@ -253,13 +268,26 @@
 
         <!-- draw the shape -->
         <div class="io-points-container input-points">
+
+            <!-- for each literal -->
+            {#each literals as literal, i}
+                <div class="point-wrapper">
+
+                    <!-- draw a circle -->
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <input type={literals[i].type} class="input">
+
+                    <p class="description-text">{literal.label}</p>
+                </div>
+            {/each}
+
             <!-- for each input attachment point -->
             {#each inputs as point, i}
                 <div class="point-wrapper">
 
                     <!-- draw a circle -->
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <div on:mousedown={(e)=>{onInputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onInputNodeMouseUp(e, i)}} class="io-point input-point" bind:this={inputElements[i]}></div>
+                    <div on:mousedown={(e)=>{onInputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onInputNodeMouseUp(e, i)}} class="io-point" bind:this={inputElements[i]} style={"background-color: var(--" + point.type + "-color);"}></div>
 
                     <p class="description-text">{point.label}</p>
                 </div>
@@ -276,7 +304,7 @@
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <p class="description-text">{point.label}</p>
 
-                    <div on:mousedown={(e)=>{onOutputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onOutputNodeMouseUp(e, i)}} class="io-point output-point" bind:this={outputElements[i]}></div>
+                    <div on:mousedown={(e)=>{onOutputNodeMouseDown(e, i)}} on:mouseup={(e)=>{onOutputNodeMouseUp(e, i)}} class="io-point" bind:this={outputElements[i]} style={"background-color: var(--" + point.type + "-color);"}></div>
 
                 </div>
             {/each}
@@ -372,14 +400,6 @@
         pointer-events: all;
     }
 
-    .input-point {
-        background-color: var(--aquamarine);
-    }
-
-    .output-point{
-        background-color: var(--pale-dogwood);
-    }
-
     .io-point:hover{
         cursor: pointer;
 
@@ -411,6 +431,23 @@
         /* pointer-events: none; */
 
 
+    }
+
+    .input{
+        width: 100%;
+        height: 20px;
+
+        border-radius: var(--general-border-radius);
+
+        border: 1px solid var(--foreground-color);
+
+        background-color: var(--midground-color);
+
+        /* color: var(--text-color); */
+
+        padding: 5px;
+
+        pointer-events: all;
     }
 
     .input-points{

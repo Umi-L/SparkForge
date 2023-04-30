@@ -21,6 +21,12 @@
     --general-border-radius: 5px;
     --general-padding: 5px;
 
+    --boolean-color: #ff8080;
+    --number-color: #ffcc66;
+    --string-color: #9bff9b;
+    --flow-color: #72d0ff;
+    --any-color: #fffd80;
+
     --error-toast-color: #b14444;
     --warning-toast-color: #bb8720;
     --success-toast-color: #57b357;
@@ -50,6 +56,12 @@
   
     --general-border-radius: 5px;
     --general-padding: 5px;
+
+    --boolean-color: #ff8080;
+    --number-color: #ffcc66;
+    --string-color: #9bff9b;
+    --flow-color: #72d0ff;
+    --any-color: #fffd80;
 
     --error-toast-color: #ff8080;
     --warning-toast-color: #ffcc66;

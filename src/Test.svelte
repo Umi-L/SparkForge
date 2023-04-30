@@ -5,6 +5,7 @@
     import StringInput from "./lib/TestComponents/StringInput.svelte";
     import ChoiceInput from "./lib/TestComponents/ChoiceInput.svelte";
     import { NodeTypes, TestPropTypes } from "./Types";
+  import FunctionRun from "./lib/TestComponents/FunctionRun.svelte";
 
     export let ElementToTest: string = "Node";
     let classToTest: any;
@@ -90,6 +91,18 @@
         })
     }
 
+    function createTestFunctionRunButton(func: Function){
+        new FunctionRun({
+            target: sidebar,
+            props: {
+                funcName: func.name,
+                callback: () => {
+                    func(componentToTest)
+                }
+            }
+        })
+    }
+
     function redrawComponent(){
         componentToTest.$destroy();
         componentToTest = new classToTest({
@@ -103,6 +116,7 @@
         const component = data[0];
         const testData = data[1];
         const propDefs = testData.possibleProps;
+        const testFuncs = testData.testFunctions;
 
         classToTest = component;
 
@@ -127,6 +141,10 @@
                 props[key] = propDefs[key].options[0];
                 createChoiceInput(key, propDefs[key].options)
             }
+        });
+
+        testFuncs.forEach(func => {
+            createTestFunctionRunButton(func);
         });
 
         componentToTest = new classToTest({

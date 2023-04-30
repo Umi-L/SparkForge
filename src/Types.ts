@@ -41,6 +41,11 @@ export enum FlowDataType {
     Array = 'array',
     Any = 'any',
 }
+export enum FlowLiteralType {
+    String = 'text',
+    Number = 'number',
+    Boolean = 'checkbox',
+}
 
 export enum NodeType {
     Start = 'start',
@@ -49,11 +54,11 @@ export enum NodeType {
 }
 
 export interface NodeDefs {
-    [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[] }
+    [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[] }
 }
 
 export interface NodeData {
-  name: string, inputs: IOPoint[], outputs: IOPoint[]
+  name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[]
 }
 
 export interface IOPoint {
@@ -61,11 +66,17 @@ export interface IOPoint {
     type: FlowDataType
 }
 
+export interface LiteralInput {
+    label: string,
+    type: FlowLiteralType,
+}
+
 export const NodeTypes: NodeDefs = {
   Start: {
     name: "start",
     inputs: [],
     outputs: [{ label: "out", type: FlowDataType.Flow }],
+    literals: [],
   },
 
   If: {
@@ -78,6 +89,7 @@ export const NodeTypes: NodeDefs = {
       { label: "true", type: FlowDataType.Flow },
       { label: "false", type: FlowDataType.Flow },
     ],
+    literals: [],
   },
 
   Log: {
@@ -87,19 +99,31 @@ export const NodeTypes: NodeDefs = {
       { label: "message", type: FlowDataType.String },
     ],
     outputs: [{ label: "out", type: FlowDataType.Flow }],
+    literals: [],
   },
-  Test: {
-    name: "test",
-    inputs: [
-      { label: "STUFFF", type: FlowDataType.Flow },
-      { label: "STUFFF", type: FlowDataType.Flow },
-      { label: "STUFFF", type: FlowDataType.Flow },
-      { label: "STUFFF", type: FlowDataType.Flow },
-      { label: "STUFFF", type: FlowDataType.Flow },
-      { label: "STUFFF", type: FlowDataType.Flow },
-      { label: "message", type: FlowDataType.String },
+  String: {
+    name: "string",
+    inputs: [],
+    outputs: [{ label: "string", type: FlowDataType.String }],
+    literals: [
+        { label: "value", type: FlowLiteralType.String },
     ],
-    outputs: [{ label: "out", type: FlowDataType.Flow }],
   },
+    Number: {
+        name: "number",
+        inputs: [],
+        outputs: [{ label: "number", type: FlowDataType.Number }],
+        literals: [
+            { label: "value", type: FlowLiteralType.Number },
+        ],
+    },
+    Boolean: {
+        name: "boolean",
+        inputs: [],
+        outputs: [{ label: "boolean", type: FlowDataType.Boolean }],
+        literals: [
+            { label: "value", type: FlowLiteralType.Boolean },
+        ],
+    },
 };
 

@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import type Node from "../Node.svelte";
-  import { ToastType, type Point, ToastPosition } from "../../Types";
+  import { ToastType, type Point, ToastPosition, FlowDataType } from "../../Types";
   import { createToast } from "../../ToastManager";
 
 
@@ -120,8 +120,25 @@
 
                         // console.log("current dragging outputNumber is not undefined");
 
-                        // create a connection
-                        createConnection(currentDraggingNode, currentDraggingOutputNumber, node, event.detail);
+                        let inputIndex = event.detail;
+
+                        // get the node types for the input and output
+                        let inputPoint = node.getIOPoint(false, inputIndex);
+                        let outputPoint = currentDraggingNode.getIOPoint(true, currentDraggingOutputNumber);
+
+                        // if the types are the same
+                        if (inputPoint.type == outputPoint.type || inputPoint.type == FlowDataType.Any || outputPoint.type == FlowDataType.Any) {
+
+                            // console.log("types are the same");
+
+                            // create a connection
+                            createConnection(currentDraggingNode, currentDraggingOutputNumber, node, event.detail);
+                        } else {
+                            // console.log("types are not the same");
+
+                            // create a toast
+                            createToast("Types are not the same", ToastType.Error, ToastPosition.TopRight);
+                        }
                     }
                 }
             }
@@ -134,20 +151,40 @@
             // if the current dragging nodeNumber is not undefined
             if (currentDraggingNode != undefined) {
 
-                console.log("current dragging node is not undefined");
+                // console.log("current dragging node is not undefined");
 
                 // if the current dragging node is not the same as the node that the input was dragged on
                 if (currentDraggingNode != node) {
 
-                    console.log("current dragging node is not the same as the node that the input was dragged on");
+                    // console.log("current dragging node is not the same as the node that the input was dragged on");
 
                     // if the current dragging inputNumber is not undefined
                     if (currentDraggingInputNumber != undefined) {
 
-                        console.log("current dragging inputNumber is not undefined");
+                        // console.log("current dragging inputNumber is not undefined");
 
-                        // create a connection
-                        createConnection(node, currentDraggingInputNumber, currentDraggingNode, event.detail);
+                        let outputIndex = event.detail;
+
+                        // get the node types for the input and output
+                        let inputPoint = currentDraggingNode.getIOPoint(false, currentDraggingInputNumber);
+                        let outputPoint = node.getIOPoint(true, outputIndex);
+
+                        console.log(inputPoint);
+                        console.log(outputPoint);
+
+                        // if the types are the same
+                        if (inputPoint.type == outputPoint.type || inputPoint.type == FlowDataType.Any || outputPoint.type == FlowDataType.Any) {
+
+                            // console.log("types are the same");
+
+                            // create a connection
+                            createConnection(currentDraggingNode, currentDraggingOutputNumber, node, event.detail);
+                        } else {
+                            // console.log("types are not the same");
+
+                            // create a toast
+                            createToast("Types are not the same", ToastType.Error, ToastPosition.TopRight);
+                        }
                     }
                 }
             }
@@ -167,7 +204,7 @@
                     moveBezierCurve(connection.element, connection.outputNode, connection.outputNumber, node, connection.inputNumber);
                 } else if (connection.outputNode == node) {
                     // move the curve
-                    moveBezierCurve(connection.element, node, connection.inputNumber, connection.inputNode, connection.outputNumber);
+                    moveBezierCurve(connection.element, node, connection.outputNumber, connection.inputNode, connection.inputNumber);
                 }
             }
         });

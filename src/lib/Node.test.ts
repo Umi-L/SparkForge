@@ -1,4 +1,5 @@
 import { NodeTypes, TestPropTypes } from "../Types";
+import type Node from "./Node.svelte";
 
 export const possibleProps = {
     type: {
@@ -9,3 +10,7 @@ export const possibleProps = {
         type: TestPropTypes.Boolean,
     }
 };
+
+export const testFunctions = [
+    
+]
