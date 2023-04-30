@@ -1,6 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
-    import type { IOPoint, NodeData, NodeType, Point } from "../Types";
+    import { NodeTypes, type IOPoint, type NodeData, type Point } from "../Types";
     import Node from "./Node.svelte";
     import { getElementFromDomElement } from "../main";
     import type Workspace from "./Components/Workspace.svelte";
@@ -12,7 +12,7 @@
     const dispatch = createEventDispatcher();
 
     //set up props
-    export let type: NodeData;
+    export let type: NodeData = NodeTypes.Test;
     export let factory: boolean = false;
     export let dragging = false;
 

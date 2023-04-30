@@ -1,5 +1,6 @@
 import './app.css'
 import App from './App.svelte'
+import Test from './Test.svelte'
 
 export let panels = []
 
@@ -50,7 +51,11 @@ export function getElementFromDomElement(domElement: Element) {
 
 // detect user color preference
 
-const app = new App({
+// const app = new App({
+//   target: document.getElementById('app'),
+// })
+
+const app = new Test({
   target: document.getElementById('app'),
 })
 

@@ -5,6 +5,13 @@ export interface Point {
     name?: string
 }
 
+export enum TestPropTypes {
+    String = 'string',
+    Number = 'number',
+    Boolean = 'boolean',
+    Choice = 'choice',
+}
+
 export interface NodeInterface {
     name: string
     inputs: Point[]
