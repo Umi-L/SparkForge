@@ -2,11 +2,25 @@ import type { NodeData } from "./Types";
 
 export class ASTNode {
     data: NodeData;
-    connections: ASTConnection[];
+    parent: ASTNode | undefined;
+    outConnections: ASTConnection[];
+    inConnections: ASTConnection[];
 
-    constructor(data: NodeData, connections: ASTConnection[]) {
+    constructor(data: NodeData, outConnections: ASTConnection[], parent: ASTNode | undefined, inConnections: ASTConnection[] = []) {
         this.data = data;
-        this.connections = connections;
+        this.outConnections = outConnections;
+        this.inConnections = inConnections;
+    }
+
+    public parentHasOutConnection(inputNumber: number): boolean {
+        if (this.parent) {
+            for (let connection of this.parent.outConnections) {
+                if (connection.to.inputNumber == inputNumber && connection.to.node == this) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
 
@@ -39,7 +53,11 @@ export class AST {
         this.root = root;
     }
 
-    public addConnection(connection: ASTConnection) {
-        connection.from.node.connections.push(connection);
+    public addOutConnection(connection: ASTConnection) {
+        connection.from.node.outConnections.push(connection);
+    }
+
+    public addInConnection(connection: ASTConnection) {
+        connection.to.node.inConnections.push(connection);
     }
 }
