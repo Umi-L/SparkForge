@@ -237,6 +237,10 @@
         return offset;
     }
 
+    export function getType(){
+        return type;
+    }
+
     function onInputNodeMouseDown(event, index){
         console.log("input node mouse down", index);
 

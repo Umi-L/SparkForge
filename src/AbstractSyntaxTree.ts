@@ -2,27 +2,31 @@ import type { NodeData } from "./Types";
 
 export class ASTNode {
     data: NodeData;
-    connections: Connection[];
+    connections: ASTConnection[];
 
-    constructor(data: NodeData, connections: Connection[]) {
+    constructor(data: NodeData, connections: ASTConnection[]) {
         this.data = data;
         this.connections = connections;
     }
 }
 
-export class Connection {
-    
-    outputNode: ASTNode;
+interface from{
+    node: ASTNode;
     outputNumber: number;
+}
 
-    inputNode: ASTNode;
+interface to{
+    node: ASTNode;
     inputNumber: number;
+}
+
+export class ASTConnection {
+    from: from;
+    to: to;
 
     constructor(outputNode: ASTNode, outputNumber: number, inputNode: ASTNode, inputNumber: number) {
-        this.outputNode = outputNode;
-        this.outputNumber = outputNumber;
-        this.inputNode = inputNode;
-        this.inputNumber = inputNumber;
+        this.from = { node: outputNode, outputNumber: outputNumber };
+        this.to = { node: inputNode, inputNumber: inputNumber };
     }
 }
 
@@ -35,16 +39,7 @@ export class AST {
         this.root = root;
     }
 
-    public addNode(node: NodeData, outputNode, outputIndex, inputIndex) {
-
-        let newNode = new ASTNode(node, []);
-
-        let connection = new Connection(outputNode, outputIndex, newNode, inputIndex);
-
-        connection.outputNode.connections.push(connection);
-    }
-
-    public addConnection(connection: Connection) {
-        connection.outputNode.connections.push(connection);
+    public addConnection(connection: ASTConnection) {
+        connection.from.node.connections.push(connection);
     }
 }

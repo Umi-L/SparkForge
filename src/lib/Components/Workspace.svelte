@@ -5,7 +5,7 @@
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import type Node from "../Node.svelte";
     import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData } from "../../Types";
-    import { AST, ASTNode, Connection } from "../../AbstractSyntaxTree";
+    import { AST, ASTConnection, ASTNode } from "../../AbstractSyntaxTree";
     import { createToast } from "../../ToastManager";
 
 
@@ -222,6 +222,8 @@
 
                     removeConnection(connection);
                 }
+
+                workspaceToASTs();
 
             }
         });
@@ -525,7 +527,7 @@
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i];
 
-            if (node.type == NodeTypes.Start) {
+            if (node.getType() == NodeTypes.Start) {
                 startNodes.push(node);
             }
         }
@@ -536,7 +538,7 @@
         for (let i = 0; i < startNodes.length; i++) {
             let startNode = startNodes[i];
 
-            let nodeData = startNode.type as NodeData;
+            let nodeData = startNode.getType() as NodeData;
             
             let astNode = new ASTNode(nodeData, []);
 
@@ -547,20 +549,29 @@
 
             asts.push(ast);
         }
+
+        console.log(asts)
     }
 
     function traverseTree(startElement: Node, astNode: ASTNode, ast: AST) {
         // get the output nodes of the start element
         let connections = getConnections(startElement);
 
-        // for every output node
+        // for every connection
         for (let i = 0; i < connections.length; i++) {
             let connection = connections[i];
 
-            // get the connections
+            let node = connection.to.node;
 
-            // traverse the tree
-            // traverseTree(, , ast);
+            let nodeData = node.type as NodeData;
+
+            let newNode = new ASTNode(nodeData, []);
+
+            let astConnection = new ASTConnection(astNode, connection.from.index, newNode, connection.to.index);
+
+            ast.addConnection(astConnection);
+
+            traverseTree(node, newNode, ast);
         }
     }
 
