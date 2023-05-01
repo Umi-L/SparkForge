@@ -553,27 +553,29 @@
         console.log(asts)
     }
 
-    function traverseTree(startElement: Node, astNode: ASTNode, ast: AST) {
+    function traverseTree(startElement: Node, astNode: ASTNode, ast: AST, reverse: boolean = false) {
 
         // get the output nodes of the start element
         let outConnections = getOutConnections(startElement);
         let inConnections = getInConnections(startElement);
 
         // for every out connection
-        for (let i = 0; i < outConnections.length; i++) {
-            let connection = outConnections[i];
+        if (!reverse){
+            for (let i = 0; i < outConnections.length; i++) {
+                let connection = outConnections[i];
 
-            let node = connection.to.node;
+                let node = connection.to.node;
 
-            let nodeData = node.getType();
+                let nodeData = node.getType();
 
-            let newNode = new ASTNode(nodeData, [], astNode);
+                let newNode = new ASTNode(nodeData, [], astNode);
 
-            let astConnection = new ASTConnection(astNode, connection.from.outputNumber, newNode, connection.to.inputNumber);
+                let astConnection = new ASTConnection(astNode, connection.from.outputNumber, newNode, connection.to.inputNumber);
 
-            ast.addOutConnection(astConnection);
+                ast.addOutConnection(astConnection);
 
-            traverseTree(node, newNode, ast);
+                traverseTree(node, newNode, ast);
+            }
         }
 
         // for every in connection
@@ -595,7 +597,7 @@
 
             ast.addInConnection(astConnection);
 
-            // traverseTree(node, newNode, ast);
+            traverseTree(node, newNode, ast, true);
         }
     }
 

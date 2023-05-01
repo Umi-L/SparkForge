@@ -10,15 +10,22 @@ export class ASTNode {
         this.data = data;
         this.outConnections = outConnections;
         this.inConnections = inConnections;
+        this.parent = parent;
     }
 
     public parentHasOutConnection(inputNumber: number): boolean {
         if (this.parent) {
+            console.log("parent exists")
             for (let connection of this.parent.outConnections) {
+                console.log(connection.to.inputNumber, inputNumber)
                 if (connection.to.inputNumber == inputNumber && connection.to.node == this) {
+                    console.log("parent has out connection")
                     return true;
                 }
             }
+        }
+        else{
+            console.log("parent does not exist")
         }
         return false;
     }

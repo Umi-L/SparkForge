@@ -125,5 +125,22 @@ export const NodeTypes: NodeDefs = {
             { label: "value", type: FlowLiteralType.Boolean },
         ],
     },
+    Equals: {
+        name: "equals",
+        inputs: [
+            { label: "a", type: FlowDataType.Any },
+            { label: "b", type: FlowDataType.Any },
+        ],
+        outputs: [{ label: "equals", type: FlowDataType.Boolean }],
+        literals: [],
+    },
+    Not: {
+        name: "not",
+        inputs: [
+            { label: "value", type: FlowDataType.Boolean },
+        ],
+        outputs: [{ label: "not", type: FlowDataType.Boolean }],
+        literals: [],
+    }
 };
 
