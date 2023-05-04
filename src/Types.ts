@@ -1,5 +1,5 @@
-import { specialCaseEquals, specialCaseIf, specialCaseNot } from "./Compiler"
 import { log } from "./NodeFunctions"
+import { Template } from "./Templates"
 
 export interface Point {
     x: number
@@ -57,11 +57,11 @@ export enum FlowLiteralType {
 // }
 
 export interface NodeDefs {
-    [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[], func: Function | undefined, specialCase?: boolean }
+    [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[], func?: Function, specialCase?: boolean, template?: Template }
 }
 
 export interface NodeData {
-  name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[], func: Function | undefined, specialCase?: boolean
+  name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[], func?: Function, specialCase?: boolean, template?: Template
 }
 
 export interface IOPoint {
@@ -80,7 +80,6 @@ export const NodeTypes: NodeDefs = {
     inputs: [],
     outputs: [{ label: "out", type: FlowDataType.Flow }],
     literals: [],
-    func: undefined
   },
 
   If: {
@@ -92,10 +91,11 @@ export const NodeTypes: NodeDefs = {
     outputs: [
       { label: "true", type: FlowDataType.Flow },
       { label: "false", type: FlowDataType.Flow },
+      { label: "out", type: FlowDataType.Flow },
     ],
     literals: [],
-    func: specialCaseIf,
-    specialCase: true
+    specialCase: true,
+    template: new Template("if({p1}){{b1}}else{{body2}}")
   },
 
   Log: {
@@ -115,7 +115,6 @@ export const NodeTypes: NodeDefs = {
     literals: [
         { label: "value", type: FlowLiteralType.String },
     ],
-    func: undefined
   },
     Number: {
         name: "number",
@@ -124,7 +123,6 @@ export const NodeTypes: NodeDefs = {
         literals: [
             { label: "value", type: FlowLiteralType.Number },
         ],
-        func: undefined
     },
     Boolean: {
         name: "boolean",
@@ -133,7 +131,6 @@ export const NodeTypes: NodeDefs = {
         literals: [
             { label: "value", type: FlowLiteralType.Boolean },
         ],
-        func: undefined
     },
     Equals: {
         name: "equals",
@@ -143,8 +140,8 @@ export const NodeTypes: NodeDefs = {
         ],
         outputs: [{ label: "equals", type: FlowDataType.Boolean }],
         literals: [],
-        func: specialCaseEquals,
-        specialCase: true
+        specialCase: true,
+        template: new Template("{p1} == {p2}")
     },
     Not: {
         name: "not",
@@ -153,8 +150,9 @@ export const NodeTypes: NodeDefs = {
         ],
         outputs: [{ label: "not", type: FlowDataType.Boolean }],
         literals: [],
-        func: specialCaseNot,
-        specialCase: true
+        specialCase: true,
+        template: new Template("!{p1}")
+        
     }
 };
 

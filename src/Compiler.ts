@@ -1,119 +1,70 @@
 import type { AST, ASTConnection, ASTNode } from "./AbstractSyntaxTree";
+import { Template } from "./Templates";
 import { createToast } from "./ToastManager";
 import { ToastPosition, ToastType } from "./Types";
 
-interface SpecialCaseOutput {
-    line: string;
-    indent: number;
-    close: string | undefined;
+interface SpecialCaseInput {
+    node: ASTNode;
+    inputNumber: number;
+
 }
 
 export function Compile(ast: AST) {
     
-    let code = "";
-    let node = ast.root;
-    let indent = 0;
+    let rootNode = ast.root;
 
-    function addLine(line: string) {
-        code += "    ".repeat(indent) + line + "\n";
-    }
+    // recursively process all in connections
+    function processNodeInConnections(node: ASTNode): string {
+        let inputs = [];
 
-    function addLineAndIndent(line: string) {
-        addLine(line);
-        indent++;
-    }
-
-    function removeIndent() {
-        indent--;
-    }
-
-    function processNodeInConnections(node: ASTNode): string[] {
-
-        let outputs = []
+        let template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...})`);
 
         for (let connection of node.inConnections) {
-            // get node the node that the connection is coming from
-            let fromNode = connection.from.node;
-
-            // get the func of the fromNode
-            let func = fromNode.data.func;
-
-            if (func == undefined) {
-                continue;
-            }
-
-            // get the number of parameters the node
-            let numParams = fromNode.data.inputs.length;
-
-            // if the number of params and the number of inConnections are not equal
-            if (numParams != fromNode.inConnections.length) {
-                //error unsatisfied parameters
-                console.log("unsatisfied parameters");
-
-                // toast error
-                createToast(`Missing connections to node ${fromNode.data.name}`, ToastType.Error, ToastPosition.BottomRight);
-
-                return;
-            }
-
-            // assume basic function call
-            let line = `${fromNode.data.name}(`;
-
-            let params = processNodeInConnections(fromNode);
-
-            // add params to line
-            line += params.join(", ");
-
-            line += ")";
-
-            outputs.push(line);
+            let input = processNodeInConnections(connection.from.node);
+            inputs.push(input);   
         }
+
+        return template.fill(inputs, []);
+    }
+
+    function getInputs(node: ASTNode): Array<string>{
+        let inputs = [];
+
+        for (let connection of node.inConnections) {
+            let input = processNodeInConnections(connection.from.node);
+            inputs.push(input);   
+        }
+
+        return inputs;
     }
 
 
-    
-    // traverse the tree
-    while (node) {
 
-        // if special case hand off to special case function
-        if (node.data.specialCase) {
-            node.data.func(node);
+    function processNode(node: ASTNode) {
+        // get all the inputs
+        let inputs = getInputs(node);  
+        
+        let template: Template;
+
+        if (node.data.func){
+            template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...})`);
+        }
+        else{
+            template = new Template(`{b1}`);
         }
 
-        let line = `${node.data.name}(`;
-        let ending = ")";
-        let params = [];        
-
-
-        if (node.data.func == undefined) {
-            line = ""
-            ending = "";
+        let bodies = [];
+        
+        // for every output connection
+        for (let connection of node.outConnections) {
+            // recursively process the node and add the body to the bodies array
+            bodies.push(processNode(connection.to.node));
         }
 
-        // if the node has inConnections that must be processed first
-        if (node.inConnections.length > 0) {
-            params = processNodeInConnections(node);
-        }
-
-        // add params to line
-        line += params.join(", ");
-
-        line += ending;
-        addLine(line);
-
+        return template.fill(inputs, bodies);
     }
+
+    let code = processNode(rootNode);
 
     return code;
-}
-
-export function specialCaseIf(){
-    
-}
-
-export function specialCaseEquals(){
-
-}
-
-export function specialCaseNot(){
-
 }

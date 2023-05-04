@@ -1,5 +1,27 @@
-<script>
+<script lang="ts">
+  import { Compile } from "../Compiler";
+  import { getElementFromDomElement } from "../main";
+  import type Workspace from "./Components/Workspace.svelte";
 
+    function runGame(){
+        // foreach workspace
+        let workfields = document.querySelectorAll(".workfield");
+
+        let workspaces = [];
+
+        for (let workfield of workfields){
+            workspaces.push(getElementFromDomElement(workfield) as Workspace);
+        }
+
+        for (let i = 0; i < workspaces.length; i++){
+            let asts = workspaces[i].workspaceToASTs();
+
+            for (let ast of asts){
+
+                console.log(Compile(ast));
+            }
+        }
+    }
 </script>
 
 
@@ -15,7 +37,8 @@
     <div class="middle">
         <div class="button-assembly">
             <!-- svelte-ignore a11y-missing-attribute -->
-            <a class="state-button"><span class="iconify" data-icon="mdi-play"></span></a>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <a class="state-button" on:click={runGame}><span class="iconify" data-icon="mdi-play"></span></a>
             
             <!-- svelte-ignore a11y-missing-attribute -->
             <a class="state-button"><span class="iconify" data-icon="mdi-stop"></span></a>

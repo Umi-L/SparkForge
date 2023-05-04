@@ -520,7 +520,7 @@
         return elementsBox;
     }
 
-    function workspaceToASTs(){
+    export function workspaceToASTs(){
         // get every start node by itterating over every node
         let startNodes: Array<Node> = [];
 
@@ -551,6 +551,8 @@
         }
 
         console.log(asts)
+
+        return asts;
     }
 
     function traverseTree(startElement: Node, astNode: ASTNode, ast: AST, reverse: boolean = false) {
