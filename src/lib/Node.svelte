@@ -237,6 +237,21 @@
         return offset;
     }
 
+    export function getLiteralValues(){
+        let values = [];
+
+        literalInputs.forEach(literalInput => {
+            if (literalInput.type == "text")
+                values.push(literalInput.value);
+            else if (literalInput.type == "number")
+                values.push(parseFloat(literalInput.value));
+            else if (literalInput.type == "checkbox")
+                values.push(literalInput.checked);
+        });
+
+        return values;
+    }
+
     export function getType(){
         return type;
     }

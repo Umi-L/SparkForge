@@ -15,10 +15,10 @@ export function Compile(ast: AST) {
 
         for (let connection of node.inConnections) {
             let input = processNodeInConnections(connection.from.node);
-            inputs.push(input);   
+            inputs.push(input);
         }
 
-        return template.fill(inputs, []);
+        return template.fill(inputs, [], node.literals);
     }
 
     function getInputs(node: ASTNode): Array<string>{
@@ -63,7 +63,7 @@ export function Compile(ast: AST) {
         console.log("filling template", template, "inputs", inputs, "bodies", bodies)
         console.log("filled template", template.fill(inputs, bodies))
 
-        return template.fill(inputs, bodies);
+        return template.fill(inputs, bodies, node.literals);
     }
 
     let code = processNode(rootNode);

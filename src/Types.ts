@@ -115,6 +115,8 @@ export const NodeTypes: NodeDefs = {
     literals: [
         { label: "value", type: FlowLiteralType.String },
     ],
+    specialCase: true,
+    template: new Template("'{l1}'"),
   },
     Number: {
         name: "number",
@@ -123,6 +125,8 @@ export const NodeTypes: NodeDefs = {
         literals: [
             { label: "value", type: FlowLiteralType.Number },
         ],
+        specialCase: true,
+        template: new Template("{l1}"),
     },
     Boolean: {
         name: "boolean",
@@ -131,6 +135,8 @@ export const NodeTypes: NodeDefs = {
         literals: [
             { label: "value", type: FlowLiteralType.Boolean },
         ],
+        specialCase: true,
+        template: new Template("{l1}"),
     },
     Equals: {
         name: "equals",

@@ -592,8 +592,10 @@
             let node = connection.from.node;
 
             let nodeData = node.getType();
+            let literalValues = node.getLiteralValues();
 
             let newNode = new ASTNode(nodeData, [], astNode);
+            newNode.literals = literalValues;
 
             let astConnection = new ASTConnection(newNode, connection.from.outputNumber, astNode, connection.to.inputNumber);
 

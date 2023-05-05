@@ -5,8 +5,9 @@ export class ASTNode {
     parent: ASTNode | undefined;
     outConnections: ASTConnection[];
     inConnections: ASTConnection[];
+    literals: any[];
 
-    constructor(data: NodeData, outConnections: ASTConnection[], parent: ASTNode | undefined, inConnections: ASTConnection[] = []) {
+    constructor(data: NodeData, outConnections: ASTConnection[], parent: ASTNode | undefined, inConnections: ASTConnection[] = [], literals: any[] = []) {
         this.data = data;
         this.outConnections = outConnections;
         this.inConnections = inConnections;
