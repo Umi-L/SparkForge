@@ -95,7 +95,7 @@ export const NodeTypes: NodeDefs = {
     ],
     literals: [],
     specialCase: true,
-    template: new Template("if({p1}){{b1}}else{{body2}}")
+    template: new Template("if({p1}){{b1}}else{{b2}}{b3}")
   },
 
   Log: {

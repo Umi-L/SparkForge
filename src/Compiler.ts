@@ -3,12 +3,6 @@ import { Template } from "./Templates";
 import { createToast } from "./ToastManager";
 import { ToastPosition, ToastType } from "./Types";
 
-interface SpecialCaseInput {
-    node: ASTNode;
-    inputNumber: number;
-
-}
-
 export function Compile(ast: AST) {
     
     let rootNode = ast.root;
@@ -41,15 +35,20 @@ export function Compile(ast: AST) {
 
 
     function processNode(node: ASTNode) {
+
+        console.log("processing node", node.data.name)
+
         // get all the inputs
         let inputs = getInputs(node);  
         
         let template: Template;
 
         if (node.data.func){
-            template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...})`);
+            template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...});\n{b1}`);
         }
-        else{
+        else if (node.data.template) {
+            template = node.data.template;
+        } else {
             template = new Template(`{b1}`);
         }
 
@@ -60,6 +59,9 @@ export function Compile(ast: AST) {
             // recursively process the node and add the body to the bodies array
             bodies.push(processNode(connection.to.node));
         }
+
+        console.log("filling template", template, "inputs", inputs, "bodies", bodies)
+        console.log("filled template", template.fill(inputs, bodies))
 
         return template.fill(inputs, bodies);
     }
