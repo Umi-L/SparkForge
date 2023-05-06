@@ -1,0 +1,14 @@
+# Brainbox TODO list
+  - [x] write a compiler
+  - [x] base GUI
+  - [x] Toasts (kind of buggy right now)
+  - [ ] game display and sandbox
+  - [ ] api functions exposed to code
+  - [ ] code text editor
+  - [ ] output
+  - [ ] tabs on panels
+  - [ ] file system
+  - [ ] saving and loading
+  - [ ] backend
+  - [ ] scene editor
+  - [ ] documentation

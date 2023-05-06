@@ -50,18 +50,36 @@ export enum FlowLiteralType {
     Boolean = 'checkbox',
 }
 
-// export enum NodeType {
-//     Start = 'start',
-//     If = 'if',
-//     Log = 'log',
-// }
+export enum NodeCatagories {
+    Control = 'control',
+    Operators = 'operators',
+    literals = 'literals',
+    Events = 'events',
+    debug = 'debug',
+}
 
 export interface NodeDefs {
-    [key: string]: { name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[], func?: Function, specialCase?: boolean, template?: Template }
+  [key: string]: {
+    name: string;
+    inputs: IOPoint[];
+    outputs: IOPoint[];
+    literals: LiteralInput[];
+    func?: Function;
+    specialCase?: boolean;
+    template?: Template;
+    category: NodeCatagories;
+  };
 }
 
 export interface NodeData {
-  name: string, inputs: IOPoint[], outputs: IOPoint[], literals: LiteralInput[], func?: Function, specialCase?: boolean, template?: Template
+  name: string;
+  inputs: IOPoint[];
+  outputs: IOPoint[];
+  literals: LiteralInput[];
+  func?: Function;
+  specialCase?: boolean;
+  template?: Template;
+  category: NodeCatagories;
 }
 
 export interface IOPoint {
@@ -75,49 +93,53 @@ export interface LiteralInput {
 }
 
 export const NodeTypes: NodeDefs = {
-  Start: {
-    name: "start",
-    inputs: [],
-    outputs: [{ label: "out", type: FlowDataType.Flow }],
-    literals: [],
-  },
+    Start: {
+        name: "start",
+        inputs: [],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        category: NodeCatagories.Events,
+    },
 
-  If: {
-    name: "if",
-    inputs: [
-      { label: "in", type: FlowDataType.Flow },
-      { label: "condition", type: FlowDataType.Boolean },
-    ],
-    outputs: [
-      { label: "true", type: FlowDataType.Flow },
-      { label: "false", type: FlowDataType.Flow },
-      { label: "out", type: FlowDataType.Flow },
-    ],
-    literals: [],
-    specialCase: true,
-    template: new Template("if({p1}){{b1}}else{{b2}}{b3}")
-  },
+    If: {
+        name: "if",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "condition", type: FlowDataType.Boolean },
+        ],
+        outputs: [
+            { label: "true", type: FlowDataType.Flow },
+            { label: "false", type: FlowDataType.Flow },
+            { label: "out", type: FlowDataType.Flow },
+        ],
+        literals: [],
+        specialCase: true,
+        template: new Template("if({p1}){{b1}}else{{b2}}{b3}"),
+        category: NodeCatagories.Control,
+    },
 
-  Log: {
-    name: "log",
-    inputs: [
-      { label: "in", type: FlowDataType.Flow },
-      { label: "message", type: FlowDataType.Any },
-    ],
-    outputs: [{ label: "out", type: FlowDataType.Flow }],
-    literals: [],
-    func: log
-  },
-  String: {
-    name: "string",
-    inputs: [],
-    outputs: [{ label: "string", type: FlowDataType.String }],
-    literals: [
-        { label: "value", type: FlowLiteralType.String },
-    ],
-    specialCase: true,
-    template: new Template("'{l1}'"),
-  },
+    Log: {
+        name: "log",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "message", type: FlowDataType.Any },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        func: log,
+        category: NodeCatagories.debug,
+    },
+    String: {
+        name: "string",
+        inputs: [],
+        outputs: [{ label: "string", type: FlowDataType.String }],
+        literals: [
+            { label: "value", type: FlowLiteralType.String },
+        ],
+        specialCase: true,
+        template: new Template("'{l1}'"),
+        category: NodeCatagories.literals,
+    },
     Number: {
         name: "number",
         inputs: [],
@@ -127,6 +149,7 @@ export const NodeTypes: NodeDefs = {
         ],
         specialCase: true,
         template: new Template("{l1}"),
+        category: NodeCatagories.literals,
     },
     Boolean: {
         name: "boolean",
@@ -137,6 +160,7 @@ export const NodeTypes: NodeDefs = {
         ],
         specialCase: true,
         template: new Template("{l1}"),
+        category: NodeCatagories.literals,
     },
     Equals: {
         name: "equals",
@@ -147,7 +171,8 @@ export const NodeTypes: NodeDefs = {
         outputs: [{ label: "equals", type: FlowDataType.Boolean }],
         literals: [],
         specialCase: true,
-        template: new Template("{p1} == {p2}")
+        template: new Template("{p1} == {p2}"),
+        category: NodeCatagories.Operators,
     },
     Not: {
         name: "not",
@@ -157,8 +182,74 @@ export const NodeTypes: NodeDefs = {
         outputs: [{ label: "not", type: FlowDataType.Boolean }],
         literals: [],
         specialCase: true,
-        template: new Template("!{p1}")
-        
+        template: new Template("!{p1}"),
+        category: NodeCatagories.Operators,
+    },
+    And: {
+        name: "and",
+        inputs: [
+            { label: "a", type: FlowDataType.Boolean },
+            { label: "b", type: FlowDataType.Boolean },
+        ],
+        outputs: [{ label: "and", type: FlowDataType.Boolean }],
+        literals: [],
+        specialCase: true,
+        template: new Template("{p1} && {p2}"),
+        category: NodeCatagories.Operators,
+    },
+    Or: {
+        name: "or",
+        inputs: [
+            { label: "a", type: FlowDataType.Boolean },
+            { label: "b", type: FlowDataType.Boolean },
+        ],
+        outputs: [{ label: "or", type: FlowDataType.Boolean }],
+        literals: [],
+        specialCase: true,
+        template: new Template("{p1} || {p2}"),
+        category: NodeCatagories.Operators,
+    },
+
+    GreaterThan: {
+        name: "greater than >",
+        inputs: [
+            { label: "a", type: FlowDataType.Number },
+            { label: "b", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "greater than >", type: FlowDataType.Boolean }],
+        literals: [],
+        specialCase: true,
+        template: new Template("{p1} > {p2}"),
+        category: NodeCatagories.Operators,
+    },
+
+    LessThan: {
+        name: "less than <",
+        inputs: [
+            { label: "a", type: FlowDataType.Number },
+            { label: "b", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "less than <", type: FlowDataType.Boolean }],
+        literals: [],
+        specialCase: true,
+        template: new Template("{p1} < {p2}"),
+        category: NodeCatagories.Operators,
+    },
+
+    Repeat: {
+        name: "repeat",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "times", type: FlowDataType.Number },
+        ],
+        outputs: [
+            { label: "repeated", type: FlowDataType.Flow },
+            { label: "done", type: FlowDataType.Flow },
+        ],
+        literals: [],
+        specialCase: true,
+        template: new Template("for(let i = 0; i < {p2}; i++){{b1}}{b2}"),
+        category: NodeCatagories.Control,
     }
 };
 
