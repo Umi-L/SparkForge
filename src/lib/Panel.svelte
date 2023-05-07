@@ -312,7 +312,6 @@
 
         border-top-left-radius: var(--general-border-radius);
         border-top-right-radius: var(--general-border-radius);
-
     }
 
     .panel-body{
@@ -347,9 +346,9 @@
         align-items: center;
         /* padding: 2px; */
 
-        padding-left: 2px;
-        padding-right: 2px;
-        padding-top: 2px;
+        padding-left: 5px;
+        padding-right: 5px;
+        padding-top: 3px;
 
         background-color: var(--foreground-color);
         border-radius: var(--general-border-radius);
@@ -358,7 +357,7 @@
     }
     .panel-header h1 {
         color: var(--text-color);
-        font-size: 0.8rem;
+        font-size: 0.8em;
         font-weight: 300;
 
         margin: 0;
@@ -366,7 +365,7 @@
         user-select: none;
     }
     .panel-header a {
-        font-size: 0.8rem;
+        font-size: 0.8em;
         color: var(--text-color);
         text-decoration: none;
 
