@@ -11,50 +11,8 @@ interface Rect {
     height: number,
 }
 
-let defaultPanelPositions = [
-    {
-        name: "workspace",
-        left: 0.2,
-        top: 0,
-        width: 0.6,
-        height: 0.8,
-    },
-    {
-        name: "output",
-        left: 0.2,
-        top: 0.8,
-        width: 0.6,
-        height: 0.2,
-    },
-    { 
-        name: "toolbox", 
-        left: 0, 
-        top: 0, 
-        width: 0.2, 
-        height: 1 
-    },
-    {
-        name: "explorer",
-        left: 0.8,
-        top: 1/3,
-        width: 0.2,
-        height: 2/3,
-    },
-    {
-        name: "properties",
-        left: 0.8,
-        top: 0,
-        width: 0.2,
-        height: 1/3,
-    },
-];
-
 export function setPanelDefaults(panel: Panel) {
-    let defaultPanelPosition = defaultPanelPositions.find(
-        (defaultPanelPosition) => {
-            return defaultPanelPosition.name == panel.getName().toLowerCase();
-        }
-    );
+    let defaultPanelPosition = panel.getDefaultTransform();
 
     if (defaultPanelPosition) {
         // console.log("setting default panel position for " + panel.getName());

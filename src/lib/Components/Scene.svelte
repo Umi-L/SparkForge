@@ -1,12 +1,11 @@
 <script lang="ts">
-    import Panel from "../Panel.svelte";
     
 </script>
 
 
 
 <div>
-    
+    <h2>SCENE!</h2>
 </div>
 
 

@@ -6,12 +6,21 @@
 
     // export let rowstyle:string;
     // export let colstyle:string;
-    export let name:string;
+
+    interface IDefaultTransform{
+        left: number,
+        top: number,
+        width: number,
+        height: number
+    }
+
     export let resizeFuncs:Array<Function> = [];
+    export let defaultTransform: IDefaultTransform | undefined;
 
     let myself = get_current_component() as Panel;
 
     let panelHeader:HTMLDivElement;
+    let panelBody:HTMLDivElement;
     
     let panelContainer:HTMLDivElement;
     let dragging = false;
@@ -20,6 +29,47 @@
     export let position = {x: 0, y: 0};
     export let relativePosition = {x: 0, y: 0};
     export let relativeSize = {width: 0, height: 0};
+
+    interface Tab{
+        name: string,
+        component: any // class of the component
+    }
+
+    export let tabs: Array<Tab> = []
+    let tabElements = [];
+
+    let currentSelectedTab = 0;
+
+    export function addTab(name:string, component:any){
+        tabs.push({
+            name: name,
+            component: component
+        })
+    }
+
+    function createTabs(){
+
+        // for every tab, create a new element
+        for (let i = 0; i < tabs.length; i++){
+            let tab = tabs[i];
+
+            new tab.component({target: tabElements[i]})
+        }
+
+    }
+
+    export function removeTab(name:string){
+        for (let i = 0; i < tabs.length; i++){
+            if (tabs[i].name == name){
+                tabs.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    export function getDefaultTransform(){
+        return defaultTransform;
+    }
     
 
     onMount(() => {
@@ -39,6 +89,8 @@
 
         // add event listeners to the panel's header
         panelHeader.addEventListener("mousedown", onHandleMouseDown);
+
+        createTabs();
     });
 
     function onGlobalMouseMove(event){
@@ -49,6 +101,10 @@
     }
 
     function onHandleMouseDown(event){
+
+        // if the target is not the header, return
+        if (event.target != panelHeader)
+            return
 
         // if not left click, return
         if (event.button != 0)
@@ -66,6 +122,10 @@
 
         // set relative position
         updateDragging(mouse.x, mouse.y);
+    }
+
+    function focusNewTab(event, index){
+        currentSelectedTab = index;
     }
 
     function globalMouseUp(event){
@@ -109,9 +169,9 @@
     }
 
     // getters
-    export function getName(){
-        return name;
-    }
+    // export function getName(){
+    //     return name;
+    // }
 
     export function getPosition(){
         return position;
@@ -167,9 +227,16 @@
 
 <div class="panel-container" bind:this={panelContainer} class:dragging={dragging}>
     <div class="panel-header" bind:this={panelHeader}>
-        <div class="panel-title">
-            <h1>{name}</h1>
+
+        <div class="tabs-container">
+            {#each tabs as tab, i}   
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="tab-header" on:click={(e)=>{focusNewTab(e,i)}} class:active-tab-header={i == currentSelectedTab} class:inactive-tab-header={i != currentSelectedTab}>
+                    <h1>{tab.name}</h1>
+                </div>        
+            {/each}
         </div>
+
         <div class="panel-buttons">
             <!-- svelte-ignore a11y-missing-attribute -->
             <a class="min-close-button"><span class="iconify" data-icon="mdi-minus"></span></a>
@@ -178,14 +245,75 @@
             <a class="min-close-button"><span class="iconify" data-icon="mdi-close"></span></a>
         </div>
     </div>
-    <div class="panel-body">
-        <slot></slot>
+    <div class="panel-body" bind:this={panelBody}>
+        {#each tabs as tab, i}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div class="tab-body" bind:this={tabElements[i]} class:active-tab={i == currentSelectedTab} class:inactive-tab={i != currentSelectedTab}>
+            </div>
+        {/each}
     </div> 
 </div>
 
 
 
 <style>
+
+    .active-tab-header{
+
+        /* border-top: 1px solid var(--foreground-color-2);
+        border-left: 1px solid var(--foreground-color-2);
+        border-right: 1px solid var(--foreground-color-2); */
+
+        background-color: var(--midground-color);
+
+        /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); */
+
+    }
+    .inactive-tab-header{
+        background-color: var(--midground-color-2);
+
+    }
+
+    .inactive-tab-header h1 {
+        color: var(--semi-light-text-color) !important;
+    }
+
+    .tabs-container{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        height: 100%;
+    }
+
+    .active-tab{
+        display : block;
+    }
+
+    .inactive-tab{
+        display : none;
+    }
+
+
+    .tab-body{
+        width: 100%;
+        height: 100%;
+    }
+
+    .tab-header{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 2px;
+        /* background-color: var(--foreground-color-2); */
+        /* border-radius: var(--general-border-radius); */
+
+        user-select: none;
+
+        border-top-left-radius: var(--general-border-radius);
+        border-top-right-radius: var(--general-border-radius);
+
+    }
 
     .panel-body{
         width: 100%;
@@ -217,7 +345,12 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        padding: 5px;
+        /* padding: 2px; */
+
+        padding-left: 2px;
+        padding-right: 2px;
+        padding-top: 2px;
+
         background-color: var(--foreground-color);
         border-radius: var(--general-border-radius);
 

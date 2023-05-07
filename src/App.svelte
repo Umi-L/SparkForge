@@ -6,6 +6,8 @@
   import Output from "./lib/Components/Output.svelte";
   import Properties from "./lib/Components/Properties.svelte";
   import Explorerer from "./lib/Components/Explorerer.svelte";
+  import Game from "./lib/Components/Game.svelte";
+  import Scene from "./lib/Components/Scene.svelte";
 </script>
 
 
@@ -18,11 +20,54 @@
 
     <div id="panel_indicator"></div>
 
-    <Workspace></Workspace>
+
+    <!-- {
+      name: "workspace",
+      left: 0.2,
+      top: 0,
+      width: 0.6,
+      height: 0.8,
+  },
+  {
+      name: "output",
+      left: 0.2,
+      top: 0.8,
+      width: 0.6,
+      height: 0.2,
+  },
+  { 
+      name: "toolbox", 
+      left: 0, 
+      top: 0, 
+      width: 0.2, 
+      height: 1 
+  },
+  {
+      name: "explorer",
+      left: 0.8,
+      top: 1/3,
+      width: 0.2,
+      height: 2/3,
+  },
+  {
+      name: "properties",
+      left: 0.8,
+      top: 0,
+      width: 0.2,
+      height: 1/3,
+  }, -->
+
+    <Panel tabs={[{name:"workspace", component: Workspace}, {name: "scene", component: Scene}, {name: "game", component: Game}]} defaultTransform={{left: 0.2, top: 0, width: 0.6, height: 0.8}}></Panel>
+    <Panel tabs={[{name:"output", component: Output}]} defaultTransform={{left: 0.2, top: 0.8, width: 0.6, height: 0.2}}></Panel>
+    <Panel tabs={[{name:"toolbox", component: Toolbox}]} defaultTransform={{left: 0, top: 0, width: 0.2, height: 1}}></Panel>
+    <Panel tabs={[{name:"explorer", component: Explorerer}]} defaultTransform={{left: 0.8, top: 1/3, width: 0.2, height: 2/3}}></Panel>
+    <Panel tabs={[{name:"properties", component: Properties}]} defaultTransform={{left: 0.8, top: 0, width: 0.2, height: 1/3}}></Panel>
+
+    <!-- <Workspace></Workspace>
     <Toolbox></Toolbox>
     <Explorerer></Explorerer>
     <Output></Output>
-    <Properties></Properties>
+    <Properties></Properties> -->
 
     <div class="debug-space-check"></div>
     <div class="debug-space-check"></div>

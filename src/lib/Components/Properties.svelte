@@ -5,9 +5,9 @@
 
 
 
-<Panel name="Properties">
-
-</Panel>
+<div>
+    
+</div>
 
 
 

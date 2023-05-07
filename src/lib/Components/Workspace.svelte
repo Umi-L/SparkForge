@@ -636,14 +636,12 @@
 
 
 
-<Panel name="Workspace">
-    <div class="workfield" bind:this={workfield}>
-        <svg class="connections" bind:this={connectionsSvg}>
-            <!-- <line x1="0" y1="80" x2="100" y2="20" stroke="black" /> -->
-        </svg>
-        <div class="extender" bind:this={panelExtender}></div>
-    </div>
-</Panel>
+<div class="workfield" bind:this={workfield}>
+    <svg class="connections" bind:this={connectionsSvg}>
+        <!-- <line x1="0" y1="80" x2="100" y2="20" stroke="black" /> -->
+    </svg>
+    <div class="extender" bind:this={panelExtender}></div>
+</div>
 
 
 

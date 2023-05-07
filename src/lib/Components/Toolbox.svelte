@@ -32,22 +32,20 @@
 </script>
 
 
-<Panel name="Toolbox">
-    <div class="node-menu">
-        <!-- foreach catagory and each node within draw it -->
-        {#each Object.keys(nodeTypesByCategory) as category}
-            <div class="node-category">
-                <h3 class="category-header">{toTitle(category)}</h3>
+<div class="node-menu">
+    <!-- foreach catagory and each node within draw it -->
+    {#each Object.keys(nodeTypesByCategory) as category}
+        <div class="node-category">
+            <h3 class="category-header">{toTitle(category)}</h3>
 
-                {#each nodeTypesByCategory[category] as nodeType}
-                    <Node type={nodeType} factory={true}/>
-                {/each}
+            {#each nodeTypesByCategory[category] as nodeType}
+                <Node type={nodeType} factory={true}/>
+            {/each}
 
-                <!-- <div class="separator"></div> -->
-            </div>
-        {/each}
-    </div>
-</Panel>
+            <!-- <div class="separator"></div> -->
+        </div>
+    {/each}
+</div>
 
 
 
