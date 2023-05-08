@@ -29,6 +29,7 @@
     let literalInputs: Array<HTMLInputElement> = [];
 
     let inWorkspace = false;
+    let selected = false;
 
 
     export function getRoot(): HTMLDivElement {
@@ -252,6 +253,25 @@
         return values;
     }
 
+    export function getBox(){
+        let clientRect = nodeBody.getBoundingClientRect();
+
+        return {
+            x: position.x,
+            y: position.y,
+            width: clientRect.width,
+            height: clientRect.height
+        }
+    }
+
+    export function getSelected(){
+        return selected;
+    }
+
+    export function setSelected(value: boolean){
+        selected = value;
+    }
+
     export function getType(){
         return type;
     }
@@ -299,7 +319,7 @@
 
 
 
-<div class:node-body={!factory} class:node-body-factory={factory} bind:this={nodeBody} class:dragging={dragging}>
+<div class:node-body={!factory} class:node-body-factory={factory} bind:this={nodeBody} class:dragging={dragging} class:selected-body={selected}>
 
     <div class="node-header">
         {toTitle(type.name)}
@@ -398,6 +418,10 @@
         box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
 
         opacity: 0.9;
+    }
+
+    .selected-body{
+        outline: 1px solid rgba(0, 0, 255, 0.5);
     }
 
     .node-body-factory{

@@ -7,6 +7,7 @@
     import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData } from "../../Types";
     import { AST, ASTConnection, ASTNode } from "../../AbstractSyntaxTree";
     import { createToast } from "../../ToastManager";
+  import { openContextMenu, type IMenuOption } from "../../ContextMenu";
 
 
     interface Connection {
@@ -31,6 +32,7 @@
     let panelExtender:HTMLDivElement;
     let workfield:HTMLDivElement;
     let connectionsSvg:SVGSVGElement;
+    let selectionBox:HTMLDivElement;
 
     let nodes = [];
     let connections: Array<Connection> = [];
@@ -39,6 +41,13 @@
     let currentDraggingInputNumber:number|undefined;
     let currentDraggingOutputNumber:number|undefined;
     let dragging = false;
+    
+    let selecting = false;
+    let selectingStartPos:Point = {x: 0, y: 0};
+    let selectedNodes: Array<Node> = []
+
+    let contextMenuOptions: Array<IMenuOption> = [{label: "Delete", action: deleteSelectedNodes},] //{label: "Duplicate", action: duplicateSelectedNodes}]
+
     let currentViewPos = {x: 0, y: 0};
 
     const panelExtenderDistance = 200;
@@ -48,9 +57,11 @@
 
         // add event listeners
         window.addEventListener("mouseup", globalOnMouseUp);
+        window.addEventListener("mousemove", globalMouseMove)
         workfield.addEventListener("mousedown", workfieldMouseDown);
         workfield.addEventListener("mousemove", workfieldMouseMove);
         workfield.addEventListener("scroll", workfieldOnScroll);
+        workfield.addEventListener("contextmenu", onContextMenu);
 
         // // start at 50% scroll
         // workfield.scrollLeft = workfield.scrollWidth / 2;
@@ -63,9 +74,11 @@
     onDestroy(() => {
         // remove event listeners
         window.removeEventListener("mouseup", globalOnMouseUp);
+        window.removeEventListener("mousemove", globalMouseMove)
         workfield.removeEventListener("mousedown", workfieldMouseDown);
         workfield.removeEventListener("mousemove", workfieldMouseMove);
         workfield.removeEventListener("scroll", workfieldOnScroll);
+        workfield.removeEventListener("contextmenu", onContextMenu);
 
         // unregister the workfield as the workspace
         unregisterElement(myself);
@@ -272,6 +285,43 @@
         element.setAttribute("d", curve.getAttribute("d"));
     }
 
+    function deleteSelectedNodes() {
+        // loop through all nodes
+        for (let node of nodes) {
+
+            // if the node is selected
+            if (node.getSelected()) {
+
+                // delete all node connections.
+                for (let connection of connections) {
+
+                    if (connection.from.node == node || connection.to.node == node) {
+
+                        removeConnection(connection);
+                    }
+                }
+
+                // destroy the node
+                node.destroy();
+            }
+        }
+    }
+
+    // function duplicateSelectedNodes() {
+    //     // loop through all nodes
+    //     for (let node of nodes) {
+
+    //         // if the node is selected
+    //         if (node.getSelected()) {
+
+    //             // duplicate the node
+    //             duplicateNode(node);
+    //         }
+    //     }
+    // }
+
+
+
     function createConnection(startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number) {
 
         // if the connection already exists, return
@@ -415,35 +465,161 @@
 
     }
 
-    function globalOnMouseUp(event) {
-        if (dragging) {
-            dragging = false;
-
-            event.preventDefault();
-        }
-
-        if (currentDraggingNode != undefined) {
-            currentDraggingNode = undefined;
-            currentDraggingInputNumber = undefined;
-            currentDraggingOutputNumber = undefined;
-
-            removeMouseLine();
-        }
-    }
-
-    function workfieldMouseDown(event){
-
-        // if the mouse is not over only the workspace then don't drag
-        if (event.target != workfield) {
-            return;
-        }
-
-        dragging = true;
+    function onContextMenu(event){
+        openContextMenu(event.clientX, event.clientY, contextMenuOptions);
 
         event.preventDefault();
     }
 
+    function globalOnMouseUp(event) {
+
+        // if left mouse
+        if (event.button == 0) {
+
+            if (selecting) {
+                selecting = false;
+
+                // get the end position of the selection box
+                let mousePos = globalMousePosToWorkfieldPos({x: event.clientX, y: event.clientY});
+
+                // box is difference between start and end position
+                let box = {
+                    x: mousePos.x - selectingStartPos.x,
+                    y: mousePos.y - selectingStartPos.y,
+                }
+
+                // set the position of the selection box to the point closest to 0,0
+                let x = box.x < 0 ? mousePos.x : selectingStartPos.x;
+                let y = box.y < 0 ? mousePos.y : selectingStartPos.y;
+
+                // set the width and height of the selection box
+                let width = Math.abs(box.x);
+                let height = Math.abs(box.y);
+
+                // get the elements in the selection box
+                let elements = getNodesInBox({x: x, y: y, width: width, height: height});
+
+                // merge arrays
+                selectedNodes = selectedNodes.concat(elements);
+
+                refreshSelected();
+
+
+                event.preventDefault();
+            }
+
+            if (dragging) {
+                dragging = false;
+
+                event.preventDefault();
+            }
+
+            if (currentDraggingNode != undefined) {
+                currentDraggingNode = undefined;
+                currentDraggingInputNumber = undefined;
+                currentDraggingOutputNumber = undefined;
+
+                removeMouseLine();
+            }
+        }
+    }
+
+    function getNodesInBox(box){
+        let nodesInBox = [];
+
+        for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+
+            let nodeBox = node.getBox();
+
+            if (box.x < nodeBox.x + nodeBox.width && box.x + box.width > nodeBox.x && box.y < nodeBox.y + nodeBox.height && box.y + box.height > nodeBox.y) {
+                nodesInBox.push(node);
+            }
+            
+        }
+
+        return nodesInBox;
+    }
+
+    function workfieldMouseDown(event){
+        if (event.button == 0){
+            // if the mouse is not over only the workspace then don't drag
+            if (event.target != workfield) {
+                return;
+            }
+
+            // if shift is pressed then don't drag
+            if (event.shiftKey) {
+                selecting = true;
+
+                selectingStartPos = globalMousePosToWorkfieldPos({x: event.clientX, y: event.clientY});
+
+                // reset selection box
+                selectionBox.style.width = "0px";
+                selectionBox.style.height = "0px";
+
+                selectionBox.style.left = selectingStartPos.x + "px";
+                selectionBox.style.top = selectingStartPos.y + "px";
+
+                //set start position of selection
+            }
+            else{
+                selectedNodes = [];
+                refreshSelected();
+                dragging = true;
+            }
+        }
+
+        event.preventDefault();
+    }
+
+    function refreshSelected(){
+        for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+
+            if (selectedNodes.includes(node)) {
+                node.setSelected(true);
+            }
+            else{
+                node.setSelected(false);
+            }
+        }
+    }
+
+    function globalMouseMove(event){
+        if (selecting) {
+            // get the mouse position
+            let mousePos = globalMousePosToWorkfieldPos({x: event.clientX, y: event.clientY});
+
+            // box is difference between start and end position
+            let box = {
+                x: mousePos.x - selectingStartPos.x,
+                y: mousePos.y - selectingStartPos.y,
+            }
+
+            // set the position of the selection box to the point closest to 0,0
+            let x = box.x < 0 ? mousePos.x : selectingStartPos.x;
+            let y = box.y < 0 ? mousePos.y : selectingStartPos.y;
+
+            // set the width and height of the selection box
+            let width = Math.abs(box.x);
+            let height = Math.abs(box.y);
+
+            // set the position and size of the selection box
+            selectionBox.style.left = x + "px";
+            selectionBox.style.top = y + "px";
+
+            selectionBox.style.width = width + "px";
+            selectionBox.style.height = height + "px";
+
+            refreshSelected();
+
+            return;
+        }
+    }
+
     function workfieldMouseMove(event){
+
         if (dragging) {
             // move the workfield the same amount as the mouse moved
             workfield.scrollLeft -= event.movementX;
@@ -646,6 +822,7 @@
 
 
 <div class="workfield" bind:this={workfield}>
+    <div class="selection-box" bind:this={selectionBox} class:visible={selecting}></div>
     <svg class="connections" bind:this={connectionsSvg}>
         <!-- <line x1="0" y1="80" x2="100" y2="20" stroke="black" /> -->
     </svg>
@@ -655,6 +832,29 @@
 
 
 <style>
+
+    .selection-box{
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 0;
+        height: 0;
+
+        border-radius: var(--general-border-radius);
+        border: 1px solid var(--text-color);
+        background-color: rgba(140, 140, 255, 0.3);
+
+        pointer-events: none;
+
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .visible{
+        display: block;
+    }
+
     .workfield {
         width: 100%;
         height: 100%;

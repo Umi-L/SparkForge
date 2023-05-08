@@ -163,6 +163,10 @@
         padding-right: 8px;
     }
 
+    .topbar-button:hover{
+        background-color: var(--foreground-color-2);
+    }
+
     .output{
         display: flex;
         flex-direction: column;
