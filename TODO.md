@@ -5,8 +5,8 @@
   - [ ] game display and sandbox
   - [ ] api functions exposed to code
   - [ ] code text editor
-  - [ ] output
-  - [ ] tabs on panels
+  - [x] output
+  - [x] tabs on panels (no movement yet)
   - [ ] file system
   - [ ] saving and loading
   - [ ] backend
