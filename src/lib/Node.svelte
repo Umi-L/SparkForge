@@ -6,6 +6,7 @@
     import type Workspace from "./Components/Workspace.svelte";
     import { get_current_component } from "svelte/internal";
     import { genUUID } from "../uuid";
+  import { openContextMenu, type IMenuOption } from "../ContextMenu";
 
     let myself = get_current_component() as Node;
     const dispatch = createEventDispatcher();
@@ -30,6 +31,16 @@
 
     let inWorkspace = false;
     let selected = false;
+
+    let contextMenuOptions: Array<IMenuOption> = [
+        {label: "Delete", action: destroy, avalableCheck: () => inWorkspace}, 
+        {label: "Duplicate", action: ()=>{dispatch("duplicate")}, avalableCheck: () => inWorkspace},
+        {label: "Peek Code", action: peekCode, avalableCheck: () => true}
+    ]
+
+    function peekCode(){
+
+    }
 
 
     export function getRoot(): HTMLDivElement {
@@ -72,14 +83,10 @@
 
             if (!wasUsed){
                 // if the mouse is not over the workfield, remove the node
-                nodeBody.remove();
+                destroy();
             }
 
-
-
             dragging = false;
-
-            dispatch("dragend", {x: position.x, y: position.y, destroyed: !wasUsed});
 
             event.preventDefault();
         } 
@@ -90,6 +97,11 @@
                 }
             });
         }
+    }
+
+    export function destroy(){
+        nodeBody.remove();
+        dispatch("destroy", {uuid: uuid});
     }
 
     function nodeBodyMouseDown(event){
@@ -176,6 +188,10 @@
         nodeBody.addEventListener("mousedown", nodeBodyMouseDown);
         window.addEventListener("mouseup", globalOnMouseUp);
         window.addEventListener("mousemove", globalMouseMove);
+        nodeBody.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            openContextMenu(event.clientX, event.clientY, contextMenuOptions);
+        });
 
         // set initial position
         nodeBody.style.left = position.x + "px";

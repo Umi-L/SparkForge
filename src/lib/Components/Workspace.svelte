@@ -46,7 +46,11 @@
     let selectingStartPos:Point = {x: 0, y: 0};
     let selectedNodes: Array<Node> = []
 
-    let contextMenuOptions: Array<IMenuOption> = [{label: "Delete", action: deleteSelectedNodes},] //{label: "Duplicate", action: duplicateSelectedNodes}]
+    let contextMenuOptions: Array<IMenuOption> = [
+        {label: "Delete", action: deleteSelectedNodes, avalableCheck: () => selectedNodes.length > 0}, 
+        {label: "Duplicate", action: duplicateSelectedNodes, avalableCheck: () => selectedNodes.length > 0}, 
+        {label: "group", action: groupSelectedNodes, avalableCheck: () => selectedNodes.length > 1}
+    ]
 
     let currentViewPos = {x: 0, y: 0};
 
@@ -219,34 +223,26 @@
             }
         });
 
-        // dragend event
-        node.$on("dragend", (event) => {
+        // destroy event
+        node.$on("destroy", (event) => {
+            // remove the node from the nodes array
+            nodes.splice(nodes.indexOf(node), 1);
 
-            // if the node was destroyed
-            if (event.detail.destroyed) {
+            let toRemove = []
 
-                // remove the node from the nodes array
-                nodes.splice(nodes.indexOf(node), 1);
+            // remove all connections that are connected to this node
+            for (let connection of connections) {
 
-                let toRemove = []
+                if (connection.from.node == node || connection.to.node == node) {
 
-                // remove all connections that are connected to this node
-                for (let connection of connections) {
-
-                    if (connection.from.node == node || connection.to.node == node) {
-
-                        toRemove.push(connection);
-                    }
+                    toRemove.push(connection);
                 }
+            }
 
-                // kinda hacky solution... not sure why it doesn't work without this
-                for (let connection of toRemove) {
+            // kinda hacky solution... not sure why it doesn't work without this
+            for (let connection of toRemove) {
 
-                    removeConnection(connection);
-                }
-
-                workspaceToASTs();
-
+                removeConnection(connection);
             }
         });
 
@@ -358,6 +354,14 @@
         connections.push(connection);
     }
 
+    function duplicateSelectedNodes(){
+
+    }
+
+    function groupSelectedNodes(){
+
+    }
+
     function drawLineToMouse(node:Node, isOutput:boolean, index:number, mouseX:number, mouseY:number){
 
         // delete previous line
@@ -466,9 +470,11 @@
     }
 
     function onContextMenu(event){
-        openContextMenu(event.clientX, event.clientY, contextMenuOptions);
+        if (event.target == workfield || selectedNodes.length > 0) {
+            openContextMenu(event.clientX, event.clientY, contextMenuOptions);
 
-        event.preventDefault();
+            event.preventDefault();
+        }
     }
 
     function globalOnMouseUp(event) {

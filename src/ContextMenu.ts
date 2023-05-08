@@ -1,25 +1,27 @@
 import ContextMenu from "./lib/ContextMenu.svelte";
 
-let contextMenu: ContextMenu | undefined;
+let contextMenu = new ContextMenu({
+    target: document.body,
+    props: {
+        left: 0,
+        top: 0,
+        menuOptions: [],
+    },
+});
 
 export interface IMenuOption {
     label: string;
     subMenuOptions?: IMenuOption[];
+    avalableCheck: () => boolean;
     action: () => void;
 }
 
 export function openContextMenu(left: number, top: number, options: Array<IMenuOption>) {
-    if (contextMenu) {
-        contextMenu.$destroy();
-    }
-
-    // create new context menu
-    contextMenu = new ContextMenu({
-        target: document.body,
-        props: {
-            left: left,
-            top: top,
-            menuOptions: options,
-        },
+    contextMenu.$set({
+        left: left,
+        top: top,
+        menuOptions: options,
     });
+
+    contextMenu.setVisible(true);
 }
