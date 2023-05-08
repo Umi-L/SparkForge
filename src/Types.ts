@@ -1,4 +1,4 @@
-import { log } from "./NodeFunctions"
+import { print } from "./NodeFunctions"
 import { Template } from "./Templates"
 
 export interface Point {
@@ -119,20 +119,20 @@ export const NodeTypes: NodeDefs = {
     },
 
     Log: {
-        name: "log",
+        name: "print",
         inputs: [
             { label: "in", type: FlowDataType.Flow },
             { label: "message", type: FlowDataType.Any },
         ],
         outputs: [{ label: "out", type: FlowDataType.Flow }],
         literals: [],
-        func: log,
+        func: print,
         category: NodeCatagories.debug,
     },
     String: {
-        name: "string",
+        name: "text",
         inputs: [],
-        outputs: [{ label: "string", type: FlowDataType.String }],
+        outputs: [{ label: "text", type: FlowDataType.String }],
         literals: [
             { label: "value", type: FlowLiteralType.String },
         ],
@@ -152,9 +152,9 @@ export const NodeTypes: NodeDefs = {
         category: NodeCatagories.literals,
     },
     Boolean: {
-        name: "boolean",
+        name: "flag",
         inputs: [],
-        outputs: [{ label: "boolean", type: FlowDataType.Boolean }],
+        outputs: [{ label: "flag", type: FlowDataType.Boolean }],
         literals: [
             { label: "value", type: FlowLiteralType.Boolean },
         ],
@@ -248,7 +248,7 @@ export const NodeTypes: NodeDefs = {
         ],
         literals: [],
         specialCase: true,
-        template: new Template("for(let i = 0; i < {p2}; i++){{b1}}{b2}"),
+        template: new Template("for(let i = 0; i < {p1}; i++){{b1}}{b2}"),
         category: NodeCatagories.Control,
     }
 };

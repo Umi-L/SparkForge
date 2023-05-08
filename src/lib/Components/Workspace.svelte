@@ -1,7 +1,7 @@
 <script lang="ts">
     import Panel from "../Panel.svelte";
-    import { panelGridPositions, registerElement } from "../../main";
-    import { onMount } from "svelte";
+    import { panelGridPositions, registerElement, unregisterElement } from "../../main";
+    import { onDestroy, onMount } from "svelte";
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import type Node from "../Node.svelte";
     import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData } from "../../Types";
@@ -56,10 +56,19 @@
         // workfield.scrollLeft = workfield.scrollWidth / 2;
         // workfield.scrollTop = workfield.scrollHeight / 2;
 
-        console.log(myself)
-
         // register the workfield as the workspace
         registerElement(workfield, myself);
+    });
+
+    onDestroy(() => {
+        // remove event listeners
+        window.removeEventListener("mouseup", globalOnMouseUp);
+        workfield.removeEventListener("mousedown", workfieldMouseDown);
+        workfield.removeEventListener("mousemove", workfieldMouseMove);
+        workfield.removeEventListener("scroll", workfieldOnScroll);
+
+        // unregister the workfield as the workspace
+        unregisterElement(myself);
     });
 
     export function addNode(node:Node, mouseX:number, mouseY:number) {

@@ -1,3 +1,3 @@
-export function log(inData) {
+export function print(inData) {
     console.log(inData);
 }

@@ -1,7 +1,9 @@
 import type { AST, ASTConnection, ASTNode } from "./AbstractSyntaxTree";
+import { OutputTypes, addOutputMessage } from "./OutputSystem";
 import { Template } from "./Templates";
 import { createToast } from "./ToastManager";
 import { ToastPosition, ToastType } from "./Types";
+
 
 export function Compile(ast: AST) {
     
@@ -67,6 +69,21 @@ export function Compile(ast: AST) {
     }
 
     let code = processNode(rootNode);
+
+    console.log("code \n", code)
+
+
+    try{
+        // use prettier to format the code
+        // @ts-ignore
+        code = prettier.format(code, { parser: "babel", plugins: prettierPlugins });
+
+        addOutputMessage("Compiled code: \n" + code)
+    }
+    catch(error){
+        addOutputMessage("Failed to format generated code ERROR: \n" + error, OutputTypes.Error)
+        addOutputMessage("Generated code: \n" + code)
+    }
 
     return code;
 }

@@ -475,7 +475,7 @@
     }
 
     .input{
-        /* width: 100%; */
+        max-width: 80px;
         height: 20px;
 
         border-radius: var(--general-border-radius);

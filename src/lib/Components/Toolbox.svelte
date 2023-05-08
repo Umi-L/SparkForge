@@ -9,7 +9,6 @@
     const nodeTypesByCategory = Object.values(NodeTypes).reduce((acc: any, nodeType: NodeData) => {
         if (!acc[nodeType.category]) {
             acc[nodeType.category] = [];
-            console.log(nodeType.category);
         }
 
         acc[nodeType.category].push(nodeType);

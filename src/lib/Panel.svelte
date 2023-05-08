@@ -305,6 +305,8 @@
         flex-direction: row;
         align-items: center;
         padding: 2px;
+        padding-left: 8px;
+        padding-right: 8px;
         /* background-color: var(--foreground-color-2); */
         /* border-radius: var(--general-border-radius); */
 

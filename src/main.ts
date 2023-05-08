@@ -37,16 +37,23 @@ export let elementReferenceTable = new Map<Element, any>();
 
 export function registerElement(domElement: Element, element: any) {
 
-  console.log("registering element: " + domElement + " to " + element)
+  // console.log("registering element: " + domElement + " to " + element)
 
   elementReferenceTable.set(domElement, element);
 }
 
 export function getElementFromDomElement(domElement: Element) {
 
-  console.log("getting element from dom element: " + domElement)
+  // console.log("getting element from dom element: " + domElement)
 
   return elementReferenceTable.get(domElement);
+}
+
+export function unregisterElement(element: any) {
+  
+    // console.log("unregistering element: " + element)
+  
+    elementReferenceTable.delete(element);
 }
 
 const app = new App({
