@@ -17,7 +17,7 @@
     let subMenuLeft = 0;
     let subMenuTop = 0;
     let submenuGoingDirection = undefined;
-    let submenu: ContextMenu;
+    let submenu: ContextMenu | any;
 
 
     let menuOptionElements = [];
@@ -100,8 +100,6 @@
 
                                 subMenuLeft = menuOptionElements[i].getBoundingClientRect().left+offset;
                                 subMenuTop = menuOptionElements[i].getBoundingClientRect().top;
-
-                                console.log("subMenuTop: " + subMenuTop)
                             }else{
                                 submenu.setVisible(false);
                             }
