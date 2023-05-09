@@ -18,12 +18,24 @@
     function onMouseUpGlobal(event){
         // if target is not a menu option, close menu
         if (!event.target.classList.contains("menu-option")){
+
+            // if menu was just shown, don't close it
+            if (justShown){
+                justShown = false;
+                return;
+            }
+
             showMenu = false;
         }
     }
 
     export function setVisible(visible: boolean){
         showMenu = visible;
+
+        // if menu is being shown, set justShown to true
+        if (visible){
+            justShown = true;
+        }
     }
 
     function runThenHide(action){

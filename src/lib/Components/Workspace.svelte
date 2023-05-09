@@ -3,7 +3,7 @@
     import { panelGridPositions, registerElement, unregisterElement } from "../../main";
     import { onDestroy, onMount } from "svelte";
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
-    import type Node from "../Node.svelte";
+    import Node from "../Node.svelte";
     import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData } from "../../Types";
     import { AST, ASTConnection, ASTNode } from "../../AbstractSyntaxTree";
     import { createToast } from "../../ToastManager";
@@ -33,6 +33,7 @@
     let workfield:HTMLDivElement;
     let connectionsSvg:SVGSVGElement;
     let selectionBox:HTMLDivElement;
+    let currentlySelectedBox: HTMLDivElement;
 
     let nodes = [];
     let connections: Array<Connection> = [];
@@ -90,9 +91,6 @@
 
     export function addNode(node:Node, mouseX:number, mouseY:number) {
 
-        // add node to nodes
-        nodes.push(node);
-
         let nodeBody = node.getRoot();
 
         console.log("adding node");
@@ -115,6 +113,18 @@
 
         node.setPosition(pos.x, pos.y);
 
+        registerNode(node);
+
+        // update positions
+        update();
+    }
+
+    function registerNode(node:Node) {
+
+        // add node to nodes
+        nodes.push(node);
+
+        node.setInWorkspace(true);
 
         // register for the node's i/o mousedown event
         node.$on("inputNodeMouseDown", (event) => {
@@ -246,6 +256,11 @@
             }
         });
 
+        //duplicate event
+        node.$on("duplicate", (event)=>{
+            duplicateNode(node);
+        })
+
         // move event
         node.$on("drag", (event) => {
             // move all connections that are connected to this node
@@ -259,9 +274,6 @@
                 }
             }
         });
-
-        // update positions
-        update();
     }
 
     function removeConnection(connection:Connection) {
@@ -282,6 +294,9 @@
     }
 
     function deleteSelectedNodes() {
+
+        let toRemove = []
+
         // loop through all nodes
         for (let node of nodes) {
 
@@ -297,24 +312,62 @@
                     }
                 }
 
-                // destroy the node
-                node.destroy();
+                toRemove.push(node);
             }
         }
+
+        // remove all selected nodes
+        for (let node of toRemove) {
+            node.destroy();
+        }
+
+        selectedNodes = []
+        refreshSelected();
     }
 
-    // function duplicateSelectedNodes() {
-    //     // loop through all nodes
-    //     for (let node of nodes) {
+    function duplicateSelectedNodes() {
 
-    //         // if the node is selected
-    //         if (node.getSelected()) {
+        let duplicatedNodes = []
 
-    //             // duplicate the node
-    //             duplicateNode(node);
-    //         }
-    //     }
-    // }
+        // loop through all nodes
+        for (let node of nodes) {
+
+            // if the node is selected
+            if (node.getSelected()) {
+
+                // duplicate the node
+                duplicatedNodes.push(duplicateNode(node));
+            }
+        }
+
+        // loop through all connections
+        for (let connection of connections) {
+
+            // if the connection is connected to a node that is selected
+            if (connection.from.node.getSelected() || connection.to.node.getSelected()) {
+
+                // duplicate the connection
+                createConnection(duplicatedNodes[nodes.indexOf(connection.from.node)], connection.from.outputNumber, duplicatedNodes[nodes.indexOf(connection.to.node)], connection.to.inputNumber);
+            }
+        }
+
+        selectedNodes = []
+        refreshSelected();
+    }
+
+    function duplicateNode(node){
+        // create a new node
+        let newNode = new Node({target: workfield, props: {type: node.getType()}});
+
+        console.log("duplicate node")
+        
+        // set the position of the new node
+        newNode.setPosition(node.getPosition().x + 20, node.getPosition().y + 20);
+
+        registerNode(newNode);
+
+        return newNode;
+    }
 
 
 
@@ -354,12 +407,9 @@
         connections.push(connection);
     }
 
-    function duplicateSelectedNodes(){
-
-    }
-
     function groupSelectedNodes(){
-
+        selectedNodes = []
+        refreshSelected();
     }
 
     function drawLineToMouse(node:Node, isOutput:boolean, index:number, mouseX:number, mouseY:number){
@@ -590,6 +640,59 @@
                 node.setSelected(false);
             }
         }
+
+        // get the box of the selected nodes
+        let box = getSelectedNodesBox();
+
+        // set the position and size of the selection box
+        currentlySelectedBox.style.left = box.x + "px";
+        currentlySelectedBox.style.top = box.y + "px";
+        currentlySelectedBox.style.width = box.width + "px";
+        currentlySelectedBox.style.height = box.height + "px";
+    }
+
+    function getSelectedNodesBox(){
+        // get the box that contains all the selected nodes
+        // get this by using the point that has the lowest x and y and the point that has the highest x and y
+
+        let box = {
+            x: undefined,
+            y: undefined,
+            width: undefined,
+            height: undefined,
+        }
+
+        for (let i = 0; i < selectedNodes.length; i++) {
+            let node = selectedNodes[i];
+
+            let nodeBox = node.getBox();
+
+            // if any of the nodeBox points are outside the box then move the box to include them
+            if (box.x == undefined || nodeBox.x < box.x) {
+                box.x = nodeBox.x;
+            }
+
+            if (box.y == undefined || nodeBox.y < box.y) {
+                box.y = nodeBox.y;
+            }
+
+            if (box.width == undefined || nodeBox.x + nodeBox.width > box.x + box.width) {
+                box.width = nodeBox.x + nodeBox.width - box.x;
+            }
+
+            if (box.height == undefined || nodeBox.y + nodeBox.height > box.y + box.height) {
+                box.height = nodeBox.y + nodeBox.height - box.y;
+            }
+        }
+
+        // add 10px padding
+        box.x -= 10;
+        box.y -= 10;
+
+        box.width += 20;
+        box.height += 20;
+
+        return box;
     }
 
     function globalMouseMove(event){
@@ -829,6 +932,7 @@
 
 <div class="workfield" bind:this={workfield}>
     <div class="selection-box" bind:this={selectionBox} class:visible={selecting}></div>
+    <div class="currently-selected-box" bind:this={currentlySelectedBox} class:visible={selectedNodes.length > 0}></div>
     <svg class="connections" bind:this={connectionsSvg}>
         <!-- <line x1="0" y1="80" x2="100" y2="20" stroke="black" /> -->
     </svg>
@@ -838,6 +942,24 @@
 
 
 <style>
+
+    .currently-selected-box{
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 0;
+        height: 0;
+
+        border-radius: var(--general-border-radius);
+        border: 1px solid var(--text-color);
+        background-color: rgba(199, 199, 255, 0.3);
+
+        pointer-events: none;
+
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
 
     .selection-box{
         display: none;

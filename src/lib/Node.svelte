@@ -39,7 +39,7 @@
     ]
 
     function peekCode(){
-
+        throw Error("Unimplemented peek code");
     }
 
 
@@ -97,6 +97,10 @@
                 }
             });
         }
+    }
+
+    export function setInWorkspace(value: boolean){
+        inWorkspace = value;
     }
 
     export function destroy(){
@@ -175,6 +179,9 @@
             // move node
             nodeBody.style.left = (nodeBody.offsetLeft + diff.x) + "px";
             nodeBody.style.top = (nodeBody.offsetTop + diff.y) + "px";
+
+            // set position
+            position = {x: nodeBody.offsetLeft, y: nodeBody.offsetTop};
 
             // dispatch event
             dispatch("drag", {uuid: uuid, x: nodeBody.offsetLeft, y: nodeBody.offsetTop});
