@@ -1,14 +1,26 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from "svelte";
-  import type { IMenuOption } from "../ContextMenu";
+  import { closeContextMenu, type IMenuOption } from "../ContextMenu";
+  import type ContextMenu from "./ContextMenu.svelte";
 
     export let menuOptions: Array<IMenuOption>;
     export let top: number;
     export let left: number;
+    export let goingDirection = undefined;
+
     let showMenu = false;
 
     let menuElement: HTMLDivElement;
     let justShown = true;
+
+    let subMenuOptions = [];
+    let subMenuLeft = 0;
+    let subMenuTop = 0;
+    let submenuGoingDirection = undefined;
+    let submenu: ContextMenu;
+
+
+    let menuOptionElements = [];
     
     onMount(() => {
         // add global mouseup event listener
@@ -40,7 +52,7 @@
 
     function runThenHide(action){
         action();
-        showMenu = false;
+        closeContextMenu(); // done to also close main menu when sub menu is clicked
     }
 
 </script>
@@ -49,26 +61,103 @@
 {#if showMenu}
     <div bind:this={menuElement}>
         <div class="menu" style={`top: ${top}px; left: ${left}px;`}>
-            {#each menuOptions as menuOption}
+            {#each menuOptions as menuOption, i}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="menu-option" on:click={()=>{runThenHide(menuOption.action)}} class:unavalable={!menuOption.avalableCheck()}>
-                    <div class="menu-option-label">{menuOption.label}</div>
+                <div class="menu-option" bind:this={menuOptionElements[i]} 
+                    on:click={
+                        ()=>{
+                            if(menuOption.avalableCheck() && menuOption.subMenuOptions == undefined)
+                            {
+                                runThenHide(menuOption.action)
+                            }
+                        }
+                    } 
+                    on:mouseenter={
+                        () => {
+                            if(menuOption.avalableCheck() && menuOption.subMenuOptions != undefined)
+                            {
+                                submenu.setVisible(true);
+                                subMenuOptions = menuOption.subMenuOptions;
+                                submenuGoingDirection = goingDirection;
+
+                                let offset = 210;
+
+                                if (goingDirection == "left"){
+                                    offset = -offset;
+                                }
+                                else if (goingDirection == "right"){
+                                    offset = offset;
+                                }
+                                else if (menuOptionElements[i].getBoundingClientRect().right+offset > window.innerWidth){
+                                    offset = -offset;
+                                    submenuGoingDirection = "left";
+                                }
+                                else{
+                                    offset = offset;
+                                    submenuGoingDirection = "right";
+                                }
+                                
+
+                                subMenuLeft = menuOptionElements[i].getBoundingClientRect().left+offset;
+                                subMenuTop = menuOptionElements[i].getBoundingClientRect().top;
+
+                                console.log("subMenuTop: " + subMenuTop)
+                            }else{
+                                submenu.setVisible(false);
+                            }
+                        }
+                    }
+                    
+                    class:unavalable={!menuOption.avalableCheck()}>
+
+
+                    
+
+                    <div class="label-container">
+                        {#if menuOption.icon}
+                            <span class="iconify icon" data-icon={menuOption.icon}></span>
+                        {/if}
+                        <div class="menu-option-label">{menuOption.label}</div>
+                    </div>
+
                     {#if menuOption.subMenuOptions}
-                        <span class="iconify" data-icon="mdi-arrow-bottom-right-bold-box-outline"></span>
+                        <span class="iconify icon" data-icon="mdi-menu-right"></span>
                     {/if}
                 </div>
             {/each}
         </div>
     </div>
+    <svelte:self menuOptions={subMenuOptions} top={subMenuTop} left={subMenuLeft} goingDirection={submenuGoingDirection} bind:this={submenu} />
 {/if}
 
 
 
 <style>
 
+    .label-container{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        gap: 5px;
+
+        user-select: none;
+        pointer-events: none;
+    }
+
+    .icon{
+
+        font-size: 1em;
+        color: var(--text-color);
+
+        user-select: none;
+        pointer-events: none;
+    }
+
     .unavalable{
         opacity: 0.5;
         user-select: none;
+        pointer-events: none;
     }    
 
     .menu{
@@ -84,12 +173,14 @@
         width: 200px;
         height: auto;
 
-        background-color: var(--midground-color);
+        background-color: var(--background-color);
         border-radius: var(--general-border-radius);
 
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 
         overflow: hidden;
+
+        outline: 1px solid var(--midground-color);
     }
 
     .menu-option{

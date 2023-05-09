@@ -1,3 +1,5 @@
+import { addOutputMessage } from "./OutputSystem";
+
 export function print(inData) {
-    console.log(inData);
+    addOutputMessage(`${inData}`)
 }

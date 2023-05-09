@@ -11,12 +11,19 @@ let contextMenu = new ContextMenu({
 
 export interface IMenuOption {
     label: string;
+    icon?: string;
     subMenuOptions?: IMenuOption[];
     avalableCheck: () => boolean;
     action: () => void;
 }
 
 export function openContextMenu(left: number, top: number, options: Array<IMenuOption>) {
+
+    // if the context menu would be off the screen, move it to the left 200px
+    if (left + 200 > window.innerWidth) {
+        left -= 200;
+    }
+
     contextMenu.$set({
         left: left,
         top: top,
@@ -24,4 +31,8 @@ export function openContextMenu(left: number, top: number, options: Array<IMenuO
     });
 
     contextMenu.setVisible(true);
+}
+
+export function closeContextMenu() {
+    contextMenu.setVisible(false);
 }

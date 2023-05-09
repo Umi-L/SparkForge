@@ -12,3 +12,5 @@
   - [ ] backend
   - [ ] scene editor
   - [ ] documentation
+  - [x] selection
+  - [x] custom context menu

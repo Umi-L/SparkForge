@@ -48,9 +48,9 @@
     let selectedNodes: Array<Node> = []
 
     let contextMenuOptions: Array<IMenuOption> = [
-        {label: "Delete", action: deleteSelectedNodes, avalableCheck: () => selectedNodes.length > 0}, 
-        {label: "Duplicate", action: duplicateSelectedNodes, avalableCheck: () => selectedNodes.length > 0}, 
-        {label: "group", action: groupSelectedNodes, avalableCheck: () => selectedNodes.length > 1}
+        {label: "Delete", action: deleteSelectedNodes, avalableCheck: () => selectedNodes.length > 0, icon: "mdi-trash-can-outline"}, 
+        {label: "Duplicate", action: duplicateSelectedNodes, avalableCheck: () => selectedNodes.length > 0, icon:"mdi-content-duplicate"}, 
+        {label: "group", action: groupSelectedNodes, avalableCheck: () => selectedNodes.length > 1, icon: "mdi-group"}
     ]
 
     let currentViewPos = {x: 0, y: 0};
@@ -327,7 +327,7 @@
 
     function duplicateSelectedNodes() {
 
-        let duplicatedNodes = []
+        let duplicatedNodes = {}
 
         // loop through all nodes
         for (let node of nodes) {
@@ -336,18 +336,22 @@
             if (node.getSelected()) {
 
                 // duplicate the node
-                duplicatedNodes.push(duplicateNode(node));
+                duplicatedNodes[nodes.indexOf(node)] = duplicateNode(node);
             }
         }
 
         // loop through all connections
         for (let connection of connections) {
 
-            // if the connection is connected to a node that is selected
-            if (connection.from.node.getSelected() || connection.to.node.getSelected()) {
+            // if the connection is connected between two selected nodes
+            if (connection.from.node.getSelected() && connection.to.node.getSelected()) {
+
+                // get the start and end nodes in the duplicated nodes array
+                let startNode = duplicatedNodes[nodes.indexOf(connection.from.node)];
+                let endNode = duplicatedNodes[nodes.indexOf(connection.to.node)];
 
                 // duplicate the connection
-                createConnection(duplicatedNodes[nodes.indexOf(connection.from.node)], connection.from.outputNumber, duplicatedNodes[nodes.indexOf(connection.to.node)], connection.to.inputNumber);
+                createConnection(startNode, connection.from.outputNumber, endNode, connection.to.inputNumber);
             }
         }
 
