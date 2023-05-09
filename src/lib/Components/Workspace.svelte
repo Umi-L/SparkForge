@@ -685,6 +685,19 @@
             }
         }
 
+        // Compute the maximum x and y coordinates of all the node boxes
+        let maxX = box.x;
+        let maxY = box.y;
+        for (let i = 0; i < selectedNodes.length; i++) {
+            let nodeBox = selectedNodes[i].getBox();
+            maxX = Math.max(maxX, nodeBox.x + nodeBox.width);
+            maxY = Math.max(maxY, nodeBox.y + nodeBox.height);
+        }
+
+        // Compute the width and height of the bounding box
+        box.width = maxX - box.x;
+        box.height = maxY - box.y;
+
         // add 10px padding
         box.x -= 10;
         box.y -= 10;

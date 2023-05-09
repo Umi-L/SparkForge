@@ -114,5 +114,6 @@
     .menu-option-label{
         user-select: none;
         pointer-events: none;
+        color: var(--text-color);
     }
 </style>
