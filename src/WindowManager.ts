@@ -39,7 +39,7 @@ export function update_all_panel_positions() {
         let relativePanelPosition = panel.getRelativePosition();
         let relativePanelSize = panel.getRelativeSize();
 
-        console.log(relativePanelSize)
+        // console.log(relativePanelSize)
 
         panel.setPosition(percent_to_px(relativePanelPosition.x, "width"), percent_to_px(relativePanelPosition.y, "height"));
         panel.setSize(percent_to_px(relativePanelSize.width, "width"), percent_to_px(relativePanelSize.height, "height"));
@@ -231,7 +231,7 @@ function generateResizeIndicators() {
                         for(let panel of edge.topPanels) {
 
                             // set the size of the panel to the percentage of the mouse vertically
-                            panel.setRelativeSize(panel.getRelativeSize().width, pos.y);
+                            panel.setRelativeSize(panel.getRelativeSize().width, pos.y - panel.getRelativePosition().y);
                         }
                         for(let panel of edge.bottomPanels) {
                             // set the size of the panel to the percentage of the mouse vertically
@@ -242,7 +242,7 @@ function generateResizeIndicators() {
                     else {
                         for(let panel of edge.leftPanels) {
                             // set the size of the panel to the percentage of the mouse horizontally
-                            panel.setRelativeSize(pos.x, panel.getRelativeSize().height);
+                            panel.setRelativeSize(pos.x - panel.getRelativePosition().x, panel.getRelativeSize().height);
                         }
                         for(let panel of edge.rightPanels) {
                             // set the size of the panel to the percentage of the mouse horizontally
