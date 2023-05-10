@@ -35,11 +35,16 @@
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "Delete", action: destroy, avalableCheck: () => inWorkspace}, 
         {label: "Duplicate", action: ()=>{dispatch("duplicate")}, avalableCheck: () => inWorkspace},
+        {label: "Description", action: showDescription, avalableCheck: () => true},
         {label: "Peek Code", action: peekCode, avalableCheck: () => true}
     ]
 
     function peekCode(){
         throw Error("Unimplemented peek code");
+    }
+
+    function showDescription(){
+        throw Error("Unimplemented show description");
     }
 
 

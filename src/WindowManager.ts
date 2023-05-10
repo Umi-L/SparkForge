@@ -1,8 +1,11 @@
+import type { Point } from "./Types";
 import type Panel from "./lib/Panel.svelte";
 
 window.addEventListener("resize", update_all_panel_positions);
 
-let panels = [];
+let panels: Array<Panel> = [];
+
+let gap = 5;
 
 interface Rect {
     x: number,
@@ -36,11 +39,251 @@ export function update_all_panel_positions() {
         let relativePanelPosition = panel.getRelativePosition();
         let relativePanelSize = panel.getRelativeSize();
 
+        console.log(relativePanelSize)
+
         panel.setPosition(percent_to_px(relativePanelPosition.x, "width"), percent_to_px(relativePanelPosition.y, "height"));
         panel.setSize(percent_to_px(relativePanelSize.width, "width"), percent_to_px(relativePanelSize.height, "height"));
 
-        apply_gap(5, panel);
+        apply_gap(gap, panel);
+
+        generateResizeIndicators();
     });
+}
+
+
+//function that returns the positions and sizes of the elements that are between different panels and can be dragged to resize the panels
+function generateResizeIndicators() {
+
+    interface IEdge{
+        p1: Point,
+        p2: Point,
+
+        isHorizontal: boolean,
+
+        // panels on the left and right of the edge
+        leftPanels: Panel[],
+        rightPanels: Panel[],
+
+        // panels on the top and bottom of the edge
+        topPanels: Panel[],
+        bottomPanels: Panel[],
+    }
+
+    let edges: IEdge[] = [];
+
+    // foreach panel
+    panels.forEach((panel) => {
+        // get the relative bounding box
+        let panelPos = panel.getRelativePosition();
+        let panelSize = panel.getRelativeSize();
+
+        let panelBoundingBox: Rect = {
+            x: panelPos.x,
+            y: panelPos.y,
+            width: panelSize.width,
+            height: panelSize.height,
+        };
+
+        // get the edges of the bounding box
+        let leftEdge: IEdge = {
+            p1: {x: panelBoundingBox.x, y: panelBoundingBox.y},
+            p2: {x: panelBoundingBox.x, y: panelBoundingBox.y + panelBoundingBox.height},
+            isHorizontal: false,
+            leftPanels: [],
+            rightPanels: [panel],
+            topPanels: [],
+            bottomPanels: [],
+        };
+
+        let rightEdge: IEdge = {
+            p1: {x: panelBoundingBox.x + panelBoundingBox.width, y: panelBoundingBox.y},
+            p2: {x: panelBoundingBox.x + panelBoundingBox.width, y: panelBoundingBox.y + panelBoundingBox.height},
+            isHorizontal: false,
+            leftPanels: [panel],
+            rightPanels: [],
+            topPanels: [],
+            bottomPanels: [],
+        };
+
+        let topEdge: IEdge = {
+            p1: {x: panelBoundingBox.x, y: panelBoundingBox.y},
+            p2: {x: panelBoundingBox.x + panelBoundingBox.width, y: panelBoundingBox.y},
+            isHorizontal: true,
+            leftPanels: [],
+            rightPanels: [],
+            topPanels: [],
+            bottomPanels: [panel],
+        };
+
+        let bottomEdge: IEdge = {
+            p1: {x: panelBoundingBox.x, y: panelBoundingBox.y + panelBoundingBox.height},
+            p2: {x: panelBoundingBox.x + panelBoundingBox.width, y: panelBoundingBox.y + panelBoundingBox.height},
+            isHorizontal: true,
+            leftPanels: [],
+            rightPanels: [],
+            topPanels: [panel],
+            bottomPanels: [],
+        };
+
+        let toAdd = [leftEdge, rightEdge, topEdge, bottomEdge];
+
+        // foreach edge
+        for(let edge of toAdd) {
+            if (edge.p1.x == 0 && edge.p2.x == 0) continue;
+            if (edge.p1.y == 0 && edge.p2.y == 0) continue;
+            if (edge.p1.x == 1 && edge.p2.x == 1) continue;
+            if (edge.p1.y == 1 && edge.p2.y == 1) continue;
+
+            // add to edges
+            edges.push(edge);
+        }
+
+
+
+        // foreach edge
+        for(let edge of edges) {
+            //foreach other edge
+            for(let otherEdge of edges) {
+                // if edges are not parallel ignore
+                if (edge.isHorizontal != otherEdge.isHorizontal) continue;
+
+                // if edges are the same ignore
+                if (edge == otherEdge) continue;
+
+                // if the edges are vertical and have the same x value then they should be merged
+                if (!edge.isHorizontal && edge.p1.x == otherEdge.p1.x) {
+                    // merge the edges
+                    edge.p1.y = Math.min(edge.p1.y, otherEdge.p1.y);
+                    edge.p2.y = Math.max(edge.p2.y, otherEdge.p2.y);
+
+                    // add the other edge's panels to this edge
+                    edge.leftPanels = edge.leftPanels.concat(otherEdge.leftPanels);
+                    edge.rightPanels = edge.rightPanels.concat(otherEdge.rightPanels);
+
+                    // remove the other edge
+                    edges.splice(edges.indexOf(otherEdge), 1);
+                }
+
+                // if the edges are horizontal and have the same y value then they should be merged
+                if (edge.isHorizontal && edge.p1.y == otherEdge.p1.y) {
+                    // merge the edges
+                    edge.p1.x = Math.min(edge.p1.x, otherEdge.p1.x);
+                    edge.p2.x = Math.max(edge.p2.x, otherEdge.p2.x);
+
+                    // add the other edge's panels to this edge
+                    edge.topPanels = edge.topPanels.concat(otherEdge.topPanels);
+                    edge.bottomPanels = edge.bottomPanels.concat(otherEdge.bottomPanels);
+
+                    // remove the other edge
+                    edges.splice(edges.indexOf(otherEdge), 1);
+                }
+            }
+        }
+
+        // delete all old edges
+        document.getElementById("panel-handles").innerHTML = "";
+
+        // debug draw edges as divs to id body
+        for(let edge of edges) {
+            let div = document.createElement("div");
+            div.style.position = "absolute";
+            div.style.backgroundColor = "transparent";
+
+            
+            if (edge.isHorizontal) {
+                div.style.left = (edge.p1.x * 100) + "%";
+                div.style.width = ((edge.p2.x - edge.p1.x) * 100) + "%";
+                div.style.top = (edge.p1.y * 100) + "%";
+                div.style.height = "1px";
+                div.style.cursor = "ns-resize";
+            } else {
+                div.style.left = (edge.p1.x * 100) + "%";
+                div.style.width = "1px";
+                div.style.top = (edge.p1.y * 100) + "%";
+                div.style.height = ((edge.p2.y - edge.p1.y) * 100) + "%";
+                div.style.cursor = "ew-resize";
+            } 
+            
+            div.style.border = "5px solid transparent";
+            div.style.pointerEvents = "all";
+            div.style.zIndex = "1000";
+            div.style.userSelect = "none";
+
+            div.setAttribute("dragging", "false");
+
+            // on drag
+            div.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+                div.setAttribute("dragging", "true");
+            });
+
+            // on global mouse move
+            document.addEventListener("mousemove", (e) => {
+                if (div.getAttribute("dragging") == "true") {
+                    e.preventDefault();
+
+                    // change width or height of panels that are attached to this edge by the direction of the edge
+
+                    // get percentage of mouse vertically
+                    let pos = mousePosToPercent(e.clientX, e.clientY);
+
+                    if (edge.isHorizontal) {
+                        for(let panel of edge.topPanels) {
+
+                            // set the size of the panel to the percentage of the mouse vertically
+                            panel.setRelativeSize(panel.getRelativeSize().width, pos.y);
+                        }
+                        for(let panel of edge.bottomPanels) {
+                            // set the size of the panel to the percentage of the mouse vertically
+                            panel.setRelativeSize(panel.getRelativeSize().width, 1 - pos.y);
+                            panel.setRelativePosition(panel.getRelativePosition().x, pos.y);
+                        }
+                    }
+                    else {
+                        for(let panel of edge.leftPanels) {
+                            // set the size of the panel to the percentage of the mouse horizontally
+                            panel.setRelativeSize(pos.x, panel.getRelativeSize().height);
+                        }
+                        for(let panel of edge.rightPanels) {
+                            // set the size of the panel to the percentage of the mouse horizontally
+                            panel.setRelativeSize(1 - pos.x, panel.getRelativeSize().height);
+                            panel.setRelativePosition(pos.x, panel.getRelativePosition().y);
+                        }
+                    }
+
+                    update_all_panel_positions();
+                }
+            });
+
+            // on global mouse up
+            document.addEventListener("mouseup", (e) => {
+                div.setAttribute("dragging", "false");
+            });
+
+
+            document.getElementById("panel-handles").appendChild(div);
+        }
+    });
+}
+
+function mousePosToPercent(mouseX, mouseY) {
+    
+        // get bodyDiv bounding box
+        let bodyDivBoundingBox = fetchBodyDiv().getBoundingClientRect();
+    
+        // get mouse position
+        let mousePos = {
+            x: mouseX,
+            y: mouseY
+        }
+
+        // calculate the percentage of the mouse position
+        let mousePosPercent = {
+            x: mousePos.x / bodyDivBoundingBox.width,
+            y: mousePos.y / bodyDivBoundingBox.height
+        }
+
+        return mousePosPercent;
 }
 
 function apply_gap(gap:number, panel: Panel){
@@ -79,7 +322,7 @@ export function register_panel(panel: Panel) {
 
     setPanelDefaults(panel);
     apply_gap(5, panel);
-    // update_panels();
+    generateResizeIndicators();
 }
 
 // export function update_panels() {
@@ -407,12 +650,13 @@ export function update_panel_position(panel: Panel){
         height: percent_to_px(panel_relative_size.height, "height"),
     };
 
+
     // set the panel's position
     panel.setPosition(panel_position.x, panel_position.y);
     panel.setSize(panel_size.width, panel_size.height);
 
     // apply gap
-    apply_gap(5, panel);
+    apply_gap(gap, panel);
 
     // update the panel's transform
     panel.updateTransform();

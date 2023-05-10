@@ -35,6 +35,8 @@
     <div class="debug-space-check"></div>
     <div class="debug-space-check"></div>
     <div class="debug-space-check"></div>
+
+    <div id="panel-handles"></div>
     
     <div id="toasts">
 
@@ -48,6 +50,18 @@
 
 
 <style>
+
+  #panel-handles{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+  }
+
   #panel_indicator{
     position: absolute;
     

@@ -55,6 +55,10 @@
         closeContextMenu(); // done to also close main menu when sub menu is clicked
     }
 
+    function convertRemToPixels(rem) {    
+        return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    }
+
 </script>
 
 
@@ -80,7 +84,11 @@
                                 subMenuOptions = menuOption.subMenuOptions;
                                 submenuGoingDirection = goingDirection;
 
-                                let offset = 210;
+
+                                //calculate the number of px in 12rem
+                                let px = convertRemToPixels(12);
+
+                                let offset = px + 10;
 
                                 if (goingDirection == "left"){
                                     offset = -offset;
@@ -160,15 +168,19 @@
 
     .menu{
 
+        padding-top: 5px;
+        padding-bottom: 5px;
+
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: center;
         gap: 5px;
 
         position: absolute;
         z-index: 1000;
 
-        width: 200px;
+        width: 12rem;
         height: auto;
 
         background-color: var(--background-color);
@@ -182,11 +194,16 @@
     }
 
     .menu-option{
+
+        width: 96%;
+
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        background-color: var(--foreground-color);
+        background-color: var(--background-color);
+
+        border-radius: var(--general-border-radius);
 
 
         font-size: 0.7em;
