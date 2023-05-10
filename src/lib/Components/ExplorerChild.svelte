@@ -20,8 +20,8 @@
             {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "mdi-folder"},
         ], icon: "mdi-plus"},
         {label: "Rename", action: rename, avalableCheck: ()=>true, icon: "mdi-rename"},
-        {label: "Delete", action: ()=>{}, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
-        {label: "Duplicate", action: ()=>{}, avalableCheck: ()=>true, icon:"mdi-content-duplicate"},
+        {label: "Delete", action: remove, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
+        {label: "Duplicate", action: duplicate, avalableCheck: ()=>true, icon:"mdi-content-duplicate"},
     ]
 
     let showChildren = false;
@@ -59,6 +59,21 @@
         let path = FS.getPath(fileordir);
 
         FS.rename(path, "new name");
+    }
+
+    function remove(){
+            
+            let fileordir = (directory) ? directory : file;
+            let path = FS.getPath(fileordir);
+    
+            FS.delete(path);
+    }
+
+    function duplicate(){
+        let fileordir = (directory) ? directory : file;
+        let path = FS.getPath(fileordir);
+
+        FS.duplicate(path);
     }
 
     function toggleShow(){
@@ -120,7 +135,7 @@
         </div>
     {:else if file}
         <div class="file" bind:this={fileElement}>
-            <Icon icon="mdi-file-document-outline"/>
+            <Icon icon="mdi-file-document-outline" class="icon"/>
             <h3>{file.name}</h3>
             <!-- <div class="sep"></div> -->
         </div>
@@ -130,11 +145,6 @@
 
 
 <style>
-
-    .icon{
-        color: var(--text-color);
-        pointer-events: none;
-    }
 
     .file{
         display: flex;

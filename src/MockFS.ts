@@ -113,6 +113,47 @@ class FileSystem{
 
         this.update();
     }
+
+    public delete(path: string){
+        let item = this.getAtPath(path)
+
+        if (item.parent){
+            if(item.type == "directory"){
+                let dir = item as FSDirectory
+                let parent = dir.parent
+                parent.children.splice(parent.children.indexOf(dir), 1)
+            }
+            else{
+                let file = item as FSFile
+                let parent = file.parent
+                parent.children.splice(parent.children.indexOf(file), 1)
+            }
+        } else{
+            let dir = item as FSDirectory
+            this.dirs.splice(this.dirs.indexOf(dir), 1)
+        }
+
+        this.update();
+    }
+
+    public duplicate(path: string){
+        let item = this.getAtPath(path)
+        let parent = item.parent
+
+        if (parent){
+            let newItem = JSON.parse(JSON.stringify(item))
+            newItem.name = item.name + " copy"
+
+            parent.children.push(newItem)
+        } else{
+            let newItem = JSON.parse(JSON.stringify(item))
+            newItem.name = item.name + " copy"
+
+            this.dirs.push(newItem)
+        }
+
+        this.update();
+    }
 }
 
 export let FS = new FileSystem([
