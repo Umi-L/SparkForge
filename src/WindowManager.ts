@@ -235,7 +235,7 @@ function generateResizeIndicators() {
                         }
                         for(let panel of edge.bottomPanels) {
                             // set the size of the panel to the percentage of the mouse vertically
-                            panel.setRelativeSize(panel.getRelativeSize().width, 1 - pos.y);
+                            panel.setRelativeSize(panel.getRelativeSize().width, panel.getRelativePosition().y + panel.getRelativeSize().height  - pos.y);
                             panel.setRelativePosition(panel.getRelativePosition().x, pos.y);
                         }
                     }
@@ -246,7 +246,7 @@ function generateResizeIndicators() {
                         }
                         for(let panel of edge.rightPanels) {
                             // set the size of the panel to the percentage of the mouse horizontally
-                            panel.setRelativeSize(1 - pos.x, panel.getRelativeSize().height);
+                            panel.setRelativeSize(panel.getRelativePosition().x + panel.getRelativeSize().width - pos.x, panel.getRelativeSize().height);
                             panel.setRelativePosition(pos.x, panel.getRelativePosition().y);
                         }
                     }
