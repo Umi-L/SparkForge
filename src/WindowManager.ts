@@ -196,15 +196,16 @@ function generateResizeIndicators() {
                 div.style.top = (edge.p1.y * 100) + "%";
                 div.style.height = "1px";
                 div.style.cursor = "ns-resize";
+                div.style.transform = "scaleY(" + gap*2 + ")";
             } else {
                 div.style.left = (edge.p1.x * 100) + "%";
                 div.style.width = "1px";
                 div.style.top = (edge.p1.y * 100) + "%";
                 div.style.height = ((edge.p2.y - edge.p1.y) * 100) + "%";
                 div.style.cursor = "ew-resize";
+                div.style.transform = "scaleX(" + gap*2 + ")";
             } 
             
-            div.style.border = "5px solid transparent";
             div.style.pointerEvents = "all";
             div.style.zIndex = "1000";
             div.style.userSelect = "none";
@@ -273,8 +274,8 @@ function mousePosToPercent(mouseX, mouseY) {
     
         // get mouse position
         let mousePos = {
-            x: mouseX,
-            y: mouseY
+            x: mouseX - bodyDivBoundingBox.left,
+            y: mouseY - bodyDivBoundingBox.top
         }
 
         // calculate the percentage of the mouse position

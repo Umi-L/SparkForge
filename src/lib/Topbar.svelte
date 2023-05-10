@@ -2,6 +2,7 @@
   import { Compile } from "../Compiler";
   import { getElementFromDomElement } from "../main";
   import type Workspace from "./Components/Workspace.svelte";
+    import Icon from "@iconify/svelte";
 
     function runGame(){
         // foreach workspace
@@ -29,7 +30,8 @@
 <div class="topbar">
     <div class="start">
         <!-- svelte-ignore a11y-missing-attribute -->
-        <a><span class="iconify" data-icon="mdi-menu"></span></a>
+        <!-- <span class="iconify" data-icon="mdi-menu"></span> -->
+        <a><Icon icon="mdi-menu" /></a>
     </div>
 
 
@@ -38,10 +40,10 @@
         <div class="button-assembly">
             <!-- svelte-ignore a11y-missing-attribute -->
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <a class="state-button" on:click={runGame}><span class="iconify" data-icon="mdi-play"></span></a>
+            <a class="state-button" on:click={runGame}><Icon icon="mdi-play"/></a>
             
             <!-- svelte-ignore a11y-missing-attribute -->
-            <a class="state-button"><span class="iconify" data-icon="mdi-stop"></span></a>
+            <a class="state-button"><Icon icon="mdi-stop"/></a>
 
         </div>
     </div>

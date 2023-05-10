@@ -1,27 +1,65 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import type { FSDirectory, FSFile } from "../../MockFS";
+  import { FS, FileTypes, type FSDirectory, type FSFile } from "../../MockFS";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
+  import Icon from '@iconify/svelte';
 
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
     export let indent = 0;
 
     let container: HTMLDivElement;
+    let directoryElement: HTMLDivElement;
+    let fileElement: HTMLDivElement;
 
     let color = indent % 2 === 0 ? "--foreground-color" : "--midground-color";
 
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
-            {label: "GameObject", action: ()=>{}, avalableCheck: ()=>true, icon: "mdi-cube-outline"},
-            {label: "Folder", action: ()=>{}, avalableCheck: ()=>true, icon: "mdi-folder"},
+            {label: "GameObject", action: newGameObject, avalableCheck: ()=>true, icon: "mdi-cube-outline"},
+            {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "mdi-folder"},
         ], icon: "mdi-plus"},
-        {label: "Rename", action: ()=>{}, avalableCheck: ()=>true, icon: "mdi-rename"},
+        {label: "Rename", action: rename, avalableCheck: ()=>true, icon: "mdi-rename"},
         {label: "Delete", action: ()=>{}, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
         {label: "Duplicate", action: ()=>{}, avalableCheck: ()=>true, icon:"mdi-content-duplicate"},
     ]
 
     let showChildren = false;
+
+    function newGameObject(){
+
+        let dir = (directory) ? directory : file.parent;
+
+        let path = FS.getPath(dir);
+
+        FS.addFile(path, {fileType: FileTypes.gameobject, type: "file", name: "new gameobject", content: {}, parent: dir});
+
+        // if dir not toggled, toggle it
+        if (!showChildren){
+            toggleShow();
+        }
+    }
+
+    function newFolder(){
+
+        let dir = (directory) ? directory : file.parent;
+
+        let path = FS.getPath(dir);
+
+        FS.addDir(path, {type: "directory", name: "new folder", parent: dir, children: []});
+
+        // if dir not toggled, toggle it
+        if (!showChildren){
+            toggleShow();
+        }
+    }
+
+    function rename(){
+        let fileordir = (directory) ? directory : file;
+        let path = FS.getPath(fileordir);
+
+        FS.rename(path, "new name");
+    }
 
     function toggleShow(){
         showChildren = !showChildren;
@@ -36,6 +74,12 @@
     })
 
     function onContextMenu(event){
+
+        if (event.target !== directoryElement && event.target !== fileElement && event.target !== container){
+            console.log(event.target)
+            return;
+        }
+
         openContextMenu(event.clientX, event.clientY, contextMenuOptions)
 
         event.preventDefault();
@@ -47,13 +91,15 @@
 <div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color})`} bind:this={container}>
     {#if directory}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="directory" on:click={toggleShow}>
+        <div class="directory" on:click={toggleShow} bind:this={directoryElement}>
 
             <div class="arrow" class:visible={!showChildren}>
-                <span class="iconify icon" data-icon="mdi-menu-right"></span>
+                <!-- <span class="iconify icon" data-icon="mdi-menu-right"></span> -->
+                <Icon icon="mdi-menu-right" class="icon" />
             </div>
             <div class="arrow" class:visible={showChildren}>
-                <span class="iconify icon" data-icon="mdi-menu-down"></span>
+                <!-- <span class="iconify icon" data-icon="mdi-menu-down"></span> -->
+                <Icon icon="mdi-menu-down" class="icon" />
             </div>
 
             <h3>
@@ -73,8 +119,8 @@
             {/each}
         </div>
     {:else if file}
-        <div class="file">
-            <span class="iconify icon" data-icon="mdi-file-document-outline"></span>
+        <div class="file" bind:this={fileElement}>
+            <Icon icon="mdi-file-document-outline"/>
             <h3>{file.name}</h3>
             <!-- <div class="sep"></div> -->
         </div>
@@ -87,6 +133,7 @@
 
     .icon{
         color: var(--text-color);
+        pointer-events: none;
     }
 
     .file{
@@ -97,6 +144,7 @@
 
     .arrow{
         display: none;
+        pointer-events: none;
     }
 
     .container{
@@ -107,6 +155,9 @@
         flex-direction: column;
         gap: 5px;
         padding: 5px;
+        width: fit-content;
+
+        min-width: 10rem;
     }
 
     .directory{
@@ -121,6 +172,8 @@
         color: var(--text-color);
         font-size: 0.7em;
         margin: 0;
+
+        pointer-events: none;
     }
 
     .visible {

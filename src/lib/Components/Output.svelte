@@ -2,6 +2,7 @@
   import { get_current_component } from "svelte/internal";
   import { registerOutput, type OutputMessage, OutputTypes, unregisterOutput } from "../../OutputSystem";
   import { onMount,onDestroy } from "svelte";
+  import Icon from '@iconify/svelte';
 
     let myself = get_current_component();
 
@@ -62,25 +63,29 @@
         <div class="counters">
             <div class="counter error-counter">
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <a><span class="iconify" data-icon="mdi-alert-circle"></span></a>
+                <!-- <span class="iconify" data-icon="mdi-alert-circle"></span> -->
+                <Icon icon="mdi-alert-circle"/>
                 <p>{errorCount}</p>
             </div>
 
             <div class="counter warning-counter">
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <a><span class="iconify" data-icon="mdi-alert-circle-outline"></span></a>
+                <!-- <a><span class="iconify" data-icon="mdi-alert-circle-outline"></span></a> -->
+                <Icon icon="mdi-alert-circle-outline"/>
                 <p>{warningCount}</p>
             </div>
 
             <div class="counter info-counter">
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <a><span class="iconify" data-icon="mdi-information-outline"></span></a>
+                <!-- <a><span class="iconify" data-icon="mdi-information-outline"></span></a> -->
+                <Icon icon="mdi-information-outline"/>
                 <p>{infoCount}</p>
             </div>
 
             <div class="counter">
                 <!-- svelte-ignore a11y-missing-attribute -->
-                <a><span class="iconify" data-icon="mdi-message-badge-outline"></span></a>
+                <!-- <a><span class="iconify" data-icon="mdi-message-badge-outline"></span></a> -->
+                <Icon icon="mdi-message-badge-outline"/>
                 <p>{messages.length}</p>
             </div>
 

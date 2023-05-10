@@ -3,6 +3,7 @@
     import { onPanelDragEnd, register_panel, onPanelDrag } from "../WindowManager";
     import { onMount } from "svelte";
     import type Panel from "./Panel.svelte";
+    import Icon from '@iconify/svelte';
 
     // export let rowstyle:string;
     // export let colstyle:string;
@@ -239,10 +240,12 @@
 
         <div class="panel-buttons">
             <!-- svelte-ignore a11y-missing-attribute -->
-            <a class="min-close-button"><span class="iconify" data-icon="mdi-minus"></span></a>
+            <!-- <span class="iconify" data-icon="mdi-minus"></span> -->
+            <a class="min-close-button"><Icon icon="mdi-minus" /></a>
 
             <!-- svelte-ignore a11y-missing-attribute -->
-            <a class="min-close-button"><span class="iconify" data-icon="mdi-close"></span></a>
+            <!-- <span class="iconify" data-icon="mdi-close"></span> -->
+            <a class="min-close-button"><Icon icon="mdi-close" /></a>
         </div>
     </div>
     <div class="panel-body" bind:this={panelBody}>

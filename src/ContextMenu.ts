@@ -19,6 +19,8 @@ export interface IMenuOption {
 
 export function openContextMenu(left: number, top: number, options: Array<IMenuOption>) {
 
+    closeContextMenu();
+
     // if the context menu would be off the screen, move it to the left 200px
     if (left + 200 > window.innerWidth) {
         left -= 200;

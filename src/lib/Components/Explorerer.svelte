@@ -3,9 +3,16 @@
     import { FS } from "../../MockFS";
   import ExplorerChild from "./ExplorerChild.svelte";
 
+
+  let localFS = FS;
   let root: HTMLDivElement;
 
   onMount(()=>{
+
+    FS.registerUpdateCallback(()=>{
+      localFS = FS;
+    })
+
     root.addEventListener("contextmenu", (e) => {
       e.preventDefault();
     });
@@ -17,7 +24,7 @@
 <div class="explorer-root" bind:this={root}>
     <!-- foreach directory in FS -->
 
-    {#each FS as directory}
+    {#each localFS.dirs as directory}
         <ExplorerChild directory={directory} />
     {/each}
 </div>

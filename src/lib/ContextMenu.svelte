@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount } from "svelte";
   import { closeContextMenu, type IMenuOption } from "../ContextMenu";
   import type ContextMenu from "./ContextMenu.svelte";
+  import Icon from '@iconify/svelte';
 
     export let menuOptions: Array<IMenuOption>;
     export let top: number;
@@ -47,6 +48,9 @@
         // if menu is being shown, set justShown to true
         if (visible){
             justShown = true;
+        } else {
+            if (submenu != undefined)
+                submenu.setVisible(false);
         }
     }
 
@@ -121,13 +125,15 @@
 
                     <div class="label-container">
                         {#if menuOption.icon}
-                            <span class="iconify icon" data-icon={menuOption.icon}></span>
+                            <!-- <span class="iconify icon" data-icon={menuOption.icon}></span> -->
+                            <Icon icon={menuOption.icon} class="icon" />
                         {/if}
                         <div class="menu-option-label">{menuOption.label}</div>
                     </div>
 
                     {#if menuOption.subMenuOptions}
-                        <span class="iconify icon" data-icon="mdi-menu-right"></span>
+                        <!-- <span class="iconify icon" data-icon="mdi-menu-right"></span> -->
+                        <Icon icon="mdi:menu-right" class="icon" />
                     {/if}
                 </div>
             {/each}
