@@ -11,7 +11,7 @@
 
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
-            {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "mdi-folder"},
+            {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "material-symbols:folder-outline"},
         ], icon: "mdi-plus"},
     ]
 

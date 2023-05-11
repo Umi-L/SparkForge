@@ -17,11 +17,16 @@
     let renaming = false;
     let name = "";
 
+    let dragging = false;
+    let possibleDragging = false;
+
+    let position: {x: number, y: number} = {x: 0, y: 0};
+
     let color = indent % 2 === 0 ? "--foreground-color" : "--midground-color";
 
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
-            {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "mdi-folder"},
+            {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "material-symbols:folder-outline"},
         ], icon: "mdi-plus"},
         {label: "Rename", action: startRename, avalableCheck: ()=>true, icon: "mdi-rename"},
         {label: "Duplicate", action: duplicate, avalableCheck: ()=>true, icon:"mdi-content-duplicate"},
@@ -111,6 +116,33 @@
 
     onMount(()=>{
         container.addEventListener("contextmenu", onContextMenu)
+        container.addEventListener("mousedown", (event)=>{
+            if (event.button !== 0) return;
+            possibleDragging = true;
+            event.preventDefault();
+        })
+
+        window.addEventListener("mousemove", (event)=>{
+            if (!possibleDragging) return;
+
+            if (Math.abs(event.movementX) > 2 || Math.abs(event.movementY) > 2){
+                dragging = true;
+            }
+
+            if (dragging){
+                position.x += event.movementX;
+                position.y += event.movementY;
+
+                container.style.left = `${position.x}px`;
+                container.style.top = `${position.y}px`;
+            }
+                        
+        })
+
+        window.addEventListener("mouseup", (event)=>{
+            dragging = false;
+            possibleDragging = false;
+        })
     })
 
     onDestroy(()=>{
@@ -132,7 +164,7 @@
 
 
 
-<div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`} bind:this={container}>
+<div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`} bind:this={container} class:dragging={dragging}>
     {#if directory && !renaming}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="directory" on:click={toggleShow} bind:this={directoryElement}>
@@ -189,6 +221,11 @@
 
 
 <style>
+
+    .dragging{
+        position: absolute;
+        opacity: 0.5;
+    }
 
     .rename{
         background-color: transparent;

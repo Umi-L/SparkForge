@@ -9,6 +9,7 @@
   - [x] output
   - [x] tabs on panels (no movement yet)
   - [x] file system
+  - [ ] fix that stupid panel arrangement bug
   - [ ] file system integration
   - [ ] saving and loading
   - [ ] scene editor
@@ -24,3 +25,8 @@
   - [ ] showcase
   - [ ] backend
 
+### note to self; don't forget to add attribution to the the libraries used
+```
+quickjs enscripten
+monaco editor if used
+```
