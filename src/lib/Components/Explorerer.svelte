@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
     import { FS } from "../../MockFS";
   import ExplorerChild from "./ExplorerChild.svelte";
+  import { children } from "svelte/internal";
 
 
   let localFS = FS;
@@ -24,8 +25,13 @@
 <div class="explorer-root" bind:this={root}>
     <!-- foreach directory in FS -->
 
-    {#each localFS.dirs as directory}
-        <ExplorerChild directory={directory} />
+    {#each localFS.root.children as fileOrDir}
+
+      {#if fileOrDir.type === "directory"}
+        <ExplorerChild directory={fileOrDir} />
+      {:else}
+        <ExplorerChild file={fileOrDir} />
+      {/if}
     {/each}
 </div>
 

@@ -1,3 +1,9 @@
+:root{
+  --font-family: 'JetBrains Mono', monospace;  
+  --general-border-radius: 5px;
+  --general-padding: 5px;
+}
+
 @media (prefers-color-scheme: dark) { 
   :root {
     /* CSS HSL */
@@ -18,9 +24,6 @@
     --midground-color: #333333;
     --foreground-color: #393939;
     --foreground-color-2: #444444;
-  
-    --general-border-radius: 5px;
-    --general-padding: 5px;
 
     --boolean-color: #ff8080;
     --number-color: #ffcc66;
@@ -55,9 +58,7 @@
     --midground-color: #f2f2f2;
     --foreground-color: #f7f7f7;
     --foreground-color-2: #ffffff;
-  
-    --general-border-radius: 5px;
-    --general-padding: 5px;
+
 
     --boolean-color: #ff8080;
     --number-color: #ffcc66;

@@ -214,6 +214,9 @@ function generateResizeIndicators() {
 
             // on drag
             div.addEventListener("mousedown", (e) => {
+
+                if (e.button != 0) return;
+
                 e.preventDefault();
                 div.setAttribute("dragging", "true");
             });

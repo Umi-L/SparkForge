@@ -3,6 +3,8 @@
   import { FS, FileTypes, type FSDirectory, type FSFile } from "../../MockFS";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
   import Icon from '@iconify/svelte';
+  import { createToast } from "../../ToastManager";
+  import { ToastPosition, ToastType } from "../../Types";
 
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
@@ -12,6 +14,9 @@
     let directoryElement: HTMLDivElement;
     let fileElement: HTMLDivElement;
 
+    let renaming = false;
+    let name = "";
+
     let color = indent % 2 === 0 ? "--foreground-color" : "--midground-color";
 
     let contextMenuOptions: Array<IMenuOption> = [
@@ -19,9 +24,9 @@
             {label: "GameObject", action: newGameObject, avalableCheck: ()=>true, icon: "mdi-cube-outline"},
             {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "mdi-folder"},
         ], icon: "mdi-plus"},
-        {label: "Rename", action: rename, avalableCheck: ()=>true, icon: "mdi-rename"},
-        {label: "Delete", action: remove, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
+        {label: "Rename", action: startRename, avalableCheck: ()=>true, icon: "mdi-rename"},
         {label: "Duplicate", action: duplicate, avalableCheck: ()=>true, icon:"mdi-content-duplicate"},
+        {label: "Delete", action: remove, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
     ]
 
     let showChildren = false;
@@ -40,11 +45,18 @@
         }
     }
 
+    function startRename(){
+        renaming = true;
+    }
+
     function newFolder(){
 
         let dir = (directory) ? directory : file.parent;
 
         let path = FS.getPath(dir);
+
+        console.log(path)
+        console.log(dir)
 
         FS.addDir(path, {type: "directory", name: "new folder", parent: dir, children: []});
 
@@ -55,10 +67,22 @@
     }
 
     function rename(){
+
+        if (name === ""){
+            renaming = false;
+
+            createToast("Name cannot be empty", ToastType.Error, ToastPosition.BottomRight);
+
+            return;
+        }
+
         let fileordir = (directory) ? directory : file;
+        console.log(fileordir)
         let path = FS.getPath(fileordir);
 
-        FS.rename(path, "new name");
+        FS.rename(path, name);
+
+        renaming = false;
     }
 
     function remove(){
@@ -104,7 +128,7 @@
 
 
 <div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color})`} bind:this={container}>
-    {#if directory}
+    {#if directory && !renaming}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="directory" on:click={toggleShow} bind:this={directoryElement}>
 
@@ -133,18 +157,45 @@
                 {/if}
             {/each}
         </div>
-    {:else if file}
+    {:else if file && !renaming}
         <div class="file" bind:this={fileElement}>
             <Icon icon="mdi-file-document-outline" class="icon"/>
             <h3>{file.name}</h3>
             <!-- <div class="sep"></div> -->
         </div>
+    {:else if renaming}
+        <input type="text" class="rename"
+        value={(file) ? file.name : directory.name} on:input={e=>{
+            // @ts-ignore
+            name = e.target.value;
+        }} 
+        on:keypress={(event)=>{
+            if (event.key === "Enter"){
+                rename();
+            }
+        }} 
+        on:blur={rename} />
+
     {/if}
 </div>
 
 
 
 <style>
+
+    .rename{
+        background-color: transparent;
+        border: none;
+        border-bottom: 1px solid var(--text-color);
+        color: var(--text-color);
+        font-size: 0.7em;
+        outline: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+
+        font-family: var(--font-family);
+    }
 
     .file{
         display: flex;

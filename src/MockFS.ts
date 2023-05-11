@@ -24,11 +24,16 @@ export enum FileTypes{
 
 
 class FileSystem{
-    public dirs: Array<FSDirectory> = []
+    public root: FSDirectory = {name: "root", type: "directory", children: []}
     updateCallbacks: Array<() => void> = []
 
     constructor(dirs: Array<FSDirectory>){
-        this.dirs = dirs
+        this.root.children = dirs
+
+        // set all parents to root
+        this.root.children.forEach(c => {
+            c.parent = this.root
+        });
     }
 
     public registerUpdateCallback(callback: () => void){
@@ -51,20 +56,15 @@ class FileSystem{
 
     public getAtPath(path: string): FSDirectory | FSFile{
         let pathParts = path.split("/")
-        let currentDir = this.dirs.find(d => d.name == pathParts[0])
-        if(!currentDir) return null
+        let head: FSDirectory | FSFile = this.root;
 
         for(let i = 1; i < pathParts.length; i++){
-            let child = currentDir.children.find(c => c.name == pathParts[i])
-            if(!child) return null
-            if(child.type == "directory"){
-                currentDir = child
-            }
-            else{
-                return child
-            }
+            let nextDir = (head as FSDirectory).children.find(d => d.name == pathParts[i])
+            if(!nextDir) return null
+            head = nextDir
         }
-        return currentDir
+
+        return head
     }
 
     public addFile(path: string, file: FSFile){
@@ -88,9 +88,12 @@ class FileSystem{
 
     public addDir(path: string, dir: FSDirectory){
 
-        
+        console.log("adding dir", path, dir)
 
         let parent = this.getAtPath(path) as FSDirectory
+
+        console.log("parent", parent)
+
         dir.parent = parent
 
         // if the dir's name already exists in the parent, add a number to the end and increment it until it doesn't
@@ -130,7 +133,7 @@ class FileSystem{
             }
         } else{
             let dir = item as FSDirectory
-            this.dirs.splice(this.dirs.indexOf(dir), 1)
+            this.root.children.splice(this.root.children.indexOf(dir), 1)
         }
 
         this.update();
@@ -139,19 +142,18 @@ class FileSystem{
     public duplicate(path: string){
         let item = this.getAtPath(path)
         let parent = item.parent
+        
+        // duplicate the item and add it using the add function if there is no parent then add to dirs
+        let newItem: FSFile | FSDirectory = {...item}
 
-        if (parent){
-            let newItem = JSON.parse(JSON.stringify(item))
-            newItem.name = item.name + " copy"
 
-            parent.children.push(newItem)
-        } else{
-            let newItem = JSON.parse(JSON.stringify(item))
-            newItem.name = item.name + " copy"
-
-            this.dirs.push(newItem)
+        if (item.type == "directory"){
+            this.addDir(this.getPath(parent), newItem as FSDirectory)
         }
-
+        else{
+            this.addFile(this.getPath(parent), newItem as FSFile)
+        }
+        
         this.update();
     }
 }
