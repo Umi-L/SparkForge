@@ -14,13 +14,27 @@ export interface FSDirectory{
 }
 
 export enum FileTypes{
-    "gameobject",
-    "scene",
-    "sprite",
-    "script",
-    "flowchart",
+    gameobject = "gameobject",
+    scene = "scene",
+    script = "script",
+    flowchart = "flowchart",
+
 }
 
+export function getFileTypeIcon(type: FileTypes): string{
+    switch (type){
+        case FileTypes.gameobject:
+            return "mdi-cube-outline";
+        case FileTypes.scene:
+            return "mdi:clapperboard-outline";
+        case FileTypes.script:
+            return "mdi:script-outline";
+        case FileTypes.flowchart:
+            return "fluent:flowchart-20-regular";
+        default:
+            return "mdi-file-document-outline";
+    }
+}
 
 
 class FileSystem{

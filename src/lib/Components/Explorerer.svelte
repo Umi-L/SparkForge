@@ -1,12 +1,49 @@
 <script lang="ts">
   import { onMount } from "svelte";
-    import { FS } from "../../MockFS";
+  import { FS, FileTypes, getFileTypeIcon } from "../../MockFS";
   import ExplorerChild from "./ExplorerChild.svelte";
   import { children } from "svelte/internal";
+  import { openContextMenu, type IMenuOption } from "../../ContextMenu";
 
 
   let localFS = FS;
   let root: HTMLDivElement;
+
+    let contextMenuOptions: Array<IMenuOption> = [
+        {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
+            {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "mdi-folder"},
+        ], icon: "mdi-plus"},
+    ]
+
+    // foreach fileType, add a new menu option
+    for (let _ in FileTypes){
+        let fileType = _ as FileTypes; // gotta love typescript
+        contextMenuOptions[0].subMenuOptions.push({label: fileType, action: ()=>{newFileOfType(fileType)}, avalableCheck: ()=>true, icon: getFileTypeIcon(fileType)})
+    }
+
+    function newFileOfType(type: FileTypes){
+
+        let dir = FS.root
+
+        let path = FS.getPath(dir);
+
+        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir});
+
+      }
+
+        function newFolder(){
+
+        let dir = FS.root;
+
+        let path = FS.getPath(dir);
+
+        console.log(path)
+        console.log(dir)
+
+        FS.addDir(path, {type: "directory", name: "new folder", parent: dir, children: []});
+        }
+
+        
 
   onMount(()=>{
 
@@ -14,8 +51,15 @@
       localFS = FS;
     })
 
-    root.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
+    root.addEventListener("contextmenu", (event) => {
+      if (event.target !== root){
+            console.log(event.target)
+            return;
+        }
+
+        openContextMenu(event.clientX, event.clientY, contextMenuOptions)
+
+        event.preventDefault();
     });
   })
 </script>

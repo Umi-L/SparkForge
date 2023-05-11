@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { FS, FileTypes, type FSDirectory, type FSFile } from "../../MockFS";
+  import { FS, FileTypes, type FSDirectory, type FSFile, getFileTypeIcon } from "../../MockFS";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
   import Icon from '@iconify/svelte';
   import { createToast } from "../../ToastManager";
@@ -21,7 +21,6 @@
 
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
-            {label: "GameObject", action: newGameObject, avalableCheck: ()=>true, icon: "mdi-cube-outline"},
             {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "mdi-folder"},
         ], icon: "mdi-plus"},
         {label: "Rename", action: startRename, avalableCheck: ()=>true, icon: "mdi-rename"},
@@ -29,15 +28,21 @@
         {label: "Delete", action: remove, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
     ]
 
+    // foreach fileType, add a new menu option
+    for (let _ in FileTypes){
+        let fileType = _ as FileTypes; // gotta love typescript
+        contextMenuOptions[0].subMenuOptions.push({label: fileType, action: ()=>{newFileOfType(fileType)}, avalableCheck: ()=>true, icon: getFileTypeIcon(fileType)})
+    }
+
     let showChildren = false;
 
-    function newGameObject(){
+    function newFileOfType(type: FileTypes){
 
         let dir = (directory) ? directory : file.parent;
 
         let path = FS.getPath(dir);
 
-        FS.addFile(path, {fileType: FileTypes.gameobject, type: "file", name: "new gameobject", content: {}, parent: dir});
+        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir});
 
         // if dir not toggled, toggle it
         if (!showChildren){
@@ -127,7 +132,7 @@
 
 
 
-<div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color})`} bind:this={container}>
+<div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`} bind:this={container}>
     {#if directory && !renaming}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="directory" on:click={toggleShow} bind:this={directoryElement}>
@@ -159,7 +164,7 @@
         </div>
     {:else if file && !renaming}
         <div class="file" bind:this={fileElement}>
-            <Icon icon="mdi-file-document-outline" class="icon"/>
+            <Icon icon={getFileTypeIcon(file.fileType)} class="icon"/>
             <h3>{file.name}</h3>
             <!-- <div class="sep"></div> -->
         </div>
@@ -217,8 +222,6 @@
         gap: 5px;
         padding: 5px;
         width: fit-content;
-
-        min-width: 10rem;
     }
 
     .directory{
