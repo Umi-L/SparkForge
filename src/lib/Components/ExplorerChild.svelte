@@ -5,10 +5,15 @@
   import Icon from '@iconify/svelte';
   import { createToast } from "../../ToastManager";
   import { ToastPosition, ToastType } from "../../Types";
+  import { elementReferenceTable, getElementFromDomElement, registerElement, unregisterElement } from "../../main";
+  import { get_current_component } from "svelte/internal";
+  import type ExplorerChild from "./ExplorerChild.svelte";
 
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
     export let indent = 0;
+
+    let myself = get_current_component();
 
     let container: HTMLDivElement;
     let directoryElement: HTMLDivElement;
@@ -40,6 +45,7 @@
     }
 
     let showChildren = false;
+    let showIndicator = false;
 
     function newFileOfType(type: FileTypes){
 
@@ -57,6 +63,19 @@
 
     function startRename(){
         renaming = true;
+    }
+
+    export function showMoveIndicator(){
+        // console.log("showing indicator")
+        showIndicator = true;
+    }
+
+    export function hideMoveIndicator(){
+        showIndicator = false;
+    }
+
+    export function getPath(){
+        return FS.getPath((directory) ? directory : file);
     }
 
     function newFolder(){
@@ -110,38 +129,102 @@
         FS.duplicate(path);
     }
 
-    function toggleShow(){
+    function toggleShow(){        
         showChildren = !showChildren;
     }
 
+    export function setShowChildren(show: boolean){
+        showChildren = show;
+    }
+
     onMount(()=>{
+
+        //register elements as myself
+        registerElement(container, myself);
+        registerElement(fileElement, myself);
+        registerElement(directoryElement, myself);
+
         container.addEventListener("contextmenu", onContextMenu)
         container.addEventListener("mousedown", (event)=>{
             if (event.button !== 0) return;
-            possibleDragging = true;
+
+            if (event.target === container || event.target === fileElement || event.target === directoryElement){
+                possibleDragging = true;
+            }
             event.preventDefault();
         })
 
         window.addEventListener("mousemove", (event)=>{
-            if (!possibleDragging) return;
 
-            if (Math.abs(event.movementX) > 2 || Math.abs(event.movementY) > 2){
+            if (!possibleDragging)
+                return;
+
+            if (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1 && !dragging){
                 dragging = true;
+                // set parent to #body
+                container.parentElement.removeChild(container);
+                document.body.appendChild(container);
+
+                showChildren = false;
             }
 
+
             if (dragging){
-                position.x += event.movementX;
-                position.y += event.movementY;
+                position.x = event.clientX;
+                position.y = event.clientY;
 
                 container.style.left = `${position.x}px`;
                 container.style.top = `${position.y}px`;
+                container.style.minWidth = ""
+
+                let target = event.target as HTMLElement;
+
+                if (target.classList.contains("directory") || target.classList.contains("file") || target.classList.contains("container")){
+                    // get the element
+                    let explorerChild: ExplorerChild = getElementFromDomElement(target)
+
+
+                    hideAllIndicators();
+
+                    explorerChild.showMoveIndicator();
+                    hideMoveIndicator();
+                }
             }
-                        
+                   
         })
 
         window.addEventListener("mouseup", (event)=>{
-            dragging = false;
+            if (!possibleDragging)
+                return;
+            
             possibleDragging = false;
+
+            if (dragging){
+                dragging = false;
+                container.style.left = `${position.x}px`;
+                container.style.top = `${position.y}px`;
+                
+                console.log(event.target)
+
+                hideAllIndicators();
+
+                let target = event.target as HTMLElement;
+
+                if (target.classList.contains("directory") || target.classList.contains("file") || target.classList.contains("container")){
+                    // get the element
+                    let explorerChild: ExplorerChild = getElementFromDomElement(target)
+
+                    explorerChild.setShowChildren(true);
+
+                    FS.move(getPath(), explorerChild.getPath());
+
+                    // destroy self
+                    container.parentElement.removeChild(container);
+
+                    // unregister self
+                    unregisterElement(container);
+                }
+            }
         })
     })
 
@@ -149,10 +232,22 @@
         container.removeEventListener("contextmenu", onContextMenu)
     })
 
+    function hideAllIndicators(){
+        // itterate thru all registered elements and if the element's classList has .container then hide the indicator
+        elementReferenceTable.forEach((_class, element)=>{
+            if (element && element.classList){
+                if (element.classList.contains("container")){
+                    let explorerChild: ExplorerChild = _class;
+                    explorerChild.hideMoveIndicator();
+                }
+            }  
+        })
+    }
+
     function onContextMenu(event){
 
         if (event.target !== directoryElement && event.target !== fileElement && event.target !== container){
-            console.log(event.target)
+            console.log(event.target);
             return;
         }
 
@@ -164,7 +259,7 @@
 
 
 
-<div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`} bind:this={container} class:dragging={dragging}>
+<div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`} bind:this={container} class:dragging={dragging} class:indicator-shown={showIndicator}>
     {#if directory && !renaming}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="directory" on:click={toggleShow} bind:this={directoryElement}>
@@ -222,9 +317,18 @@
 
 <style>
 
+    .indicator-shown{
+        background-color: var(--highlight-color) !important;
+    }
+
     .dragging{
         position: absolute;
-        opacity: 0.5;
+        opacity: 0.8;
+        width: 10rem;
+        z-index: 500;
+        transform: translate(-50%, -50%);
+
+        pointer-events: none !important;
     }
 
     .rename{
@@ -284,6 +388,7 @@
     }
 
     .children{
+        display: flex;
         flex-direction: column;
         gap: 5px;
     }

@@ -19,6 +19,7 @@
   
     --primary-color: var(--pale-dogwood);
     --secondary-color: var(--almond);
+    --highlight-color: rgb(183, 222, 255);
   
     --midground-color-2: #2a2a2a;
     --midground-color: #333333;
@@ -53,6 +54,7 @@
   
     --primary-color: var(--pale-dogwood);
     --secondary-color: var(--almond);
+    --highlight-color: rgb(183, 222, 255);
   
     --midground-color-2: #e6e6e6;
     --midground-color: #f2f2f2;

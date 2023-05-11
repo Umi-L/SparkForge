@@ -157,15 +157,6 @@
         pointer-events: none;
     }
 
-    .icon{
-
-        font-size: 1em;
-        color: var(--text-color);
-
-        user-select: none;
-        pointer-events: none;
-    }
-
     .unavalable{
         opacity: 0.5;
         user-select: none;

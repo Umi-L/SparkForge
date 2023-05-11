@@ -126,6 +126,38 @@ class FileSystem{
         this.update();
     }
 
+    public move(itemToMove:string, destination:string){
+        let item = this.getAtPath(itemToMove)
+        let destinationDir = this.getAtPath(destination) as FSDirectory
+
+        // if the item is a directory, make sure the destination isn't a child of the item
+        if (item.type == "directory"){
+            let dir = item as FSDirectory
+            let parent = dir.parent
+            while(parent){
+                if(parent == destinationDir){
+                    console.log("can't move a directory into one of its children")
+                    return
+                }
+                parent = parent.parent
+                item.parent = destinationDir
+            }
+        }
+
+        // remove the item from its parent
+        if(item.parent){
+            let parent = item.parent
+            parent.children.splice(parent.children.indexOf(item), 1)
+        } else{
+            this.root.children.splice(this.root.children.indexOf(item), 1)
+        }
+
+        // add the item to the destination
+        destinationDir.children.push(item)
+
+        this.update();
+    }
+
     public rename(path: string, newName: string){
         let item = this.getAtPath(path)
         item.name = newName

@@ -287,6 +287,8 @@
         align-items: center;
         gap: 5px;
         height: 100%;
+
+        overflow-x: auto;
     }
 
     .active-tab{
