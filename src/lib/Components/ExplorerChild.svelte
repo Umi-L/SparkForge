@@ -153,15 +153,17 @@
            
         </div>
 
-        <div class="children" class:visible={showChildren}>
-            {#each directory.children as child}
-                {#if child.type === "file"}
-                    <svelte:self file={child} indent={indent+1} />
-                {:else}
-                    <svelte:self directory={child} indent={indent+1} />
-                {/if}
-            {/each}
-        </div>
+        {#if showChildren && directory.children.length > 0}
+            <div class="children">
+                {#each directory.children as child}
+                    {#if child.type === "file"}
+                        <svelte:self file={child} indent={indent+1} />
+                    {:else}
+                        <svelte:self directory={child} indent={indent+1} />
+                    {/if}
+                {/each}
+            </div>
+        {/if}
     {:else if file && !renaming}
         <div class="file" bind:this={fileElement}>
             <Icon icon={getFileTypeIcon(file.fileType)} class="icon"/>
@@ -245,8 +247,6 @@
     }
 
     .children{
-        display: none;
-
         flex-direction: column;
         gap: 5px;
     }
