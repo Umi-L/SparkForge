@@ -12,15 +12,17 @@
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
     export let indent = 0;
-
+    
     let myself = get_current_component();
 
     let container: HTMLDivElement;
     let directoryElement: HTMLDivElement;
     let fileElement: HTMLDivElement;
+    let childrenElements: Array<ExplorerChild> | any = [];
 
     let renaming = false;
     let name = "";
+    let oldParent;
 
     let dragging = false;
     let possibleDragging = false;
@@ -159,9 +161,14 @@
             if (!possibleDragging)
                 return;
 
-            if (Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1 && !dragging){
+            if ((Math.abs(event.movementX) > 0.1 || Math.abs(event.movementY) > 0.1) && !dragging){
                 dragging = true;
+
+                oldParent = container.parentElement;
+                console.log("oldparent", oldParent)
+
                 // set parent to #body
+                console.log("setting parent to body")
                 container.parentElement.removeChild(container);
                 document.body.appendChild(container);
 
@@ -201,8 +208,7 @@
 
             if (dragging){
                 dragging = false;
-                container.style.left = `${position.x}px`;
-                container.style.top = `${position.y}px`;
+                container.setAttribute("style", calcStyle());
                 
                 console.log(event.target)
 
@@ -216,19 +222,39 @@
 
                     explorerChild.setShowChildren(true);
 
+                    _destroy();
+
                     FS.move(getPath(), explorerChild.getPath());
 
-                    // destroy self
-                    container.parentElement.removeChild(container);
+                } else{
+                    // set parent back
+                    oldParent.appendChild(container);
 
-                    // unregister self
-                    unregisterElement(container);
+                    console.log(oldParent)
                 }
             }
         })
     })
 
+    export function _destroy(){
+        console.log("destroying", (directory) ? "directory " + directory.name : "file " + file.name)
+
+        if (directory){
+            // foreach child, destroy it
+            for(let child of childrenElements){
+                child._destroy();
+            }
+        }
+
+        container.parentElement.removeChild(container);
+
+        unregisterElement(container);
+        unregisterElement(fileElement);
+        unregisterElement(directoryElement);
+    }
+
     onDestroy(()=>{
+        console.log("ondestroy", (directory) ? "directory " + directory.name : "file " + file.name)
         container.removeEventListener("contextmenu", onContextMenu)
     })
 
@@ -255,11 +281,15 @@
 
         event.preventDefault();
     }
+
+    function calcStyle(){
+        return `margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`
+    }
 </script>
 
 
 
-<div class="container" style={`margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`} bind:this={container} class:dragging={dragging} class:indicator-shown={showIndicator}>
+<div class="container" style={calcStyle()} bind:this={container} class:dragging={dragging} class:indicator-shown={showIndicator}>
     {#if directory && !renaming}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="directory" on:click={toggleShow} bind:this={directoryElement}>
@@ -280,17 +310,17 @@
            
         </div>
 
-        {#if showChildren && directory.children.length > 0}
-            <div class="children">
-                {#each directory.children as child}
-                    {#if child.type === "file"}
-                        <svelte:self file={child} indent={indent+1} />
-                    {:else}
-                        <svelte:self directory={child} indent={indent+1} />
-                    {/if}
-                {/each}
-            </div>
-        {/if}
+        
+        <div class="children" class:visible={showChildren && directory.children.length > 0}>
+            {#each directory.children as child, i}
+                {#if child.type === "file"}
+                    <svelte:self file={child} indent={indent+1} bind:this={childrenElements[i]}/>
+                {:else}
+                    <svelte:self directory={child} indent={indent+1} bind:this={childrenElements[i]}/>
+                {/if}
+            {/each}
+        </div>
+        
     {:else if file && !renaming}
         <div class="file" bind:this={fileElement}>
             <Icon icon={getFileTypeIcon(file.fileType)} class="icon"/>
@@ -388,7 +418,8 @@
     }
 
     .children{
-        display: flex;
+
+        display: none;
         flex-direction: column;
         gap: 5px;
     }
