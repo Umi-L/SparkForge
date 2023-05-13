@@ -19,6 +19,7 @@
     let directoryElement: HTMLDivElement;
     let fileElement: HTMLDivElement;
     let childrenElements: Array<ExplorerChild> | any = [];
+    let inputElement: HTMLInputElement;
 
     let renaming = false;
     let name = "";
@@ -46,7 +47,7 @@
         contextMenuOptions[0].subMenuOptions.push({label: fileType, action: ()=>{newFileOfType(fileType)}, avalableCheck: ()=>true, icon: getFileTypeIcon(fileType)})
     }
 
-    let showChildren = false;
+    let showChildren = directory ? directory.open : false;
     let showIndicator = false;
 
     function newFileOfType(type: FileTypes){
@@ -55,16 +56,19 @@
 
         let path = FS.getPath(dir);
 
-        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir});
+        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir, renaming: true});
 
         // if dir not toggled, toggle it
-        if (!showChildren){
-            toggleShow();
-        }
+        setShowChildren(true);
     }
 
     function startRename(){
         renaming = true;
+
+        setTimeout(()=>{
+            inputElement.focus();
+            inputElement.select();
+        }, 0)
     }
 
     export function showMoveIndicator(){
@@ -89,15 +93,18 @@
         console.log(path)
         console.log(dir)
 
-        FS.addDir(path, {type: "directory", name: "new folder", parent: dir, children: []});
+        FS.addDir(path, {type: "directory", name: "new folder", parent: dir, children: [], renaming: true});
 
         // if dir not toggled, toggle it
-        if (!showChildren){
-            toggleShow();
-        }
+        setShowChildren(true);
     }
 
     function rename(){
+
+        let dirOrFile = (directory) ? directory : file;
+        let dirOrFilePath = FS.getPath(dirOrFile);
+
+        FS.setRenaming(dirOrFilePath, false);
 
         if (name === ""){
             renaming = false;
@@ -132,11 +139,15 @@
     }
 
     function toggleShow(){        
-        showChildren = !showChildren;
+        setShowChildren(!showChildren);
     }
 
     export function setShowChildren(show: boolean){
+        if (!directory) return;
         showChildren = show;
+
+        let path = FS.getPath(directory);
+        FS.setOpen(path, showChildren);
     }
 
     onMount(()=>{
@@ -152,8 +163,8 @@
 
             if (event.target === container || event.target === fileElement || event.target === directoryElement){
                 possibleDragging = true;
+                event.preventDefault();
             }
-            event.preventDefault();
         })
 
         window.addEventListener("mousemove", (event)=>{
@@ -186,7 +197,7 @@
 
                 let target = event.target as HTMLElement;
 
-                if (target.classList.contains("directory") || target.classList.contains("file") || target.classList.contains("container")){
+                if (target.classList.contains("directory") || target.classList.contains("file") || target.classList.contains("container") || target.classList.contains("explorer-root")){
                     // get the element
                     let explorerChild: ExplorerChild = getElementFromDomElement(target)
 
@@ -222,11 +233,15 @@
 
                     explorerChild.setShowChildren(true);
 
-                    _destroy();
-
                     FS.move(getPath(), explorerChild.getPath());
 
-                } else{
+                } else if (target.classList.contains("explorer-root")){
+                    // get the element
+                    let explorer: ExplorerChild = getElementFromDomElement(target)
+
+                    FS.move(getPath(), explorer.getPath());
+                }
+                else{
                     // set parent back
                     oldParent.appendChild(container);
 
@@ -234,35 +249,27 @@
                 }
             }
         })
+
+        let dirOrFile = (directory) ? directory : file;
+        if (dirOrFile.renaming){
+            startRename();
+        }
     })
 
-    export function _destroy(){
-        console.log("destroying", (directory) ? "directory " + directory.name : "file " + file.name)
-
-        if (directory){
-            // foreach child, destroy it
-            for(let child of childrenElements){
-                child._destroy();
-            }
-        }
-
-        container.parentElement.removeChild(container);
+    onDestroy(()=>{
+        console.log("ondestroy", (directory) ? "directory " + directory.name : "file " + file.name)
+        // container.removeEventListener("contextmenu", onContextMenu)
 
         unregisterElement(container);
         unregisterElement(fileElement);
         unregisterElement(directoryElement);
-    }
-
-    onDestroy(()=>{
-        console.log("ondestroy", (directory) ? "directory " + directory.name : "file " + file.name)
-        container.removeEventListener("contextmenu", onContextMenu)
     })
 
     function hideAllIndicators(){
         // itterate thru all registered elements and if the element's classList has .container then hide the indicator
         elementReferenceTable.forEach((_class, element)=>{
             if (element && element.classList){
-                if (element.classList.contains("container")){
+                if (element.classList.contains("container") || element.classList.contains("explorer-root")){
                     let explorerChild: ExplorerChild = _class;
                     explorerChild.hideMoveIndicator();
                 }
@@ -303,6 +310,8 @@
                 <Icon icon="mdi-menu-down" class="icon" />
             </div>
 
+            <Icon icon="material-symbols:folder-outline" class="icon"/>
+
             <h3>
                 {directory.name}
             </h3>
@@ -327,33 +336,53 @@
             <h3>{file.name}</h3>
             <!-- <div class="sep"></div> -->
         </div>
-    {:else if renaming}
+    {/if}
+    <div class="hidden rename-container" class:visible={renaming}> 
+        {#if directory}
+            <Icon icon="material-symbols:folder-outline" class="icon"/>
+        {:else}
+            <Icon icon={getFileTypeIcon(file.fileType)} class="icon"/>
+        {/if}
+
         <input type="text" class="rename"
         value={(file) ? file.name : directory.name} on:input={e=>{
             // @ts-ignore
             name = e.target.value;
         }} 
+        
         on:keypress={(event)=>{
             if (event.key === "Enter"){
+                // @ts-ignore
+                name = event.target.value;
                 rename();
             }
         }} 
-        on:blur={rename} />
-
-    {/if}
+        on:blur={rename} 
+        bind:this={inputElement}/>
+    </div>
 </div>
 
 
 
 <style>
 
+    .rename-container{
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .hidden{
+        display: none;
+    }
+
     .indicator-shown{
-        background-color: var(--highlight-color) !important;
+        outline: 1px solid var(--highlight-color);
     }
 
     .dragging{
         position: absolute;
-        opacity: 0.8;
+        opacity: 0.6;
         width: 10rem;
         z-index: 500;
         transform: translate(-50%, -50%);
@@ -373,6 +402,8 @@
         width: 100%;
 
         font-family: var(--font-family);
+        /* pointer-events: all !important;
+        user-select: all !important; */
     }
 
     .file{

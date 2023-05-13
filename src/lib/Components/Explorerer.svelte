@@ -1,13 +1,29 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { FS, FileTypes, getFileTypeIcon } from "../../MockFS";
   import ExplorerChild from "./ExplorerChild.svelte";
-  import { children } from "svelte/internal";
+  import { children, get_current_component } from "svelte/internal";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
+  import { registerElement, unregisterElement } from "../../main";
 
+  let myself = get_current_component();
 
   let localFS = FS;
   let root: HTMLDivElement;
+
+  let indicatorShown = false;
+
+  export function showMoveIndicator() {
+    indicatorShown = true;
+  }
+
+  export function hideMoveIndicator() {
+    indicatorShown = false;
+  }
+
+  export function getPath() {
+    return FS.getPath(localFS.root);
+  }
 
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
@@ -47,11 +63,16 @@
 
   onMount(()=>{
 
+    registerElement(root, myself);
+
     FS.registerUpdateCallback(()=>{
       localFS = FS;
     })
 
     root.addEventListener("contextmenu", (event) => {
+
+      console.log("context menu event")
+
       if (event.target !== root){
             console.log(event.target)
             return;
@@ -62,26 +83,37 @@
         event.preventDefault();
     });
   })
+
+  onDestroy(()=>{
+    unregisterElement(root);
+  })
 </script>
 
 
+<div class="explorer-root" bind:this={root} class:indicator-shown={indicatorShown}>
 
-<div class="explorer-root" bind:this={root}>
-    <!-- foreach directory in FS -->
+  {#key localFS.root.children}
+      <!-- foreach directory in FS -->
 
-    {#each localFS.root.children as fileOrDir}
+      {#each localFS.root.children as fileOrDir}
 
-      {#if fileOrDir.type === "directory"}
-        <ExplorerChild directory={fileOrDir} />
-      {:else}
-        <ExplorerChild file={fileOrDir} />
-      {/if}
-    {/each}
+        {#if fileOrDir.type === "directory"}
+          <ExplorerChild directory={fileOrDir} />
+        {:else}
+          <ExplorerChild file={fileOrDir} />
+        {/if}
+      {/each}
+  {/key}
+
 </div>
 
 
-
 <style>
+   .indicator-shown{
+        outline: 1px solid var(--highlight-color) !important;
+        outline-offset: -1px;
+    }
+
     .explorer-root {
         width: 100%;
         height: 100%;
@@ -91,5 +123,8 @@
         gap: 10px;
 
         padding: 5px;
+
+        border-bottom-left-radius: var(--general-border-radius);
+        border-bottom-right-radius: var(--general-border-radius);
     }
 </style>

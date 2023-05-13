@@ -4,6 +4,7 @@ export interface FSFile{
     fileType: FileTypes
     content: object
     parent: FSDirectory
+    renaming?: boolean
 }
 
 export interface FSDirectory{
@@ -11,6 +12,8 @@ export interface FSDirectory{
     name: string
     children: Array<FSFile|FSDirectory>
     parent?: FSDirectory
+    open?: boolean
+    renaming?: boolean
 }
 
 export enum FileTypes{
@@ -83,6 +86,16 @@ class FileSystem{
         return head
     }
 
+    public setOpen(path: string, open: boolean){
+        let dir = this.getAtPath(path) as FSDirectory
+        dir.open = open
+    }
+
+    public setRenaming(path: string, renaming: boolean){
+        let item = this.getAtPath(path)
+        item.renaming = renaming
+    }
+
     public addFile(path: string, file: FSFile){
         let dir = this.getAtPath(path) as FSDirectory
 
@@ -134,16 +147,12 @@ class FileSystem{
             destinationDir = destinationDir.parent
         }
 
-        // if the item is a directory, make sure the destination isn't a child of the item
-        if (item.type == "directory"){
+        // if the item is a directory, make sure the destination isn't a child itself
+        if(item.type == "directory"){
             let dir = item as FSDirectory
-            let parent = dir.parent
-            while(parent){
-                if(parent == destinationDir){
-                    console.log("can't move a directory into one of its children")
-                    return
-                }
-                parent = parent.parent
+            if(dir.children.find(c => c == destinationDir)){
+                console.log("can't move a directory into itself")
+                return
             }
         }
 
