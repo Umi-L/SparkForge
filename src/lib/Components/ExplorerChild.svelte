@@ -179,9 +179,9 @@
                 console.log("oldparent", oldParent)
 
                 // set parent to #body
-                console.log("setting parent to body")
-                container.parentElement.removeChild(container);
-                document.body.appendChild(container);
+                // console.log("setting parent to body")
+                // container.parentElement.removeChild(container);
+                // document.body.appendChild(container);
 
                 showChildren = false;
             }
@@ -240,6 +240,8 @@
                     let explorer: ExplorerChild = getElementFromDomElement(target)
 
                     FS.move(getPath(), explorer.getPath());
+
+                    // _destroy();
                 }
                 else{
                     // set parent back
@@ -265,12 +267,46 @@
         unregisterElement(directoryElement);
     })
 
+    function _destroy(){
+
+        // foreach child, destroy
+        childrenElements.forEach((child)=>{
+
+            if (!child._destroy){
+                console.warn("child._destroy is null", child)
+                return;
+            }
+
+            child._destroy();
+        })
+
+        // destroy container
+        container.parentElement.removeChild(container);
+
+        // unregister elements
+        unregisterElement(container);
+        unregisterElement(fileElement);
+        unregisterElement(directoryElement);
+    }
+
     function hideAllIndicators(){
         // itterate thru all registered elements and if the element's classList has .container then hide the indicator
         elementReferenceTable.forEach((_class, element)=>{
             if (element && element.classList){
                 if (element.classList.contains("container") || element.classList.contains("explorer-root")){
                     let explorerChild: ExplorerChild = _class;
+
+                    if (!explorerChild){
+                        console.log("explorerChild is null")
+                        unregisterElement(element);
+                        return;
+                    }
+
+                    if (!explorerChild.hideMoveIndicator){
+                        console.log("explorerChild.hideMoveIndicator is null?", explorerChild)
+                        // unregisterElement(element);
+                        return;
+                    }
                     explorerChild.hideMoveIndicator();
                 }
             }  
@@ -349,7 +385,7 @@
             // @ts-ignore
             name = e.target.value;
         }} 
-        
+
         on:keypress={(event)=>{
             if (event.key === "Enter"){
                 // @ts-ignore

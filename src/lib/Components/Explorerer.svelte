@@ -37,6 +37,10 @@
         contextMenuOptions[0].subMenuOptions.push({label: fileType, action: ()=>{newFileOfType(fileType)}, avalableCheck: ()=>true, icon: getFileTypeIcon(fileType)})
     }
 
+    export function _destroy(){
+      console.error("destroying explorer?")
+    }
+
     function newFileOfType(type: FileTypes){
 
         let dir = FS.root
