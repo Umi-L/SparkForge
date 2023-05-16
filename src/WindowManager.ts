@@ -150,6 +150,12 @@ function generateResizeIndicators() {
                 // if edges are the same ignore
                 if (edge == otherEdge) continue;
 
+                 // floor the points to prevent floating point errors
+                    edge.p1.x = Math.floor(edge.p1.x * 1000) / 1000;
+                    edge.p1.y = Math.floor(edge.p1.y * 1000) / 1000;
+                    edge.p2.x = Math.floor(edge.p2.x * 1000) / 1000;
+                    edge.p2.y = Math.floor(edge.p2.y * 1000) / 1000;
+
                 // if the edges are vertical and have the same x value then they should be merged
                 if (!edge.isHorizontal && edge.p1.x == otherEdge.p1.x) {
                     // merge the edges
@@ -183,7 +189,7 @@ function generateResizeIndicators() {
         // delete all old edges
         document.getElementById("panel-handles").innerHTML = "";
 
-        // debug draw edges as divs to id body
+        // create new edges in divs
         for(let edge of edges) {
             let div = document.createElement("div");
             div.style.position = "absolute";

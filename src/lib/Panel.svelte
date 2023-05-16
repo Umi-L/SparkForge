@@ -26,6 +26,8 @@
     let panelContainer:HTMLDivElement;
     let dragging = false;
 
+    let tabComponents = [];
+
     export let size = {width: 0, height: 0};
     export let position = {x: 0, y: 0};
     export let relativePosition = {x: 0, y: 0};
@@ -50,11 +52,13 @@
 
     function createTabs(){
 
+        tabComponents = [];
+
         // for every tab, create a new element
         for (let i = 0; i < tabs.length; i++){
             let tab = tabs[i];
 
-            new tab.component({target: tabElements[i]})
+            tabComponents.push(new tab.component({target: tabElements[i]}))
         }
 
     }
@@ -127,6 +131,9 @@
 
     function focusNewTab(event, index){
         currentSelectedTab = index;
+
+        if (tabComponents[currentSelectedTab].onFocus)
+            tabComponents[currentSelectedTab].onFocus();
     }
 
     function globalMouseUp(event){
@@ -147,6 +154,11 @@
         // set width and height to size
         panelContainer.style.width = size.width + "px";
         panelContainer.style.height = size.height + "px";
+
+        for(let tabComponent of tabComponents){
+            if (tabComponent.onResize)
+                tabComponent.onResize()
+        }
     }
 
     function updateDragging(mouseX, mouseY){        

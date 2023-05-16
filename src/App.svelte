@@ -22,8 +22,9 @@
 
     <Panel tabs={[{name:"workspace", component: Workspace}, {name: "scene", component: Scene}, {name: "game", component: Game}]} defaultTransform={{left: 0.2, top: 0, width: 0.6, height: 0.8}}></Panel>
     <Panel tabs={[{name:"output", component: Output}]} defaultTransform={{left: 0.2, top: 0.8, width: 0.6, height: 0.2}}></Panel>
-    <Panel tabs={[{name:"toolbox", component: Toolbox}, {name:"properties", component: Properties}]} defaultTransform={{left: 0, top: 0, width: 0.2, height: 1}}></Panel>
-    <Panel tabs={[{name:"explorer", component: Explorerer}]} defaultTransform={{left: 0.8, top: 0, width: 0.2, height: 1}}></Panel>
+    <Panel tabs={[{name:"toolbox", component: Toolbox}]} defaultTransform={{left: 0, top: 0, width: 0.2, height: 1}}></Panel>
+    <Panel tabs={[{name:"explorer", component: Explorerer}]} defaultTransform={{left: 0.8, top: 0, width: 0.2, height: 0.5}}></Panel>
+    <Panel tabs={[{name:"properties", component: Properties}]} defaultTransform={{left: 0.8, top: 0.5, width: 0.2, height: 0.5}}></Panel>
 
     <!-- <Workspace></Workspace>
     <Toolbox></Toolbox>

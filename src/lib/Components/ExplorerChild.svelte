@@ -179,9 +179,9 @@
                 console.log("oldparent", oldParent)
 
                 // set parent to #body
-                // console.log("setting parent to body")
-                // container.parentElement.removeChild(container);
-                // document.body.appendChild(container);
+                console.log("setting parent to body")
+                container.parentElement.removeChild(container);
+                document.body.appendChild(container);
 
                 showChildren = false;
             }

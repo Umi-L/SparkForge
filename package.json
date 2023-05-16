@@ -20,6 +20,7 @@
     "vite": "^4.2.0"
   },
   "dependencies": {
+    "pixi.js": "^7.2.4",
     "quickjs-emscripten": "^0.23.0"
   }
 }

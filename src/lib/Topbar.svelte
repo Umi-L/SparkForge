@@ -60,8 +60,11 @@
 <style>
 
     a{
+        display: flex;
         text-decoration: none;
         color: var(--text-color);
+        justify-content: center;
+        align-items: center;
     }
 
     .topbar{

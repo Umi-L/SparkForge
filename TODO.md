@@ -27,6 +27,6 @@
 
 ### note to self; don't forget to add attribution to the the libraries used
 ```
-quickjs enscripten
+quickjs-emscripten
 monaco editor if used
 ```

@@ -244,7 +244,7 @@ export const NodeTypes: NodeDefs = {
         ],
         outputs: [
             { label: "repeated", type: FlowDataType.Flow },
-            { label: "done", type: FlowDataType.Flow },
+            { label: "out", type: FlowDataType.Flow },
         ],
         literals: [],
         specialCase: true,
