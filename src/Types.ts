@@ -1,4 +1,4 @@
-import { print } from "./NodeFunctions"
+import { print } from "./API"
 import { Template } from "./Templates"
 
 export interface Point {
@@ -35,6 +35,7 @@ export enum ToastPosition {
     BottomRight = 'bottom-right',
 }
 
+
 export enum FlowDataType {
     Flow = 'flow',
     String = 'string',
@@ -43,6 +44,7 @@ export enum FlowDataType {
     Object = 'object',
     Array = 'array',
     Any = 'any',
+    Vector2 = "vector2"
 }
 export enum FlowLiteralType {
     String = 'text',
@@ -250,6 +252,18 @@ export const NodeTypes: NodeDefs = {
         specialCase: true,
         template: new Template("for(let i = 0; i < {p1}; i++){{b1}}{b2}"),
         category: NodeCatagories.Control,
-    }
+    },
+    Vector2: {
+        name: "vector2",
+        inputs: [],
+        outputs: [{ label: "vector2", type: FlowDataType.Vector2 }],
+        literals: [
+            { label: "x", type: FlowLiteralType.Number },
+            { label: "y", type: FlowLiteralType.Number },
+        ],
+        specialCase: true,
+        template: new Template("new Vector2({l1}, {l2})"),
+        category: NodeCatagories.literals,
+    },
 };
 

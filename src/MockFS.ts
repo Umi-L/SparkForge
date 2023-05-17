@@ -1,7 +1,10 @@
+import type { Property } from "./PropertiesSystem"
+
 export interface FSFile{
     type: "file"
     name: string
     fileType: FileTypes
+    fileTypeProperties?: Array<Property>
     content: object
     parent: FSDirectory
     renaming?: boolean
@@ -17,16 +20,21 @@ export interface FSDirectory{
 }
 
 export enum FileTypes{
-    gameobject = "gameobject",
+    object = "object",
     sprite = "sprite",
     scene = "scene",
     script = "script",
     flowchart = "flowchart",
 }
 
+export let fileTypeProperties = {
+    object: [{"name": "Position", "value": {"x": 0, "y": 0}, "type": "vector2"}, {"name": "Rotation", "value": 0, "type": "number"}, {"name": "Scale", "value": {"x": 1, "y": 1}, "type": "vector2"}],
+    sprite: [{"name": "Image", "value": "", "type": "string"}],
+}
+
 export function getFileTypeIcon(type: FileTypes): string{
     switch (type){
-        case FileTypes.gameobject:
+        case FileTypes.object:
             return "mdi-cube-outline";
         case FileTypes.scene:
             return "mdi:clapperboard-outline";
@@ -100,6 +108,11 @@ class FileSystem{
         let dir = this.getAtPath(path) as FSDirectory
 
         let parent = this.getAtPath(path) as FSDirectory
+
+        // if the file's type is in the fileTypeProperties object, add those properties to the file
+        if(fileTypeProperties[file.fileType] && !file.fileTypeProperties){
+            file.fileTypeProperties = fileTypeProperties[file.fileType];
+        }
 
         // if the file's name already exists in the parent, add a number to the end and increment it until it doesn't
         let name = file.name
@@ -175,6 +188,10 @@ class FileSystem{
 
     public rename(path: string, newName: string){
         let item = this.getAtPath(path)
+
+        // if name has slashes, remove them
+        newName = newName.replace(/\//g, "")
+
         item.name = newName
 
         this.update();

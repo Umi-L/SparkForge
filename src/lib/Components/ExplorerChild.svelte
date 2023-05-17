@@ -8,6 +8,7 @@
   import { elementReferenceTable, getElementFromDomElement, registerElement, unregisterElement } from "../../main";
   import { get_current_component } from "svelte/internal";
   import type ExplorerChild from "./ExplorerChild.svelte";
+  import { clearProperties, getPropertiesOfFile, setProperties } from "../../PropertiesSystem";
 
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
@@ -22,6 +23,7 @@
     let inputElement: HTMLInputElement;
 
     let renaming = false;
+    let selected = false;
     let name = "";
     let oldParent;
 
@@ -167,6 +169,17 @@
             }
         })
 
+        container.addEventListener("click", (event)=>{
+            if (event.button !== 0) return;
+
+            if ((event.target === container || event.target === fileElement) && file){
+                selected = true;
+                
+                setProperties(getPropertiesOfFile(file));
+                
+            }
+        })
+
         window.addEventListener("mousemove", (event)=>{
 
             if (!possibleDragging)
@@ -212,6 +225,23 @@
         })
 
         window.addEventListener("mouseup", (event)=>{
+
+            let inExplorer = false;
+            let parentElement = event.target as HTMLElement;
+            while (parentElement){
+                if (parentElement.classList.contains("explorer-root")){
+                    inExplorer = true;
+                    break;
+                }
+                parentElement = parentElement.parentElement;
+            }
+
+            // if we are selecting and the mouse is up and it is within the explorer, then we are not selecting anymore
+            if (selected && inExplorer){
+                selected = false;
+                clearProperties();
+            }
+        
             if (!possibleDragging)
                 return;
             
@@ -332,7 +362,7 @@
 
 
 
-<div class="container" style={calcStyle()} bind:this={container} class:dragging={dragging} class:indicator-shown={showIndicator}>
+<div class="container" style={calcStyle()} bind:this={container} class:dragging={dragging} class:indicator-shown={showIndicator} class:selected={selected}>
     {#if directory && !renaming}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="directory" on:click={toggleShow} bind:this={directoryElement}>
@@ -346,7 +376,11 @@
                 <Icon icon="mdi-menu-down" class="icon" />
             </div>
 
+            {#if showChildren}
             <Icon icon="material-symbols:folder-outline" class="icon"/>
+            {:else}
+            <Icon icon="material-symbols:folder" class="icon"/>
+            {/if}
 
             <h3>
                 {directory.name}
@@ -393,7 +427,11 @@
                 rename();
             }
         }} 
-        on:blur={rename} 
+        on:blur={(event)=>{
+            // @ts-ignore
+            name = event.target.value;
+            rename();
+        }} 
         bind:this={inputElement}/>
     </div>
 </div>
@@ -401,6 +439,10 @@
 
 
 <style>
+
+    .selected{
+        outline: 1px solid var(--highlight-color);
+    }
 
     .rename-container{
         flex-direction: row;

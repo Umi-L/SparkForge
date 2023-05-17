@@ -4,6 +4,7 @@
     import Node from "../Node.svelte";
     import { afterUpdate, onMount } from "svelte";
     import Panel from "../Panel.svelte";
+  import { toTitle } from "../../Utils";
 
     // sort the node types by category
     const nodeTypesByCategory = Object.values(NodeTypes).reduce((acc: any, nodeType: NodeData) => {
@@ -15,19 +16,6 @@
 
         return acc;
     }, {});
-
-    // function that capitalises the first letter of each word
-    function toTitle(string){
-        let words = string.split(" ");
-
-        let newWords = [];
-
-        for (let word of words){
-            newWords.push(word.charAt(0).toUpperCase() + word.slice(1));
-        }
-
-        return newWords.join(" ");
-    }
 </script>
 
 

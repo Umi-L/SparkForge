@@ -4,6 +4,7 @@
     import { onMount } from "svelte";
     import type Panel from "./Panel.svelte";
     import Icon from '@iconify/svelte';
+  import { toTitle } from "../Utils";
 
     // export let rowstyle:string;
     // export let colstyle:string;
@@ -245,7 +246,7 @@
             {#each tabs as tab, i}   
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div class="tab-header" on:click={(e)=>{focusNewTab(e,i)}} class:active-tab-header={i == currentSelectedTab} class:inactive-tab-header={i != currentSelectedTab}>
-                    <h1>{tab.name}</h1>
+                    <h1>{toTitle(tab.name)}</h1>
                 </div>        
             {/each}
         </div>

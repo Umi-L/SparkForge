@@ -7,6 +7,7 @@
     import { get_current_component } from "svelte/internal";
     import { genUUID } from "../uuid";
   import { openContextMenu, type IMenuOption } from "../ContextMenu";
+  import { toTitle } from "../Utils";
 
     let myself = get_current_component() as Node;
     const dispatch = createEventDispatcher();
@@ -328,19 +329,6 @@
         console.log("output node released on top of", index);
 
         dispatch('outputNodeMouseUp', index);
-    }
-
-    // function that capitalises the first letter of each word
-    function toTitle(string){
-        let words = string.split(" ");
-
-        let newWords = [];
-
-        for (let word of words){
-            newWords.push(word.charAt(0).toUpperCase() + word.slice(1));
-        }
-
-        return newWords.join(" ");
     }
 </script>
 

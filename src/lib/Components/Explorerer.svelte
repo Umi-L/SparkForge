@@ -47,7 +47,7 @@
 
         let path = FS.getPath(dir);
 
-        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir});
+        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir, renaming: true});
 
       }
 
@@ -61,7 +61,7 @@
         console.log(dir)
 
         FS.addDir(path, {type: "directory", name: "new folder", parent: dir, children: []});
-        }
+      }
 
         
 
