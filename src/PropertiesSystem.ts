@@ -1,15 +1,8 @@
 import type Properties from "./lib/Components/Properties.svelte"
 import { type FSFile, FS } from "./MockFS"
+import { PropertyTypes } from "./Types"
 
 export let propertiesPanels: Array<Properties> = []
-
-export enum PropertyTypes {
-    String = "string",
-    Number = "number",
-    Boolean = "boolean",
-    Vector2 = "vector2",
-    Array = "array",
-}
 
 export interface Property {
     name: string

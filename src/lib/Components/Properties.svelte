@@ -1,7 +1,8 @@
 <script lang="ts">
   import { each, get_current_component } from "svelte/internal";
-    import { registerPropertiesPanel, type Property, unregisterPropertiesPanel, type Catagory, PropertyTypes} from "../../PropertiesSystem";
+    import { registerPropertiesPanel, type Property, unregisterPropertiesPanel, type Catagory} from "../../PropertiesSystem";
     import { onMount, onDestroy } from "svelte";
+  import { PropertyTypes } from "../../Types";
 
     let myself = get_current_component();
     
@@ -48,8 +49,8 @@
                         {:else if property.type == PropertyTypes.Boolean}
                             <input type="checkbox" value={property.value} class="input" disabled={!property.isModifiable}/>
                         {:else if property.type == PropertyTypes.Vector2}
-                            <p>x</p><input type="number" value={property.value["x"]} class="input" disabled={!property.isModifiable}/>
-                            <p>y</p><input type="number" value={property.value["y"]} class="input" disabled={!property.isModifiable}/>
+                            <p>x:</p><input type="number" value={property.value["x"]} class="input" disabled={!property.isModifiable}/>
+                            <p>y:</p><input type="number" value={property.value["y"]} class="input" disabled={!property.isModifiable}/>
                         {/if}
                         
                     </div>
@@ -90,7 +91,7 @@
 
         transition: 0.05s;
 
-        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+        box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.2);
 
     }
 
@@ -105,7 +106,7 @@
 
     .input{
         border-radius: var(--general-border-radius);
-        border: 1px solid var(--text-color);
+        border: 1px solid var(--background-color);
         padding: 1px 2px;
         width: 100%;
 
@@ -141,7 +142,7 @@
         margin: 0;
         padding: 0;
 
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         color: var(--text-color);
 
         display: flex;
@@ -169,7 +170,7 @@
         border-radius: var(--general-border-radius);
         overflow: hidden;
 
-        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+        box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.2);
     }
     
     .catagory-content{

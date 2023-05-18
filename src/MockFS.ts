@@ -1,4 +1,5 @@
-import type { Catagory, Property } from "./PropertiesSystem"
+import type { Catagory } from "./PropertiesSystem"
+import { PropertyTypes } from "./Types"
 
 export interface FSFile{
     type: "file"
@@ -29,17 +30,15 @@ export enum FileTypes{
 
 export let fileTypeProperties = {
     object: [
-        {name: "Transform", properties: [
-            {name: "Position", value: {x: 0, y: 0}, type: "vector2", isModifiable: true},
-            {name: "Rotation", value: 0, type: "number", isModifiable: true},
-            {name: "Scale", value: {x: 1, y: 1}, type: "vector2", isModifiable: true},
+        {name: "Sprite", properties: [
+            {name: "Sprite", value: "", type: PropertyTypes.Sprite, isModifiable: true},
         ]}
-    ],
+    ] as Array<Catagory>,
     sprite: [
         {name: "Image", properties: [
-            {name: "Image", value: "", type: "string", isModifiable: true},
+            {name: "Image", value: "", type: PropertyTypes.Image, isModifiable: true},
         ]}
-    ],
+    ] as Array<Catagory>,
 }
 
 export function getFileTypeIcon(type: FileTypes): string{

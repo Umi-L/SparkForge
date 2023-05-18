@@ -1,4 +1,5 @@
 import type { Point } from "./Types";
+import { numToPrecision } from "./Utils";
 import type Panel from "./lib/Panel.svelte";
 
 window.addEventListener("resize", update_all_panel_positions);
@@ -50,7 +51,17 @@ export function update_all_panel_positions() {
     });
 }
 
+interface IElementListenerPairs {
+    element: HTMLElement | Document | Window,
+    listeners: Array<IEventListener>,
+}
 
+interface IEventListener{
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+}
+
+let elementListenerPairs: IElementListenerPairs[] = [];
 //function that returns the positions and sizes of the elements that are between different panels and can be dragged to resize the panels
 function generateResizeIndicators() {
 
@@ -138,6 +149,14 @@ function generateResizeIndicators() {
             edges.push(edge);
         }
 
+        // floor all edges 4 decimal places
+        edges.forEach((edge) => {
+            edge.p1.x = numToPrecision(edge.p1.x, 4);
+            edge.p1.y = numToPrecision(edge.p1.y, 4);
+            edge.p2.x = numToPrecision(edge.p2.x, 4);
+            edge.p2.y = numToPrecision(edge.p2.y, 4);
+        });
+
 
 
         // foreach edge
@@ -148,13 +167,7 @@ function generateResizeIndicators() {
                 if (edge.isHorizontal != otherEdge.isHorizontal) continue;
 
                 // if edges are the same ignore
-                if (edge == otherEdge) continue;
-
-                 // floor the points to prevent floating point errors
-                    edge.p1.x = Math.floor(edge.p1.x * 1000) / 1000;
-                    edge.p1.y = Math.floor(edge.p1.y * 1000) / 1000;
-                    edge.p2.x = Math.floor(edge.p2.x * 1000) / 1000;
-                    edge.p2.y = Math.floor(edge.p2.y * 1000) / 1000;
+                if (edge == otherEdge) continue;                
 
                 // if the edges are vertical and have the same x value then they should be merged
                 if (!edge.isHorizontal && edge.p1.x == otherEdge.p1.x) {
@@ -186,16 +199,57 @@ function generateResizeIndicators() {
             }
         }
 
-        // delete all old edges
-        document.getElementById("panel-handles").innerHTML = "";
+        // get all current edges
+        let handlesElement = document.getElementById("panel-handles");
+        let currentHandles = handlesElement.childNodes
 
-        // create new edges in divs
-        for(let edge of edges) {
+        // add edges if needed
+        while (currentHandles.length < edges.length) {
             let div = document.createElement("div");
             div.style.position = "absolute";
             div.style.backgroundColor = "transparent";
+            div.style.pointerEvents = "all";
+            div.style.zIndex = "1000";
+            div.style.userSelect = "none";
 
-            
+            div.setAttribute("dragging", "false");
+
+            handlesElement.appendChild(div);
+
+            currentHandles = handlesElement.childNodes;
+
+            // console.log("added new handle")
+            // console.log(currentHandles.length)
+        }
+
+        // get rid of extra edges
+        while (currentHandles.length > edges.length) {
+            let itemToSplice = currentHandles[currentHandles.length - 1];
+            handlesElement.removeChild(itemToSplice);
+
+            itemToSplice.remove();
+
+            currentHandles = handlesElement.childNodes;
+
+            // console.log("removed handle")
+            // console.log(currentHandles.length)
+        }
+
+        // unregister all events
+        elementListenerPairs.forEach((pair) => {
+            pair.listeners.forEach(listener => {
+                pair.element.removeEventListener(listener.type, listener.listener);
+            });
+        });
+
+        // clear all events
+        elementListenerPairs = [];
+
+        // change edge properties
+        for(let i = 0; i < edges.length; i++) {
+            let edge = edges[i];
+            let div = <HTMLElement>handlesElement.childNodes[i];
+
             if (edge.isHorizontal) {
                 div.style.left = (edge.p1.x * 100) + "%";
                 div.style.width = ((edge.p2.x - edge.p1.x) * 100) + "%";
@@ -211,24 +265,17 @@ function generateResizeIndicators() {
                 div.style.cursor = "ew-resize";
                 div.style.transform = "scaleX(" + gap*2 + ")";
             } 
-            
-            div.style.pointerEvents = "all";
-            div.style.zIndex = "1000";
-            div.style.userSelect = "none";
-
-            div.setAttribute("dragging", "false");
 
             // on drag
-            div.addEventListener("mousedown", (e) => {
+            let mouseDownFunc = (e) => {
 
                 if (e.button != 0) return;
 
                 e.preventDefault();
                 div.setAttribute("dragging", "true");
-            });
-
-            // on global mouse move
-            document.addEventListener("mousemove", (e) => {
+            };
+            
+            let mouseMoveFunc = (e) => {
                 if (div.getAttribute("dragging") == "true") {
                     e.preventDefault();
 
@@ -263,15 +310,39 @@ function generateResizeIndicators() {
 
                     update_all_panel_positions();
                 }
-            });
+            };
 
             // on global mouse up
-            document.addEventListener("mouseup", (e) => {
+            let mouseUpFunc = (e) => {
                 div.setAttribute("dragging", "false");
+            };
+
+            // on global mouse
+            document.addEventListener("mousemove", mouseMoveFunc);
+            document.addEventListener("mouseup", mouseUpFunc);
+
+            // on local mouse
+            div.addEventListener("mousedown", mouseDownFunc);
+
+            elementListenerPairs.push({
+                element: document,
+                listeners: [{
+                    type: "mousemove",
+                    listener: mouseMoveFunc
+                }, {
+                    type: "mouseup",
+                    listener: mouseUpFunc
+                }]
+            });
+            
+            elementListenerPairs.push({
+                element: div,
+                listeners: [{
+                    type: "mousedown",
+                    listener: mouseDownFunc
+                }]
             });
 
-
-            document.getElementById("panel-handles").appendChild(div);
         }
     });
 }

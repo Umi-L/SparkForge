@@ -8,6 +8,16 @@ export interface Point {
     name?: string
 }
 
+export enum PropertyTypes {
+    String = "string",
+    Number = "number",
+    Boolean = "boolean",
+    Vector2 = "vector2",
+    Array = "array",
+    Sprite = "sprite",
+    Image = "image",
+}
+
 export enum TestPropTypes {
     String = 'string',
     Number = 'number',
