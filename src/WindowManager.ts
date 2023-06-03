@@ -61,6 +61,7 @@ interface IEventListener{
     listener: EventListenerOrEventListenerObject,
 }
 
+let edgesDown: boolean[] = [];
 let elementListenerPairs: IElementListenerPairs[] = [];
 //function that returns the positions and sizes of the elements that are between different panels and can be dragged to resize the panels
 function generateResizeIndicators() {
@@ -204,6 +205,7 @@ function generateResizeIndicators() {
         let currentHandles = handlesElement.childNodes
 
         // add edges if needed
+        let i = 0;
         while (currentHandles.length < edges.length) {
             let div = document.createElement("div");
             div.style.position = "absolute";
@@ -211,12 +213,16 @@ function generateResizeIndicators() {
             div.style.pointerEvents = "all";
             div.style.zIndex = "1000";
             div.style.userSelect = "none";
-
-            div.setAttribute("dragging", "false");
-
             handlesElement.appendChild(div);
 
             currentHandles = handlesElement.childNodes;
+            if (edgesDown.length < currentHandles.length) {
+                edgesDown.push(false);
+            } else{
+                div.setAttribute("dragging", edgesDown[i].toString());
+            }
+
+            i++;
 
             // console.log("added new handle")
             // console.log(currentHandles.length)
@@ -230,6 +236,8 @@ function generateResizeIndicators() {
             itemToSplice.remove();
 
             currentHandles = handlesElement.childNodes;
+
+            edgesDown.pop();
 
             // console.log("removed handle")
             // console.log(currentHandles.length)
@@ -273,6 +281,7 @@ function generateResizeIndicators() {
 
                 e.preventDefault();
                 div.setAttribute("dragging", "true");
+                edgesDown[i] = true;
             };
             
             let mouseMoveFunc = (e) => {
@@ -314,7 +323,9 @@ function generateResizeIndicators() {
 
             // on global mouse up
             let mouseUpFunc = (e) => {
+                console.log("mouse up")
                 div.setAttribute("dragging", "false");
+                edgesDown[i] = false;
             };
 
             // on global mouse
