@@ -1,7 +1,10 @@
 <script lang="ts">
-  import Icon from "@iconify/svelte";
-    import { getFileTypeIcon, type FileTypes } from "../../MockFS";
+    import Icon from "@iconify/svelte";
+    import { getFileTypeIcon, FileTypes } from "../../MockFS";
     import { openTabs } from "../../globals";
+    import { each } from "svelte/internal";
+    import FlowchartEditor from "./Editors/FlowchartEditor.svelte";
+    import ScriptEditor from "./Editors/ScriptEditor.svelte";
 
     interface ITab {
         file: string;
@@ -9,6 +12,7 @@
     }
 
     let tabs: Array<ITab>;
+    let editors: Array<any> = [];
     let selectedIndex = 0;
 
     openTabs.subscribe((value) => {
@@ -22,12 +26,24 @@
 
     function selectTab(index: number){
         selectedIndex = index;
+
+        editors[selectedIndex].onResize();
     }
 </script>
 
 
 
 <div class="container">
+
+    {#each tabs as tab, index}
+        <div class="tab-content" class:visible={index == selectedIndex}>
+            {#if tab.type == FileTypes.flowchart}
+                <FlowchartEditor file={tab.file} bind:this={editors[index]}/>
+            {:else if tab.type == FileTypes.script}
+                <ScriptEditor file={tab.file} content="" bind:this={editors[index]}/>
+            {/if}
+        </div>
+    {/each}
 
     <div class="open-tabs">
         {#each tabs as tab, index}
@@ -52,6 +68,16 @@
 
 
 <style>
+
+    .visible{
+        display: block !important;
+    }
+
+    .tab-content{
+        display: none;
+        width: 100%;
+        height: 100%;
+    }
 
     .close-tab-button{
         cursor: pointer;
@@ -83,14 +109,15 @@
 
         padding: var(--general-padding);
 
-        border-bottom-left-radius: var(--general-border-radius);
-        border-bottom-right-radius: var(--general-border-radius);
+        border-radius: var(--general-border-radius);
 
         color: var(--text-color);
 
         font-size: 0.7em;
 
         pointer-events: all;
+
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
     }
 
     .unselected{
@@ -135,16 +162,14 @@
         justify-content: start;
         gap: 10px;
         width: 100%;
-        height: 1.5em;
+        height: 1.8em;
 
         bottom: 0px;
 
         overflow-x: auto;
 
-        background-color: var(--foreground-color);
-        padding-left: var(--general-padding);
-        padding-right: var(--general-padding);
-        padding-bottom: var(--general-padding);
+        /* background-color: var(--foreground-color); */
+        padding: var(--general-padding);
 
         pointer-events: none;
         user-select: none;

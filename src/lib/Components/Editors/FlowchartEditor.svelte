@@ -8,6 +8,8 @@
     import { createToast } from "../../../ToastManager";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
 
+    export let file: string;
+    export const onResize = ()=>{};
 
     interface Connection {
 
