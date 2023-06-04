@@ -1,27 +1,11 @@
 <script lang="ts">
-    import { Compile } from "../Compiler";
+    import { Compile, compileAll } from "../Compiler";
     import { getElementFromDomElement } from "../main";
     import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
     import Icon from "@iconify/svelte";
 
     function runGame(){
-        // foreach workspace
-        let workfields = document.querySelectorAll(".workfield");
-
-        let workspaces = [];
-
-        for (let workfield of workfields){
-            workspaces.push(getElementFromDomElement(workfield) as FlowchartEditor);
-        }
-
-        for (let i = 0; i < workspaces.length; i++){
-            let asts = workspaces[i].workspaceToASTs();
-
-            for (let ast of asts){
-
-                console.log(Compile(ast));
-            }
-        }
+        compileAll();
     }
 </script>
 

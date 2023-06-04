@@ -4,8 +4,8 @@
   - [x] Toasts (kind of buggy right now)
   - [ ] game display and sandbox
   - [ ] api functions exposed to code
-  - [ ] code text editor (Monaco?)
-  - [ ] tabs on workspaces
+  - [x] code text editor (Monaco?)
+  - [x] tabs on workspaces
   - [x] output
   - [x] tabs on panels (no movement yet)
   - [x] file system

@@ -3,12 +3,12 @@
     import { onDestroy, onMount } from "svelte";
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import Node from "../../Node.svelte";
-    import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData } from "../../../Types";
+    import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData, type SavedNode, type SavedConnection } from "../../../Types";
     import { AST, ASTConnection, ASTNode } from "../../../AbstractSyntaxTree";
     import { createToast } from "../../../ToastManager";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
   import { FS, type FSFile } from "../../../MockFS";
-
+  
     export let file: string;
     export const onResize = ()=>{};
 
@@ -886,136 +886,6 @@
         }
 
         return elementsBox;
-    }
-
-    export function workspaceToASTs(){
-        // get every start node by itterating over every node
-        let startNodes: Array<Node> = [];
-
-        for (let i = 0; i < nodes.length; i++) {
-            let node = nodes[i];
-
-            if (node.getType() == NodeTypes.Start) {
-                startNodes.push(node);
-            }
-        }
-
-        // convert every start node to an AST
-        let asts = [];
-
-        for (let i = 0; i < startNodes.length; i++) {
-            let startNode = startNodes[i];
-
-            let nodeData = startNode.getType() as NodeData;
-            
-            let astNode = new ASTNode(nodeData, [], undefined);
-
-            let ast = new AST(astNode);
-
-            // traverse the tree and add every node to the ast
-            traverseTree(startNode, astNode, ast);
-
-            asts.push(ast);
-        }
-
-        console.log(asts)
-
-        return asts;
-    }
-
-    function traverseTree(startElement: Node, astNode: ASTNode, ast: AST, reverse: boolean = false) {
-
-        // get the output nodes of the start element
-        let outConnections = getOutConnections(startElement);
-        let inConnections = getInConnections(startElement);
-
-        // for every out connection
-        if (!reverse){
-            for (let i = 0; i < outConnections.length; i++) {
-                let connection = outConnections[i];
-
-                let node = connection.to.node;
-
-                let nodeData = node.getType();
-
-                let newNode = new ASTNode(nodeData, [], astNode);
-
-                let astConnection = new ASTConnection(astNode, connection.from.outputNumber, newNode, connection.to.inputNumber);
-
-                ast.addOutConnection(astConnection);
-
-                traverseTree(node, newNode, ast);
-            }
-        }
-
-        // for every in connection
-        for (let i = 0; i < inConnections.length; i++) {
-
-            if (astNode.parentHasOutConnection(inConnections[i].to.inputNumber)) {
-                continue;
-            }
-
-            let connection = inConnections[i];
-
-            let node = connection.from.node;
-
-            let nodeData = node.getType();
-            let literalValues = node.getLiteralValues();
-
-            let newNode = new ASTNode(nodeData, [], astNode);
-            newNode.literals = literalValues;
-
-            let astConnection = new ASTConnection(newNode, connection.from.outputNumber, astNode, connection.to.inputNumber);
-
-            ast.addInConnection(astConnection);
-
-            traverseTree(node, newNode, ast, true);
-        }
-    }
-
-    function getOutConnections(node: Node): Array<Connection> {
-        let containing: Array<Connection> = [];
-
-        // get every connection coming out of the node
-        connections.forEach(connection => {
-            // console.log(connection.from.node, node)
-            if (connection.from.node == node) {
-                containing.push(connection);
-            }
-        });
-
-        return containing;
-    }
-
-    function getInConnections(node: Node): Array<Connection> {
-        let containing: Array<Connection> = [];
-
-        // get every connection coming out of the node
-        connections.forEach(connection => {
-            // console.log(connection.from.node, node)
-            if (connection.to.node == node) {
-                containing.push(connection);
-            }
-        });
-
-        return containing;
-    }
-
-    interface SavedNode {
-        type: NodeData,
-        pos: {x: number, y: number},
-        literals: Array<string>
-    }
-
-    interface SavedConnection {
-        from: {
-            node: number,
-            outputNumber: number
-        },
-        to: {
-            node: number,
-            inputNumber: number
-        }
     }
 
     function save(){

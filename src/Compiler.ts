@@ -1,9 +1,127 @@
-import type { AST, ASTConnection, ASTNode } from "./AbstractSyntaxTree";
+import { ASTNode, AST, ASTConnection } from "./AbstractSyntaxTree";
+import { FS, FileTypes } from "./MockFS";
 import { OutputTypes, addOutputMessage } from "./OutputSystem";
 import { Template } from "./Templates";
 import { createToast } from "./ToastManager";
-import { ToastPosition, ToastType } from "./Types";
+import { NodeTypes, ToastPosition, ToastType, type SavedNode, type SavedConnection } from "./Types";
 
+function flowchartDataToASTs(data: any): Array<AST> {
+
+    let nodes = data.nodes as Array<SavedNode>;
+    let connections = data.connections as Array<SavedConnection>;
+
+    // get every start node by itterating over every node
+    let startNodes: Array<SavedNode> = [];
+
+    for (let i = 0; i < nodes.length; i++) {
+        let node = nodes[i];
+
+        if (node.type == NodeTypes.Start) {
+            startNodes.push(node);
+        }
+    }
+
+    // convert every start node to an AST
+    let asts = [];
+
+    for (let i = 0; i < startNodes.length; i++) {
+        let startNode = startNodes[i];
+
+        let nodeData = startNode.type;
+        
+        let astNode = new ASTNode(nodeData, [], undefined);
+
+        let ast = new AST(astNode);
+
+        // traverse the tree and add every node to the ast
+        traverseTree(startNode, astNode, ast);
+
+        asts.push(ast);
+    }
+
+    console.log(asts)
+
+    return asts;
+    
+
+    function traverseTree(startElement: SavedNode, astNode: ASTNode, ast: AST, reverse: boolean = false) {
+
+        // get the output nodes of the start element
+        let outConnections = getOutConnections(startElement);
+        let inConnections = getInConnections(startElement);
+
+        // for every out connection
+        if (!reverse){
+            for (let i = 0; i < outConnections.length; i++) {
+                let connection = outConnections[i];
+
+                let node = connection.to.node;
+
+                let nodeData = nodes[node].type;
+
+                let newNode = new ASTNode(nodeData, [], astNode);
+
+                let astConnection = new ASTConnection(astNode, connection.from.outputNumber, newNode, connection.to.inputNumber);
+
+                ast.addOutConnection(astConnection);
+
+                traverseTree(nodes[node], newNode, ast);
+            }
+        }
+
+        // for every in connection
+        for (let i = 0; i < inConnections.length; i++) {
+
+            if (astNode.parentHasOutConnection(inConnections[i].to.inputNumber)) {
+                continue;
+            }
+
+            let connection = inConnections[i];
+
+            let node = nodes[connection.from.node];
+
+            let nodeData = node.type;
+            let literalValues = node.literals;
+
+            let newNode = new ASTNode(nodeData, [], astNode);
+            newNode.literals = literalValues;
+
+            let astConnection = new ASTConnection(newNode, connection.from.outputNumber, astNode, connection.to.inputNumber);
+
+            ast.addInConnection(astConnection);
+
+            traverseTree(node, newNode, ast, true);
+        }
+    }
+
+    function getOutConnections(node: SavedNode): Array<SavedConnection> {
+        let containing: Array<SavedConnection> = [];
+
+        // get every connection coming out of the node
+        connections.forEach(connection => {
+            // console.log(connection.from.node, node)
+            if (nodes[connection.from.node] == node) {
+                containing.push(connection);
+            }
+        });
+
+        return containing;
+    }
+
+    function getInConnections(node: SavedNode): Array<SavedConnection> {
+        let containing: Array<SavedConnection> = [];
+
+        // get every connection coming out of the node
+        connections.forEach(connection => {
+            // console.log(connection.from.node, node)
+            if (nodes[connection.to.node] == node) {
+                containing.push(connection);
+            }
+        });
+
+        return containing;
+    }
+}
 
 export function Compile(ast: AST) {
     
@@ -86,4 +204,18 @@ export function Compile(ast: AST) {
     }
 
     return code;
+}
+
+export function compileAll(){
+    // get all flowchart files
+    let files = FS.getAllOfType(FileTypes.flowchart);
+
+    for (let file of files){
+        let asts = flowchartDataToASTs(file.content);
+
+        for (let ast of asts){
+            Compile(ast);
+        }
+
+    }
 }

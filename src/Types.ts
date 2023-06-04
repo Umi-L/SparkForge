@@ -12,6 +12,23 @@ export interface ScriptData {
     content: string
 }
 
+export interface SavedNode {
+    type: NodeData,
+    pos: {x: number, y: number},
+    literals: Array<string>
+}
+
+export interface SavedConnection {
+    from: {
+        node: number,
+        outputNumber: number
+    },
+    to: {
+        node: number,
+        inputNumber: number
+    }
+}
+
 export enum PropertyTypes {
     String = "string",
     Number = "number",

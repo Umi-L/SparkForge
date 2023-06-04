@@ -124,6 +124,18 @@ class FileSystem{
         item.renaming = renaming
     }
 
+    public getAllOfType(type: FileTypes): Array<FSFile>{
+        let files = []
+        let search = (dir: FSDirectory) => {
+            dir.children.forEach(c => {
+                if(c.type == "directory") search(c)
+                else if(c.fileType == type) files.push(c)
+            })
+        }
+        search(this.root)
+        return files
+    }
+
     public addFile(path: string, file: FSFile){
         let dir = this.getAtPath(path) as FSDirectory
 
