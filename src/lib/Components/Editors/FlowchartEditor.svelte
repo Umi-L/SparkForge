@@ -7,6 +7,7 @@
     import { AST, ASTConnection, ASTNode } from "../../../AbstractSyntaxTree";
     import { createToast } from "../../../ToastManager";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
+  import { FS, type FSFile } from "../../../MockFS";
 
     export let file: string;
     export const onResize = ()=>{};
@@ -36,7 +37,7 @@
     let selectionBox:HTMLDivElement;
     let currentlySelectedBox: HTMLDivElement;
 
-    let nodes = [];
+    let nodes: Array<Node> = [];
     let connections: Array<Connection> = [];
 
     let currentDraggingNode:Node|undefined;
@@ -59,6 +60,8 @@
     const panelExtenderDistance = 200;
 
     onMount(() => {
+        load();
+
         update();
 
         // add event listeners
@@ -75,6 +78,7 @@
 
         // register the workfield as the workspace
         registerElement(workfield, myself);
+
     });
 
     onDestroy(() => {
@@ -118,6 +122,52 @@
 
         // update positions
         update();
+
+        save();
+    }
+
+    function load(){
+        let fsFile = FS.getAtPath(file) as FSFile;
+
+        if (!fsFile.content["nodes"] || !fsFile.content["connections"])
+            return;
+        
+        console.log("loading flowchart from file");
+
+        let savedNodes: Array<SavedNode> = fsFile.content["nodes"];
+        let savedConnections: Array<SavedConnection> = fsFile.content["connections"];
+
+        for (let savedNode of savedNodes) {
+            let node = new Node({
+                target: workfield,
+                props: {
+                    type: savedNode.type,
+                }
+            });
+
+            registerNode(node);
+
+            node.setPosition(savedNode.pos.x, savedNode.pos.y);
+        }
+
+        for (let savedConnection of savedConnections) {
+            createConnection(
+                nodes[savedConnection.from.node],
+                savedConnection.from.outputNumber,
+                nodes[savedConnection.to.node],
+                savedConnection.to.inputNumber
+            );
+        }
+
+        panelExtender.style.left = fsFile.content["extenderPosition"].x;
+        panelExtender.style.top = fsFile.content["extenderPosition"].y;
+
+
+    
+    }
+
+    export function updateNodePosition(node: Node){
+        save();
     }
 
     function registerNode(node:Node) {
@@ -283,6 +333,8 @@
 
         // remove the connection from the workfield
         connectionsSvg.removeChild(connection.element);
+
+        save();
     }
 
     function moveBezierCurve(element: SVGPathElement, startNode:Node, startOutputNumber:number, endNode:Node, endInputNumber:number) {
@@ -324,6 +376,8 @@
 
         selectedNodes = []
         refreshSelected();
+
+        save();
     }
 
     function duplicateSelectedNodes() {
@@ -410,6 +464,8 @@
         
         // add the connection to the connections array
         connections.push(connection);
+
+        save();
     }
 
     function groupSelectedNodes(){
@@ -943,6 +999,67 @@
         });
 
         return containing;
+    }
+
+    interface SavedNode {
+        type: NodeData,
+        pos: {x: number, y: number},
+        literals: Array<string>
+    }
+
+    interface SavedConnection {
+        from: {
+            node: number,
+            outputNumber: number
+        },
+        to: {
+            node: number,
+            inputNumber: number
+        }
+    }
+
+    function save(){
+        // get position of every node
+        let nodeData: Array<SavedNode> = [];
+        let connectionData: Array<SavedConnection> = [];
+
+        for (let i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+
+            let nodePos = node.getPosition();
+
+            let nodeDataItem = {
+                type: node.getType(),
+                pos: nodePos,
+                literals: node.getLiteralValues()
+            }
+
+            nodeData.push(nodeDataItem);
+        }
+
+        for (let i = 0; i < connections.length; i++) {
+            let connection = connections[i];
+
+            let connectionDataItem = {
+                from: {
+                    node: nodes.indexOf(connection.from.node),
+                    outputNumber: connection.from.outputNumber
+                },
+                to: {
+                    node: nodes.indexOf(connection.to.node),
+                    inputNumber: connection.to.inputNumber
+                }
+            }
+
+            connectionData.push(connectionDataItem);
+        }
+
+        // write to file
+        FS.writeData(file, {
+            nodes: nodeData,
+            connections: connectionData,
+            extenderPosition: {x: panelExtender.style.left, y: panelExtender.style.top}
+        });
     }
 </script>
 

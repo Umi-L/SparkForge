@@ -8,6 +8,10 @@ export interface Point {
     name?: string
 }
 
+export interface ScriptData {
+    content: string
+}
+
 export enum PropertyTypes {
     String = "string",
     Number = "number",

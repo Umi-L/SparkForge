@@ -103,6 +103,17 @@ class FileSystem{
         return head
     }
 
+    public writeData(path: string, data: object){
+        let file = this.getAtPath(path) as FSFile
+
+        if (file == null) {
+            console.error("file not found", path)
+            return
+        }
+
+        file.content = data
+    }
+
     public setOpen(path: string, open: boolean){
         let dir = this.getAtPath(path) as FSDirectory
         dir.open = open

@@ -3,11 +3,11 @@
     import { NodeTypes, type IOPoint, type NodeData, type Point } from "../Types";
     import Node from "./Node.svelte";
     import { getElementFromDomElement } from "../main";
-    import type Workspace from "./Components/Workspace.svelte";
     import { get_current_component } from "svelte/internal";
     import { genUUID } from "../uuid";
-  import { openContextMenu, type IMenuOption } from "../ContextMenu";
-  import { toTitle } from "../Utils";
+    import { openContextMenu, type IMenuOption } from "../ContextMenu";
+    import { toTitle } from "../Utils";
+    import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
 
     let myself = get_current_component() as Node;
     const dispatch = createEventDispatcher();
@@ -75,13 +75,15 @@
                 if (element.classList.contains("workfield")){
 
                     // get the workspace; kinda hacky but it works.
-                    let workspace = getElementFromDomElement(element) as Workspace;
+                    let workspace = getElementFromDomElement(element) as FlowchartEditor;
 
                     // if the node is already in the workspace don't bother re-registering.
                     if (!inWorkspace){
                         workspace.addNode(myself, event.clientX, event.clientY);
                         inWorkspace = true;  
-                    }                
+                    }else{
+                        workspace.updateNodePosition(myself);
+                    }             
 
                     wasUsed = true;
                 }

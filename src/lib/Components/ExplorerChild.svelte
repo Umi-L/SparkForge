@@ -9,6 +9,7 @@
   import { get_current_component } from "svelte/internal";
   import type ExplorerChild from "./ExplorerChild.svelte";
   import { clearProperties, getPropertiesOfFile, setProperties } from "../../PropertiesSystem";
+  import { openTabs } from "../../globals";
 
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
@@ -358,6 +359,24 @@
     function calcStyle(){
         return `margin-left: ${indent*10}px; background-color: var(${color}); min-width: calc(100% - ${indent*10}px);`
     }
+
+    function openFileInWorkspace(){
+        openTabs.update((tabs)=>{
+            
+            // if the file is already open, then just return
+            for (let i = 0; i < tabs.length; i++){
+                if (tabs[i].file === getPath()){
+                    return tabs;
+                }
+            }
+
+            tabs.push({
+                file: getPath(),
+                type: file.fileType
+            })
+            return tabs;
+        })
+    }
 </script>
 
 
@@ -401,7 +420,7 @@
         </div>
         
     {:else if file && !renaming}
-        <div class="file" bind:this={fileElement}>
+        <div class="file" bind:this={fileElement} on:dblclick={openFileInWorkspace}>
             <Icon icon={getFileTypeIcon(file.fileType)} class="icon"/>
             <h3>{file.name}</h3>
             <!-- <div class="sep"></div> -->

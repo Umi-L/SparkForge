@@ -27,7 +27,13 @@
     function selectTab(index: number){
         selectedIndex = index;
 
+        if (!editors[selectedIndex] || !editors[selectedIndex].onResize) return;
+
         editors[selectedIndex].onResize();
+    }
+
+    function getFileName(path: string){
+        return path.split("/").pop();
     }
 </script>
 
@@ -40,7 +46,7 @@
             {#if tab.type == FileTypes.flowchart}
                 <FlowchartEditor file={tab.file} bind:this={editors[index]}/>
             {:else if tab.type == FileTypes.script}
-                <ScriptEditor file={tab.file} content="" bind:this={editors[index]}/>
+                <ScriptEditor file={tab.file} bind:this={editors[index]}/>
             {/if}
         </div>
     {/each}
@@ -50,7 +56,7 @@
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div class="tab" class:unselected={index != selectedIndex} on:click={()=>{selectTab(index)}}>
                 <Icon icon={getFileTypeIcon(tab.type)} class="icon"/>
-                <p>{tab.file}</p>
+                <p>{getFileName(tab.file)}</p>
                 <div class="close-tab-button" on:click={()=>{deleteTab(index)}}>
                     <Icon icon="mdi:close" class="icon close-tab-icon"/>
                 </div>
@@ -60,7 +66,7 @@
 
     {#if tabs.length === 0}
         <div class="no-tabs-wrapper">
-            <p class="no-tabs">No files open. Double click or drag a file onto the workspace to open it in the workspace</p>
+            <p class="no-tabs">No files open. Double click a file to open it in the workspace.</p>
         </div>
     {/if}
 </div>
