@@ -10,7 +10,7 @@
 	
 	export let file: string;
 
-	export const onResize = resize;
+	export const onSelect = resize;
 		
 	let divEl;
 	let editor;

@@ -273,5 +273,7 @@ class FileSystem{
 export let FS = new FileSystem([
     {name: "assets", children: [], type: "directory"}, 
     {name: "objects", children: [], type: "directory"},
-    {name: "scenes", children: [], type: "directory"}
+    {name: "scripts", children: [], type: "directory"},
+    {name: "scenes", children: [], type: "directory"},
+    {name: "flowcharts", children: [], type: "directory"},
 ]);

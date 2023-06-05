@@ -27,9 +27,9 @@
     function selectTab(index: number){
         selectedIndex = index;
 
-        if (!editors[selectedIndex] || !editors[selectedIndex].onResize) return;
+        if (!editors[selectedIndex] || !editors[selectedIndex].onSelect) return;
 
-        editors[selectedIndex].onResize();
+        editors[selectedIndex].onSelect();
     }
 
     function getFileName(path: string){
@@ -168,16 +168,18 @@
         justify-content: start;
         gap: 10px;
         width: 100%;
-        height: 1.8em;
+        min-height: 1.8em;
+        height: fit-content;
 
         bottom: 0px;
 
         overflow-x: auto;
+        overflow-y: hidden;
 
         /* background-color: var(--foreground-color); */
         padding: var(--general-padding);
 
-        pointer-events: none;
+        /* pointer-events: none; */
         user-select: none;
 
         /* border-radius: var(--general-border-radius); */

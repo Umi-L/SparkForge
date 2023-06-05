@@ -7,7 +7,7 @@
     import { AST, ASTConnection, ASTNode } from "../../../AbstractSyntaxTree";
     import { createToast } from "../../../ToastManager";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
-  import { FS, type FSFile } from "../../../MockFS";
+    import { FS, type FSFile } from "../../../MockFS";
   
     export let file: string;
     export const onResize = ()=>{};
@@ -49,6 +49,8 @@
     let selectingStartPos:Point = {x: 0, y: 0};
     let selectedNodes: Array<Node> = []
 
+    let hasBeenSelected = false;
+
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "Delete", action: deleteSelectedNodes, avalableCheck: () => selectedNodes.length > 0, icon: "mdi-trash-can-outline"}, 
         {label: "Duplicate", action: duplicateSelectedNodes, avalableCheck: () => selectedNodes.length > 0, icon:"mdi-content-duplicate"}, 
@@ -59,11 +61,15 @@
 
     const panelExtenderDistance = 200;
 
-    onMount(() => {
+    export const onSelect = ()=>{
+        if (hasBeenSelected) return;
+
         load();
 
         update();
+    }
 
+    onMount(() => {
         // add event listeners
         window.addEventListener("mouseup", globalOnMouseUp);
         window.addEventListener("mousemove", globalMouseMove)

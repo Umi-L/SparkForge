@@ -1,11 +1,64 @@
 <script lang="ts">
     import { Compile, compileAll } from "../Compiler";
+  import { openContextMenu, type IMenuOption } from "../ContextMenu";
     import { getElementFromDomElement } from "../main";
     import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
     import Icon from "@iconify/svelte";
 
+    const menuOptions = [
+        {
+            label: "New",
+            action: () => {
+                console.log("New");
+            },
+            avalableCheck: () => {
+                return true;
+            },
+            icon: "mdi-file",
+        },
+        {
+            label: "Open",
+            action: () => {
+                console.log("Open");
+            },
+            avalableCheck: () => {
+                return true;
+            },
+            icon: "mdi-folder-open",
+        },
+        {
+            label: "Save As File",
+            action: () => {
+                console.log("Save As");
+            },
+            avalableCheck: () => {
+                return true;
+            },
+            icon: "mdi-content-save",
+        },
+        {
+            label: "Settings",
+            action: () => {
+                console.log("Settings");
+            },
+            avalableCheck: () => {
+                return true;
+            },
+            icon: "mdi-cog",
+        }
+    ] as Array<IMenuOption>;
+
     function runGame(){
         compileAll();
+    }
+
+    function menuClick(event){
+        // get position of click
+        let x = event.clientX;
+        let y = event.clientY;
+
+        // open context menu
+        openContextMenu(x,y,menuOptions);
     }
 </script>
 
@@ -15,7 +68,7 @@
     <div class="start">
         <!-- svelte-ignore a11y-missing-attribute -->
         <!-- <span class="iconify" data-icon="mdi-menu"></span> -->
-        <a><Icon icon="mdi-menu" /></a>
+        <a on:click={menuClick}><Icon icon="mdi-menu" /></a>
     </div>
 
 

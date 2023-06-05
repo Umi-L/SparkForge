@@ -262,6 +262,10 @@
             offset.x += element.offsetLeft;
             offset.y += element.offsetTop;
 
+            // check if parent is null
+            if (element.offsetParent == null)
+                console.error("offsetParent is null", element);
+
             element = element.offsetParent;
 
         }
