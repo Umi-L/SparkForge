@@ -17,6 +17,22 @@
 
     openTabs.subscribe((value) => {
         tabs = value;
+
+        // set selectedTab value
+        if (selectedIndex >= tabs.length) selectedIndex = tabs.length - 1;
+
+        // if < 0
+        if (selectedIndex < 0) selectedIndex = 0;
+
+
+        // wait animation frame so the tab has actually been added by svelte
+        window.requestAnimationFrame(() => {        
+            // call onSelect on selected tab
+            if (!editors[selectedIndex] || !editors[selectedIndex].onSelect) return;
+
+            editors[selectedIndex].onSelect();
+        });
+        
     });
 
     function deleteTab(index: number){
@@ -54,7 +70,14 @@
     <div class="open-tabs">
         {#each tabs as tab, index}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div class="tab" class:unselected={index != selectedIndex} on:click={()=>{selectTab(index)}}>
+            <div class="tab" class:unselected={index != selectedIndex} 
+            on:click={
+                ()=>{ 
+                        console.log("selecting tab", index);
+                        selectTab(index)
+
+                    }
+            }>
                 <Icon icon={getFileTypeIcon(tab.type)} class="icon"/>
                 <p>{getFileName(tab.file)}</p>
                 <div class="close-tab-button" on:click={()=>{deleteTab(index)}}>

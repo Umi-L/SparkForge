@@ -116,6 +116,11 @@
         dispatch("destroy", {uuid: uuid});
     }
 
+    function updateParent(){
+        console.log("updating parent");
+        dispatch("update", {uuid: uuid, data: type});
+    }
+
     function nodeBodyMouseDown(event){
 
         // if not left click, return
@@ -288,6 +293,17 @@
         return values;
     }
 
+    export function setLiteralValues(values){
+        literalInputs.forEach((literalInput, index) => {
+            if (literalInput.type == "text")
+                literalInput.value = values[index];
+            else if (literalInput.type == "number")
+                literalInput.value = values[index];
+            else if (literalInput.type == "checkbox")
+                literalInput.checked = values[index];
+        });
+    }
+
     export function getBox(){
         let clientRect = nodeBody.getBoundingClientRect();
 
@@ -358,7 +374,7 @@
 
                     <!-- draw a circle -->
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <input type={literals[i].type} class="input" bind:this={literalInputs[i]}>
+                    <input type={literals[i].type} class="input" bind:this={literalInputs[i]} on:change={updateParent} on:input={updateParent}>
 
                     <p class="description-text">{literal.label}</p>
                 </div>

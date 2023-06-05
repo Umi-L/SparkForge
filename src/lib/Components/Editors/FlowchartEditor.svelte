@@ -50,6 +50,7 @@
     let selectedNodes: Array<Node> = []
 
     let hasBeenSelected = false;
+    let hasMounted = false;
 
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "Delete", action: deleteSelectedNodes, avalableCheck: () => selectedNodes.length > 0, icon: "mdi-trash-can-outline"}, 
@@ -63,6 +64,8 @@
 
     export const onSelect = ()=>{
         if (hasBeenSelected) return;
+        
+        hasBeenSelected = true;
 
         load();
 
@@ -70,6 +73,7 @@
     }
 
     onMount(() => {
+
         // add event listeners
         window.addEventListener("mouseup", globalOnMouseUp);
         window.addEventListener("mousemove", globalMouseMove)
@@ -154,6 +158,7 @@
             registerNode(node);
 
             node.setPosition(savedNode.pos.x, savedNode.pos.y);
+            node.setLiteralValues(savedNode.literals);
         }
 
         for (let savedConnection of savedConnections) {
@@ -331,6 +336,10 @@
                 }
             }
         });
+
+        node.$on("update", ()=>{
+            save();
+        })
     }
 
     function removeConnection(connection:Connection) {
