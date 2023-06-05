@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Compile, compileAll } from "../Compiler";
-  import { openContextMenu, type IMenuOption } from "../ContextMenu";
+    import { openContextMenu, type IMenuOption } from "../ContextMenu";
     import { getElementFromDomElement } from "../main";
     import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
     import Icon from "@iconify/svelte";
@@ -45,7 +45,8 @@
                 return true;
             },
             icon: "mdi-cog",
-        }
+        },
+        
     ] as Array<IMenuOption>;
 
     function runGame(){
