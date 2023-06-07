@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { FS, FileTypes, type FSDirectory, type FSFile, getFileTypeIcon } from "../../MockFS";
+  import { FS, FileTypes, type FSDirectory, type FSFile, getFileTypeIcon } from "../../FileSystem";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
   import Icon from '@iconify/svelte';
   import { createToast } from "../../ToastManager";
@@ -59,7 +59,7 @@
 
         let path = FS.getPath(dir);
 
-        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir, renaming: true});
+        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir, renaming: true, components: []});
 
         // if dir not toggled, toggle it
         setShowChildren(true);

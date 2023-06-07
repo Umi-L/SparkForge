@@ -1,11 +1,11 @@
-import type { Catagory } from "./PropertiesSystem"
+import type { Component } from "./PropertiesSystem"
 import { PropertyTypes } from "./Types"
 
 export interface FSFile{
     type: "file"
     name: string
     fileType: FileTypes
-    fileTypeProperties?: Array<Catagory>
+    components: Array<Component>
     content: object
     parent: FSDirectory
     renaming?: boolean
@@ -28,17 +28,17 @@ export enum FileTypes{
     flowchart = "flowchart",
 }
 
-export let fileTypeProperties = {
+export let fileTypeDefaultComponents = {
     object: [
         {name: "Sprite", properties: [
             {name: "Sprite", value: "", type: PropertyTypes.Sprite, isModifiable: true},
         ]}
-    ] as Array<Catagory>,
+    ] as Array<Component>,
     sprite: [
         {name: "Image", properties: [
             {name: "Image", value: "", type: PropertyTypes.Image, isModifiable: true},
         ]}
-    ] as Array<Catagory>,
+    ] as Array<Component>,
 }
 
 export function getFileTypeIcon(type: FileTypes): string{
@@ -141,9 +141,9 @@ class FileSystem{
 
         let parent = this.getAtPath(path) as FSDirectory
 
-        // if the file's type is in the fileTypeProperties object, add those properties to the file
-        if(fileTypeProperties[file.fileType] && !file.fileTypeProperties){
-            file.fileTypeProperties = fileTypeProperties[file.fileType];
+        // if the file's type is in the fileTypeDefaultComponents object, add those properties to the file
+        if(fileTypeDefaultComponents[file.fileType] && file.components.length == 0){
+            file.components = fileTypeDefaultComponents[file.fileType];
         }
 
         // if the file's name already exists in the parent, add a number to the end and increment it until it doesn't

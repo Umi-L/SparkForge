@@ -7,11 +7,12 @@
     export let menuOptions: Array<IMenuOption>;
     export let top: number;
     export let left: number;
+    export let maxHeight: number | string = "none";
     export let goingDirection = undefined;
 
     let showMenu = false;
 
-    let menuElement: HTMLDivElement;
+    let menuContainer: HTMLDivElement;
     let justShown = true;
 
     let subMenuOptions = [];
@@ -26,6 +27,7 @@
     onMount(() => {
         // add global mouseup event listener
         window.addEventListener("mouseup", onMouseUpGlobal)
+        console.log("mounted", menuContainer)
     });
 
     function onMouseUpGlobal(event){
@@ -67,8 +69,8 @@
 
 
 {#if showMenu}
-    <div bind:this={menuElement}>
-        <div class="menu" style={`top: ${top}px; left: ${left}px;`}>
+    <div bind:this={menuContainer} class="menu-container">
+        <div class="menu" style={`top: ${top}px; left: ${left}px; max-height: ${maxHeight}px`}>
             {#each menuOptions as menuOption, i}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div class="menu-option" bind:this={menuOptionElements[i]} 
@@ -139,12 +141,16 @@
             {/each}
         </div>
     </div>
-    <svelte:self menuOptions={subMenuOptions} top={subMenuTop} left={subMenuLeft} goingDirection={submenuGoingDirection} bind:this={submenu} />
+    <svelte:self menuOptions={subMenuOptions} top={subMenuTop} left={subMenuLeft} goingDirection={submenuGoingDirection} bind:this={submenu} maxHeight={window.innerHeight - top-5} />
 {/if}
 
 
 
 <style>
+
+    .menu-container{
+        overflow: hidden;
+    }
 
     .label-container{
         display: flex;
@@ -170,7 +176,6 @@
 
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
         gap: 5px;
 
@@ -185,7 +190,7 @@
 
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 
-        overflow: hidden;
+        overflow-y: auto;
 
         outline: 1px solid var(--midground-color);
     }

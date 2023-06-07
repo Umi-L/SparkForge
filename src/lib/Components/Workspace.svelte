@@ -1,10 +1,11 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
-    import { getFileTypeIcon, FileTypes } from "../../MockFS";
+    import { getFileTypeIcon, FileTypes } from "../../FileSystem";
     import { openTabs } from "../../globals";
     import { each } from "svelte/internal";
     import FlowchartEditor from "./Editors/FlowchartEditor.svelte";
     import ScriptEditor from "./Editors/ScriptEditor.svelte";
+  import ObjectEditor from "./Editors/ObjectEditor.svelte";
 
     interface ITab {
         file: string;
@@ -63,6 +64,8 @@
                 <FlowchartEditor file={tab.file} bind:this={editors[index]}/>
             {:else if tab.type == FileTypes.script}
                 <ScriptEditor file={tab.file} bind:this={editors[index]}/>
+            {:else if tab.type == FileTypes.object}
+                <!-- <ObjectEditor file={tab.file} bind:this={editors[index]}></ObjectEditor> -->
             {/if}
         </div>
     {/each}

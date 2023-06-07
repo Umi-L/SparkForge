@@ -6,7 +6,13 @@ let contextMenu = new ContextMenu({
         left: 0,
         top: 0,
         menuOptions: [],
+        maxHeight: 0,
     },
+});
+
+// on window resize close all context menus
+window.addEventListener("resize", () => {
+    closeContextMenu();
 });
 
 export interface IMenuOption {
@@ -30,6 +36,7 @@ export function openContextMenu(left: number, top: number, options: Array<IMenuO
         left: left,
         top: top,
         menuOptions: options,
+        maxHeight: window.innerHeight - top-5,
     });
 
     contextMenu.setVisible(true);

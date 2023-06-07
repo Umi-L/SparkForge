@@ -1,6 +1,8 @@
 <script lang="ts">
     import { Compile, compileAll } from "../Compiler";
     import { openContextMenu, type IMenuOption } from "../ContextMenu";
+  import { changeAllPanelsTabIfPossible } from "../WindowManager";
+  import { gameRunning } from "../globals";
     import { getElementFromDomElement } from "../main";
     import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
     import Icon from "@iconify/svelte";
@@ -49,8 +51,21 @@
         
     ] as Array<IMenuOption>;
 
+    let running = false;
+
+    gameRunning.subscribe((value) => {
+        running = value;
+    });
+
     function runGame(){
+
+        if (running) return;
+
         compileAll();
+
+        changeAllPanelsTabIfPossible("game");
+
+        gameRunning.update(()=>{return true;});
     }
 
     function menuClick(event){
@@ -60,6 +75,10 @@
 
         // open context menu
         openContextMenu(x,y,menuOptions);
+    }
+
+    function stopGame(){
+        gameRunning.update(()=>{return false;});
     }
 </script>
 
@@ -78,10 +97,11 @@
         <div class="button-assembly">
             <!-- svelte-ignore a11y-missing-attribute -->
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <a class="state-button" on:click={runGame}><Icon icon="mdi-play"/></a>
+            <a class="state-button" on:click={runGame} class:highlighted-start={running}><Icon icon="mdi-play"/></a>
             
             <!-- svelte-ignore a11y-missing-attribute -->
-            <a class="state-button"><Icon icon="mdi-stop"/></a>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <a class="state-button" on:click={stopGame} class:highlighted={running}><Icon icon="mdi-stop"/></a>
 
         </div>
     </div>
@@ -184,8 +204,16 @@
         transition-duration: 0.1s;
     }
 
+    .highlighted-start{
+        color: var(--primary-color);
+    }
+
+    .highlighted{
+        background-color: var(--foreground-color-2);
+    }
+
     .state-button:hover{
-        background-color: var(--background-color);
+        background-color: var(--foreground-color);
     }
 
 </style>

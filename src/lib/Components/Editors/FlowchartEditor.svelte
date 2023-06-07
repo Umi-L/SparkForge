@@ -7,7 +7,7 @@
     import { AST, ASTConnection, ASTNode } from "../../../AbstractSyntaxTree";
     import { createToast } from "../../../ToastManager";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
-    import { FS, type FSFile } from "../../../MockFS";
+    import { FS, type FSFile } from "../../../FileSystem";
   
     export let file: string;
     export const onResize = ()=>{};

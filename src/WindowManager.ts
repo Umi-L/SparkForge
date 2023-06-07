@@ -438,6 +438,12 @@ export function onPanelDrag(mouseX: number, mouseY: number){
     }
 }
 
+export function changeAllPanelsTabIfPossible(tab: string) {
+    panels.forEach((panel) => {
+        panel.changeTabIfPossible(tab);
+    });
+}
+
 export function onPanelDragEnd(mouseX: number, mouseY: number){
 
 

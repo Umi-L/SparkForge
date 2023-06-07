@@ -1,14 +1,16 @@
 <script lang="ts">
   import { each, get_current_component } from "svelte/internal";
-    import { registerPropertiesPanel, type Property, unregisterPropertiesPanel, type Catagory} from "../../PropertiesSystem";
+    import { registerPropertiesPanel, type Property, unregisterPropertiesPanel, type Component} from "../../PropertiesSystem";
     import { onMount, onDestroy } from "svelte";
   import { PropertyTypes } from "../../Types";
+  import FileTypeSelect from "./FileTypeSelect.svelte";
+  import { FileTypes } from "../../FileSystem";
 
     let myself = get_current_component();
     
-    let properties: Array<Catagory> = [];
+    let properties: Array<Component> = [];
 
-    export function setProperties(newProperties: Array<Catagory>){
+    export function setProperties(newProperties: Array<Component>){
         properties = newProperties;
     }
 
@@ -40,18 +42,24 @@
                     <div class="property">
                         <h1 class="property-name">{property.name + ": "}</h1>
 
-                        <!-- svelte-ignore empty-block -->
-                        {#if property.type == PropertyTypes.String}
-                            <input type="text" value={property.value} class="input" disabled={!property.isModifiable}/>
 
-                        {:else if property.type == PropertyTypes.Number}
-                            <input type="number" value={property.value} class="input" disabled={!property.isModifiable}/>
-                        {:else if property.type == PropertyTypes.Boolean}
-                            <input type="checkbox" value={property.value} class="input" disabled={!property.isModifiable}/>
-                        {:else if property.type == PropertyTypes.Vector2}
-                            <p>x:</p><input type="number" value={property.value["x"]} class="input" disabled={!property.isModifiable}/>
-                            <p>y:</p><input type="number" value={property.value["y"]} class="input" disabled={!property.isModifiable}/>
-                        {/if}
+                        <div class="property-content">
+                            <!-- svelte-ignore empty-block -->
+                            {#if property.type == PropertyTypes.String}
+                                <input type="text" value={property.value} class="input" disabled={!property.isModifiable}/>
+
+                            {:else if property.type == PropertyTypes.Number}
+                                <input type="number" value={property.value} class="input" disabled={!property.isModifiable}/>
+                            {:else if property.type == PropertyTypes.Boolean}
+                                <input type="checkbox" value={property.value} class="input" disabled={!property.isModifiable}/>
+                            {:else if property.type == PropertyTypes.Vector2}
+                                <p>x:</p><input type="number" value={property.value["x"]} class="input" disabled={!property.isModifiable}/>
+                                <p>y:</p><input type="number" value={property.value["y"]} class="input" disabled={!property.isModifiable}/>
+                            {:else if property.type == PropertyTypes.Sprite}
+                                <FileTypeSelect value={property.value} disabled={!property.isModifiable} type={FileTypes.sprite} 
+                                onChange={(newValue)=>{property.onChange(newValue)}}/>
+                            {/if}
+                        </div>
                         
                     </div>
                 {/each}
@@ -76,6 +84,10 @@
 
 
 <style>
+
+    .property-content{
+        width: 80%;
+    }
 
     .add-component-button{
         width: 95%;
@@ -189,6 +201,8 @@
         flex-direction: row;
         width: 100%;
         gap: 5px;
+
+        overflow: hidden;
     }
 
     .catagory-topbar{

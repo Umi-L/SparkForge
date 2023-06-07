@@ -1,5 +1,5 @@
 import { ASTNode, AST, ASTConnection } from "./AbstractSyntaxTree";
-import { FS, FileTypes } from "./MockFS";
+import { FS, FileTypes } from "./FileSystem";
 import { OutputTypes, addOutputMessage } from "./OutputSystem";
 import { Template } from "./Templates";
 import { createToast } from "./ToastManager";

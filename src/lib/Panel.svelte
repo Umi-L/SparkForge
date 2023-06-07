@@ -99,6 +99,19 @@
         createTabs();
     });
 
+    export function changeTabIfPossible(tab: string){
+        for (let i = 0; i < tabs.length; i++){
+            if (tabs[i].name == tab){
+                currentSelectedTab = i;
+
+                if (tabComponents[currentSelectedTab].onSelect)
+                    tabComponents[currentSelectedTab].onSelect()
+
+                break;
+            }
+        }
+    }
+
     function onGlobalMouseMove(event){
         if (!dragging)
             return
@@ -133,8 +146,8 @@
     function focusNewTab(event, index){
         currentSelectedTab = index;
 
-        if (tabComponents[currentSelectedTab].onFocus)
-            tabComponents[currentSelectedTab].onFocus();
+        if (tabComponents[currentSelectedTab].onSelect)
+            tabComponents[currentSelectedTab].onSelect();
     }
 
     function globalMouseUp(event){

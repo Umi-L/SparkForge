@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { FS, FileTypes, getFileTypeIcon } from "../../MockFS";
+  import { FS, FileTypes, getFileTypeIcon } from "../../FileSystem";
   import ExplorerChild from "./ExplorerChild.svelte";
   import { children, get_current_component } from "svelte/internal";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
@@ -47,7 +47,7 @@
 
         let path = FS.getPath(dir);
 
-        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir, renaming: true});
+        FS.addFile(path, {fileType: type, type: "file", name: `new ${type}`, content: {}, parent: dir, renaming: true, components: []});
 
       }
 
