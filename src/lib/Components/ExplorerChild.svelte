@@ -10,6 +10,7 @@
   import type ExplorerChild from "./ExplorerChild.svelte";
   import { clearProperties, getPropertiesOfFile, setProperties } from "../../PropertiesSystem";
   import { openTabs } from "../../globals";
+  import { showUploadWindow } from "../../UploadPopoverManager";
 
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
@@ -42,6 +43,7 @@
         {label: "Rename", action: startRename, avalableCheck: ()=>true, icon: "mdi-rename"},
         {label: "Duplicate", action: duplicate, avalableCheck: ()=>true, icon:"mdi-content-duplicate"},
         {label: "Delete", action: remove, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
+        {label: "Upload File", action: showUploadWindow, avalableCheck: ()=>true, icon: "mdi-upload"},
     ]
 
     // foreach fileType, add a new menu option
@@ -377,11 +379,23 @@
             return tabs;
         })
     }
+
+    function onDrop(event){
+        console.log("onDrop", event)
+    }
+
+    function onDragOver(event){
+        selected = true;
+    }
+
+    function onDragLeave(event){
+        selected = false;
+    }
 </script>
 
 
 
-<div class="container" style={calcStyle()} bind:this={container} class:dragging={dragging} class:indicator-shown={showIndicator} class:selected={selected}>
+<div class="container" style={calcStyle()} bind:this={container} class:dragging={dragging} class:indicator-shown={showIndicator} class:selected={selected} on:dragover={onDragOver} on:drop={onDrop} on:dragleave={onDragLeave}>
     {#if directory && !renaming}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="directory" on:click={toggleShow} bind:this={directoryElement}>

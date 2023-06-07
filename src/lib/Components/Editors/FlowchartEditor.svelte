@@ -50,7 +50,6 @@
     let selectedNodes: Array<Node> = []
 
     let hasBeenSelected = false;
-    let hasMounted = false;
 
     let contextMenuOptions: Array<IMenuOption> = [
         {label: "Delete", action: deleteSelectedNodes, avalableCheck: () => selectedNodes.length > 0, icon: "mdi-trash-can-outline"}, 

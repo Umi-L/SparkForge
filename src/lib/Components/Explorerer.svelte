@@ -5,6 +5,7 @@
   import { children, get_current_component } from "svelte/internal";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
   import { registerElement, unregisterElement } from "../../main";
+  import { showUploadWindow } from "../../UploadPopoverManager";
 
   let myself = get_current_component();
 
@@ -29,6 +30,8 @@
         {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
             {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "material-symbols:folder-outline"},
         ], icon: "mdi-plus"},
+        {label: "Upload File", action: showUploadWindow, avalableCheck: ()=>true, icon: "mdi-upload"},
+
     ]
 
     // foreach fileType, add a new menu option
