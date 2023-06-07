@@ -11,9 +11,9 @@
 
 <div class="upload-window-wrapper" class:visible={visible}>
     <Popover>
-        <h1>
-            Upload
-        </h1>
+        <div class="upload-container">
+            UPLOAD
+        </div>
     </Popover>    
 </div>
 
@@ -27,5 +27,15 @@
 
     .upload-window-wrapper{
         display: none;
+    }
+
+    .upload-container{
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
     }
 </style>
