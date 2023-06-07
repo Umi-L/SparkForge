@@ -86,7 +86,7 @@
 <style>
 
     .property-content{
-        width: 80%;
+        overflow:hidden;
     }
 
     .add-component-button{
