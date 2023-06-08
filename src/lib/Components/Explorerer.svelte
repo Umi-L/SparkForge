@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { FS, FileTypes, getFileTypeIcon } from "../../FileSystem";
+  import { FS, FileTypes, creatableFileTypes, getFileTypeIcon } from "../../FileSystem";
   import ExplorerChild from "./ExplorerChild.svelte";
   import { children, get_current_component } from "svelte/internal";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
@@ -35,7 +35,7 @@
     ]
 
     // foreach fileType, add a new menu option
-    for (let _ in FileTypes){
+    for (let _ of creatableFileTypes){
         let fileType = _ as FileTypes; // gotta love typescript
         contextMenuOptions[0].subMenuOptions.push({label: fileType, action: ()=>{newFileOfType(fileType)}, avalableCheck: ()=>true, icon: getFileTypeIcon(fileType)})
     }

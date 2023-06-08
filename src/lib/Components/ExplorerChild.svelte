@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { FS, FileTypes, type FSDirectory, type FSFile, getFileTypeIcon } from "../../FileSystem";
+  import { FS, FileTypes, type FSDirectory, type FSFile, getFileTypeIcon, creatableFileTypes } from "../../FileSystem";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
   import Icon from '@iconify/svelte';
   import { createToast } from "../../ToastManager";
@@ -11,6 +11,7 @@
   import { clearProperties, getPropertiesOfFile, setProperties } from "../../PropertiesSystem";
   import { openTabs } from "../../globals";
   import { showUploadWindow } from "../../UploadPopoverManager";
+  import { addFilesToDirectory } from "../../Utils";
 
     export let directory: FSDirectory = undefined;
     export let file: FSFile = undefined;
@@ -47,7 +48,7 @@
     ]
 
     // foreach fileType, add a new menu option
-    for (let _ in FileTypes){
+    for (let _ of creatableFileTypes){
         let fileType = _ as FileTypes; // gotta love typescript
         contextMenuOptions[0].subMenuOptions.push({label: fileType, action: ()=>{newFileOfType(fileType)}, avalableCheck: ()=>true, icon: getFileTypeIcon(fileType)})
     }
@@ -381,10 +382,20 @@
     }
 
     function onDrop(event){
-        console.log("onDrop", event)
+        // get files dropped
+        let files = event.dataTransfer.files;
+
+        event.preventDefault();
+
+        // if there are no files, then return
+        if (files.length === 0)
+            return;
+
+        addFilesToDirectory(files, getPath());
     }
 
     function onDragOver(event){
+        event.preventDefault();
         selected = true;
     }
 

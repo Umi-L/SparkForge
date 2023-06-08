@@ -37,6 +37,14 @@ export enum FileTypes{
     json = "json",
 }
 
+export const creatableFileTypes = [
+    FileTypes.object,
+    FileTypes.sprite,
+    FileTypes.scene,
+    FileTypes.script,
+    FileTypes.flowchart,
+]
+
 export let fileTypeDefaultComponents = {
     object: [
         {name: "Sprite", properties: [
@@ -62,6 +70,16 @@ export function getFileTypeIcon(type: FileTypes): string{
             return "fluent:flowchart-20-regular";
         case FileTypes.sprite:
             return "material-symbols:image-outline";
+        case FileTypes.png:
+            return "mdi-file-image-outline";
+        case FileTypes.jpg:
+            return "mdi-file-image-outline";
+        case FileTypes.jpeg:
+            return "mdi-file-image-outline";
+        case FileTypes.gif:
+            return "mdi-file-image-outline";
+        case FileTypes.json:
+            return "mdi-code-json";
         default:
             return "mdi-file-document-outline";
     }
@@ -108,8 +126,6 @@ class FileSystem{
 
         if (pathParts.length == 1) return head
 
-        console.log(pathParts)
-
         for(let i = 1; i < pathParts.length; i++){
             let nextDir = (head as FSDirectory).children.find(d => d.name == pathParts[i])
             if(!nextDir) return null
@@ -140,12 +156,19 @@ class FileSystem{
         item.renaming = renaming
     }
 
-    public getAllOfType(type: FileTypes): Array<FSFile>{
+    public getAllOfType(type: FileTypes | Array<FileTypes>): Array<FSFile>{
         let files = []
         let search = (dir: FSDirectory) => {
             dir.children.forEach(c => {
                 if(c.type == "directory") search(c)
-                else if(c.fileType == type) files.push(c)
+                
+                if(c.type == "file"){
+                    if(Array.isArray(type)){
+                        if(type.includes(c.fileType)) files.push(c)
+                    }else{
+                        if(c.fileType == type) files.push(c)
+                    }
+                }
             })
         }
         search(this.root)
@@ -153,8 +176,6 @@ class FileSystem{
     }
 
     public addFile(path: string, file: FSFile){
-        console.log("adding file", path, file)
-
         let parent = this.getAtPath(path) as FSDirectory
 
         // if the file's type is in the fileTypeDefaultComponents object, add those properties to the file
@@ -176,16 +197,17 @@ class FileSystem{
         
         parent.children.push(file)
 
+        // make parent open
+        parent.open = true
+
         this.update();
     }
 
     public addDir(path: string, dir: FSDirectory){
 
-        console.log("adding dir", path, dir)
 
         let parent = this.getAtPath(path) as FSDirectory
 
-        console.log("parent", parent)
 
         dir.parent = parent
 
@@ -215,7 +237,7 @@ class FileSystem{
         if(item.type == "directory"){
             let dir = item as FSDirectory
             if(dir.children.find(c => c == destinationDir)){
-                console.log("can't move a directory into itself")
+                console.error("can't move a directory into itself")
                 return
             }
         }
@@ -233,8 +255,6 @@ class FileSystem{
         
 
         this.update();
-
-        console.log(this.root)
     }
 
     public rename(path: string, newName: string){
