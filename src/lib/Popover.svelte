@@ -23,7 +23,7 @@
         justify-content: center;
         align-items: center;
 
-        background-color: rgba(0, 0, 0, 0.2);
+        background-color: rgba(0, 0, 0, 0.4);
     }
 
     .popover-container{
@@ -32,5 +32,7 @@
         
         background-color: var(--foreground-color);
         border-radius: var(--general-border-radius);
+
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
     }
 </style>

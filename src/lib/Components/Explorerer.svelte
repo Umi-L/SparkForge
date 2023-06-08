@@ -30,7 +30,7 @@
         {label: "New", action: ()=>{}, avalableCheck: ()=>true, subMenuOptions: [
             {label: "Folder", action: newFolder, avalableCheck: ()=>true, icon: "material-symbols:folder-outline"},
         ], icon: "mdi-plus"},
-        {label: "Upload File", action: showUploadWindow, avalableCheck: ()=>true, icon: "mdi-upload"},
+        {label: "Upload File", action: ()=>{showUploadWindow("root/")}, avalableCheck: ()=>true, icon: "mdi-upload"},
 
     ]
 

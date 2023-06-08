@@ -4,10 +4,10 @@ let uploadWindow = new UploadWindow({
     target: document.body,
 });
 
-export function showUploadWindow(){
-    uploadWindow.setVisible(true);
+export function showUploadWindow(path: string){
+    uploadWindow.setVisible(true, path);
 }
 
 export function hideUploadWindow(){
-    uploadWindow.setVisible(false);
+    uploadWindow.setVisible(false, "");
 }

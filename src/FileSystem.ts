@@ -26,6 +26,15 @@ export enum FileTypes{
     scene = "scene",
     script = "script",
     flowchart = "flowchart",
+
+    // image types
+    png = "png",
+    jpg = "jpg",
+    jpeg = "jpeg",
+    gif = "gif",
+
+    // json
+    json = "json",
 }
 
 export let fileTypeDefaultComponents = {
@@ -94,6 +103,13 @@ class FileSystem{
         let pathParts = path.split("/")
         let head: FSDirectory | FSFile = this.root;
 
+        // remove all empty parts
+        pathParts = pathParts.filter(p => p != "")
+
+        if (pathParts.length == 1) return head
+
+        console.log(pathParts)
+
         for(let i = 1; i < pathParts.length; i++){
             let nextDir = (head as FSDirectory).children.find(d => d.name == pathParts[i])
             if(!nextDir) return null
@@ -137,7 +153,7 @@ class FileSystem{
     }
 
     public addFile(path: string, file: FSFile){
-        let dir = this.getAtPath(path) as FSDirectory
+        console.log("adding file", path, file)
 
         let parent = this.getAtPath(path) as FSDirectory
 
@@ -154,8 +170,11 @@ class FileSystem{
             i++
         }
         file.name = name
+
+        // set the file's parent
+        file.parent = parent
         
-        dir.children.push(file)
+        parent.children.push(file)
 
         this.update();
     }
@@ -267,6 +286,23 @@ class FileSystem{
         }
         
         this.update();
+    }
+
+    public addDataFile(name:string, path: string, type:FileTypes, data: any){
+        let file = {
+            name: name,
+            type: "file",
+            fileType: type,
+            content: data,
+            components: []
+        } as FSFile
+        this.addFile(path, file)
+
+        this.update();
+    }
+
+    public fileExists(path: string): boolean{
+        return this.getAtPath(path) != null
     }
 }
 

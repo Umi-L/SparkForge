@@ -43,7 +43,7 @@
         {label: "Rename", action: startRename, avalableCheck: ()=>true, icon: "mdi-rename"},
         {label: "Duplicate", action: duplicate, avalableCheck: ()=>true, icon:"mdi-content-duplicate"},
         {label: "Delete", action: remove, avalableCheck: ()=>true, icon: "mdi-trash-can-outline"},
-        {label: "Upload File", action: showUploadWindow, avalableCheck: ()=>true, icon: "mdi-upload"},
+        {label: "Upload File", action: ()=>{showUploadWindow(FS.getPath((file == undefined) ? directory : file))}, avalableCheck: ()=>true, icon: "mdi-upload"},
     ]
 
     // foreach fileType, add a new menu option
