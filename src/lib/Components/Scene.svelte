@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Icon from "@iconify/svelte";
   import { onMount } from "svelte";
 
     let container: HTMLDivElement;
@@ -16,6 +17,8 @@
     let gridSize = 35;
 
     let hasBeenFocused = false;
+
+    let pulloutOpen = true;
 
     onMount(()=>{
         window.addEventListener("mousemove", globalMouseMove);
@@ -135,13 +138,23 @@
         }
     }
 
+    function toggleSidebar(){
+        pulloutOpen = !pulloutOpen;
+    }
+
 </script>
 
 
 
 <div class="scene-container" bind:this={container}>
 
-    <div class="sidebar">
+    <div class="sidebar" class:closed={!pulloutOpen}>
+
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div class="sidebar-pullout" on:click={toggleSidebar}>
+            <Icon icon={(pulloutOpen) ? "mdi-chevron-left" : "mdi-chevron-right"} class="icon"/>
+        </div>
+
         <div class="sidebar-content">
             <div class="sidebar-header">
                 <h1>Scene</h1>
@@ -184,6 +197,33 @@
 
 
 <style>
+
+    .closed{
+        transform: translate(-105%);
+    }
+
+    .sidebar-pullout{
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+
+        width: 2rem;
+
+        height: 4rem;
+
+        background-color: var(--foreground-color);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 5rem;
+
+        cursor: pointer;
+
+    }
 
     .value-input{
         width: 100%;
@@ -269,14 +309,14 @@
 
         position: absolute;
 
-        left: 2%;
+        left: 1%;
         top: 3%;
 
         z-index: 1000;
 
         border-radius: var(--general-border-radius);
 
-
+        transition: transform 0.2s ease-in-out;
     }
 
     .currently-selected-box{

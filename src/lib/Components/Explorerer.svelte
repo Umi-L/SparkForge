@@ -54,7 +54,7 @@
 
       }
 
-        function newFolder(){
+      function newFolder(){
 
         let dir = FS.root;
 
@@ -76,16 +76,14 @@
       localFS = FS;
     })
 
-    root.addEventListener("contextmenu", (event) => {
+    root.addEventListener("contextmenu", (event) => { // on context menu opened
 
-      console.log("context menu event")
-
-      if (event.target !== root){
+      if (event.target !== root){ // if target is not self return
             console.log(event.target)
             return;
         }
 
-        openContextMenu(event.clientX, event.clientY, contextMenuOptions)
+        openContextMenu(event.clientX, event.clientY, contextMenuOptions) // open context menu
 
         event.preventDefault();
     });
