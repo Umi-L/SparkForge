@@ -61,6 +61,15 @@
 
     const panelExtenderDistance = 200;
 
+    export function onNodeDrop(node: Node, mousePosition: Point){
+        if (!node.getInWorkspace()){
+            node.setInWorkspace(true);
+            addNode(node, mousePosition.x, mousePosition.y);
+        } else{
+            updateNodePosition(node);
+        }
+    }
+
     export const onSelect = ()=>{
         if (hasBeenSelected) return;
         

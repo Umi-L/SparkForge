@@ -72,20 +72,13 @@
             let wasUsed = false;
 
             elements.forEach(element => {
-                if (element.classList.contains("workfield")){
+                let svelteElement = getElementFromDomElement(element);
 
-                    // get the workspace; kinda hacky but it works.
-                    let workspace = getElementFromDomElement(element) as FlowchartEditor;
-
-                    // if the node is already in the workspace don't bother re-registering.
-                    if (!inWorkspace){
-                        workspace.addNode(myself, event.clientX, event.clientY);
-                        inWorkspace = true;  
-                    }else{
-                        workspace.updateNodePosition(myself);
-                    }             
+                if (svelteElement && svelteElement.onNodeDrop){
 
                     wasUsed = true;
+
+                    svelteElement.onNodeDrop(myself, {x: event.clientX, y: event.clientY});
                 }
             });
 
@@ -107,6 +100,10 @@
         }
     }
 
+    export function getInWorkspace(){
+        return inWorkspace;
+    }
+
     export function setInWorkspace(value: boolean){
         inWorkspace = value;
     }
@@ -117,7 +114,7 @@
     }
 
     function updateParent(){
-        console.log("updating parent");
+        // console.log("updating parent");
         dispatch("update", {uuid: uuid, data: type});
     }
 

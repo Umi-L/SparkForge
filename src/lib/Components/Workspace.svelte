@@ -6,6 +6,7 @@
     import FlowchartEditor from "./Editors/FlowchartEditor.svelte";
     import ScriptEditor from "./Editors/ScriptEditor.svelte";
   import ObjectEditor from "./Editors/ObjectEditor.svelte";
+  import SpriteEditor from "./Editors/SpriteEditor.svelte";
 
     interface ITab {
         file: string;
@@ -66,6 +67,8 @@
                 <ScriptEditor file={tab.file} bind:this={editors[index]}/>
             {:else if tab.type == FileTypes.object}
                 <!-- <ObjectEditor file={tab.file} bind:this={editors[index]}></ObjectEditor> -->
+            {:else if tab.type == FileTypes.sprite}
+                <SpriteEditor filePath={tab.file} bind:this={editors[index]}></SpriteEditor>
             {/if}
         </div>
     {/each}

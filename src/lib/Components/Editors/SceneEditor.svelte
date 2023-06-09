@@ -1,6 +1,12 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
   import { onMount } from "svelte";
+  import { FileTypes, type FSDirectory, type FSFile } from "../../../FileSystem";
+  import { registerElement } from "../../../main";
+  import { get_current_component } from "svelte/internal";
+  import ObjectDisplay from "./SceneEditorComponents/ObjectDisplay.svelte";
+
+    let myself = get_current_component();
 
     let container: HTMLDivElement;
     let viewer: HTMLDivElement;
@@ -21,6 +27,8 @@
     let pulloutOpen = true;
 
     onMount(()=>{
+        registerElement(viewer, myself);
+
         window.addEventListener("mousemove", globalMouseMove);
     })
 
@@ -142,6 +150,29 @@
         pulloutOpen = !pulloutOpen;
     }
 
+    export function onFileDrop(file: FSFile | FSDirectory, mousePos: {x: number, y: number}){
+        // if the file is a directory ignore
+        if (file.type == "directory") {
+            return;
+        }
+
+        // if fileType is not an object ignore
+        if (file.fileType != FileTypes.object){
+            return;
+        }
+
+        // add the object to the scene at the drop position
+        let localPos = globalMousePosToViewerPos(mousePos);
+
+        // create objectDisplay
+        let objectDisplay = new ObjectDisplay({
+            target: viewer,
+            props: {
+                object: file,
+                position: localPos
+            }
+        })
+    }
 </script>
 
 
@@ -222,6 +253,9 @@
         font-size: 5rem;
 
         cursor: pointer;
+
+        border-top-right-radius: var(--general-border-radius);
+        border-bottom-right-radius: var(--general-border-radius);
 
     }
 

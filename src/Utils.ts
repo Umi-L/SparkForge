@@ -57,9 +57,12 @@ export function addFilesToDirectory(files: FileList, path: string){
                 }
             }
 
+            let content = {
+                data: URL.createObjectURL(file),
+            }
+
             // add the file to the file system
-            console.log(file.name, "path=" + parentPath, FileTypes[fileType], URL.createObjectURL(file));
-            FS.addDataFile(file.name, parentPath, FileTypes[fileType], URL.createObjectURL(file));
+            FS.addDataFile(file.name, parentPath, FileTypes[fileType], content);
         }
     }
 }

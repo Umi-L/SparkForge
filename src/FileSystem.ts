@@ -86,6 +86,7 @@ export function getFileTypeIcon(type: FileTypes): string{
 }
 
 
+
 class FileSystem{
     public root: FSDirectory = {name: "root", type: "directory", children: []}
     updateCallbacks: Array<() => void> = []

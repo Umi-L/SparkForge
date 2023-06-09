@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="22mm"
+   height="22mm"
+   viewBox="0 0 22 22"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (b0a8486, 2022-12-01)"
+   sodipodi:docname="UnknownSprite.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.36147739"
+     inkscape:cx="17.981761"
+     inkscape:cy="5.5328495"
+     inkscape:window-width="1440"
+     inkscape:window-height="900"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-94,-137.5)">
+    <rect
+       style="fill:#292929;fill-opacity:0;stroke:#292929;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"
+       id="rect234"
+       width="20"
+       height="20"
+       x="95"
+       y="138.5" />
+    <text
+       xml:space="preserve"
+       style="font-size:14.1111px;font-family:Roboto;-inkscape-font-specification:Roboto;fill:#292929;fill-opacity:1;stroke:#292929;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       x="101.68926"
+       y="153.54706"
+       id="text952"><tspan
+         sodipodi:role="line"
+         id="tspan950"
+         style="fill:#292929;fill-opacity:1;stroke:#292929;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
+         x="101.68926"
+         y="153.54706">?</tspan></text>
+  </g>
+</svg>

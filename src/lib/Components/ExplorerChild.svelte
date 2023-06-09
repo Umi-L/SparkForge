@@ -218,9 +218,7 @@
                     // get the element
                     let explorerChild: ExplorerChild = getElementFromDomElement(target)
 
-
                     hideAllIndicators();
-
                     explorerChild.showMoveIndicator();
                     hideMoveIndicator();
                 }
@@ -261,28 +259,14 @@
 
                 let target = event.target as HTMLElement;
 
-                if (target.classList.contains("directory") || target.classList.contains("file") || target.classList.contains("container")){
-                    // get the element
-                    let explorerChild: ExplorerChild = getElementFromDomElement(target)
+                let targetElement = getElementFromDomElement(target);
 
-                    explorerChild.setShowChildren(true);
+                oldParent.appendChild(container);
 
-                    FS.move(getPath(), explorerChild.getPath());
-
-                } else if (target.classList.contains("explorer-root")){
-                    // get the element
-                    let explorer: ExplorerChild = getElementFromDomElement(target)
-
-                    FS.move(getPath(), explorer.getPath());
-
-                    // _destroy();
+                if (targetElement && targetElement.onFileDrop){
+                    targetElement.onFileDrop((directory) ? directory : file, {x: event.clientX, y: event.clientY});
                 }
-                else{
-                    // set parent back
-                    oldParent.appendChild(container);
-
-                    console.log(oldParent)
-                }
+                
             }
         })
 
@@ -291,6 +275,12 @@
             startRename();
         }
     })
+
+    export function onFileDrop(file: FSFile | FSDirectory){
+        setShowChildren(true);
+
+        FS.move(FS.getPath(file), getPath());
+    }
 
     onDestroy(()=>{
         console.log("ondestroy", (directory) ? "directory " + directory.name : "file " + file.name)
@@ -337,7 +327,7 @@
                     }
 
                     if (!explorerChild.hideMoveIndicator){
-                        console.log("explorerChild.hideMoveIndicator is null?", explorerChild)
+                        // console.log("explorerChild.hideMoveIndicator is null?", explorerChild)
                         // unregisterElement(element);
                         return;
                     }

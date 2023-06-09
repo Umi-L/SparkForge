@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { FS, FileTypes, creatableFileTypes, getFileTypeIcon } from "../../FileSystem";
+  import { FS, FileTypes, creatableFileTypes, getFileTypeIcon, type FSFile, type FSDirectory } from "../../FileSystem";
   import ExplorerChild from "./ExplorerChild.svelte";
   import { children, get_current_component } from "svelte/internal";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
@@ -42,6 +42,10 @@
 
     export function _destroy(){
       console.error("destroying explorer?")
+    }
+
+    export function onFileDrop(file: FSFile | FSDirectory){
+      FS.move(FS.getPath(file), FS.getPath(FS.root));
     }
 
     function newFileOfType(type: FileTypes){
