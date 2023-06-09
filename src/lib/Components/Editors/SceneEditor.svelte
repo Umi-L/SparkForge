@@ -1,10 +1,10 @@
 <script lang="ts">
     import Icon from "@iconify/svelte";
-  import { onMount } from "svelte";
-  import { FileTypes, type FSDirectory, type FSFile } from "../../../FileSystem";
-  import { registerElement } from "../../../main";
-  import { get_current_component } from "svelte/internal";
-  import ObjectDisplay from "./SceneEditorComponents/ObjectDisplay.svelte";
+    import { onMount } from "svelte";
+    import { FileTypes, type FSDirectory, type FSFile } from "../../../FileSystem";
+    import { registerElement } from "../../../main";
+    import { get_current_component } from "svelte/internal";
+    import ObjectDisplay from "./SceneEditorComponents/ObjectDisplay.svelte";
 
     let myself = get_current_component();
 
@@ -346,7 +346,7 @@
         left: 1%;
         top: 3%;
 
-        z-index: 1000;
+        z-index: 1;
 
         border-radius: var(--general-border-radius);
 

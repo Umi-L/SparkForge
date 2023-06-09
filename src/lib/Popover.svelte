@@ -24,6 +24,8 @@
         align-items: center;
 
         background-color: rgba(0, 0, 0, 0.4);
+
+        z-index: 1000;
     }
 
     .popover-container{

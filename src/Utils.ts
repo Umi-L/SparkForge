@@ -1,4 +1,5 @@
-import { FS, FileTypes } from "./FileSystem";
+import { FS, FileTypes, type FSFile } from "./FileSystem";
+import type { Component } from "./PropertiesSystem";
 import { createToast } from "./ToastManager";
 import { ToastPosition, ToastType } from "./Types";
 
@@ -65,4 +66,20 @@ export function addFilesToDirectory(files: FileList, path: string){
             FS.addDataFile(file.name, parentPath, FileTypes[fileType], content);
         }
     }
+}
+
+export function getComponent(file: FSFile, componentName: string){
+    for (let component of file.components){
+        if (component.name == componentName) return component;
+    }
+
+    return null;
+}
+
+export function getProperty(component: Component, propertyName: string){
+    for (let property of component.properties){
+        if (property.name == propertyName) return property;
+    }
+
+    return null;
 }

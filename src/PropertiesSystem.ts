@@ -24,9 +24,9 @@ export function unregisterPropertiesPanel(output) {
     propertiesPanels.splice(propertiesPanels.indexOf(output), 1)
 }
 
-export function setProperties(properties: Array<Component>){
+export function setProperties(properties: Array<Component>, editingObject: FSFile){
     for(let panel of propertiesPanels){
-        panel.setProperties(properties)
+        panel.setProperties(properties, editingObject)
     }
 }
 

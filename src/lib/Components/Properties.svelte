@@ -4,14 +4,17 @@
     import { onMount, onDestroy } from "svelte";
   import { PropertyTypes } from "../../Types";
   import FileTypeSelect from "./FileTypeSelect.svelte";
-  import { FileTypes } from "../../FileSystem";
+  import { FS, FileTypes, getFileTypeIcon, type FSFile } from "../../FileSystem";
+  import { openContextMenu, type IMenuOption } from "../../ContextMenu";
 
     let myself = get_current_component();
     
     let properties: Array<Component> = [];
+    let editingObject: FSFile;
 
-    export function setProperties(newProperties: Array<Component>){
+    export function setProperties(newProperties: Array<Component>, newEditingObject: FSFile){
         properties = newProperties;
+        editingObject = newEditingObject;
     }
 
     export function clearProperties(){
@@ -25,6 +28,29 @@
     onDestroy(()=>{
         unregisterPropertiesPanel(myself);
     })
+
+    function showAddComponentWindow(event: MouseEvent){
+        let options: Array<IMenuOption> = [];
+
+        let scriptFiles = FS.getAllOfType([FileTypes.script, FileTypes.flowchart]);
+
+        for (let scriptFile of scriptFiles){
+            options.push({
+                label: FS.getPath(scriptFile),
+                action: () => {
+                    addScriptToObject(editingObject, scriptFile);
+                },
+                avalableCheck: () => !properties.find(component => component.name == FS.getPath(scriptFile)),
+                icon: getFileTypeIcon(scriptFile.fileType)
+            })
+        }
+
+        openContextMenu(event.clientX, event.clientY, options);
+    }
+
+    function addScriptToObject(object: FSFile, scriptFile: FSFile){
+        
+    }
 </script>
 
 
@@ -75,7 +101,7 @@
     <!-- TODO: Refactor this -->
     {:else if properties.find((catagory) => catagory.name == "File" && catagory.properties.find((property) => property.name == "Type").value == "object")}
         <!-- svelte-ignore a11y-missing-attribute -->
-        <div class="add-component-button">
+        <div class="add-component-button" on:click={showAddComponentWindow}>
             <h1 class="add-component-button-text">Add Component</h1>
         </div>
     {/if}
