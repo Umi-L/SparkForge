@@ -15,9 +15,25 @@
     let stageSize = {width: 25, height: 15};
     let gridSize = 35;
 
+    let hasBeenFocused = false;
+
     onMount(()=>{
         window.addEventListener("mousemove", globalMouseMove);
     })
+
+    export function onSelect(event){
+        if (!hasBeenFocused){
+            hasBeenFocused = true;
+            
+            // wait for the viewer to be rendered
+            requestAnimationFrame(()=>{
+                // centre viewer
+                viewer.scrollLeft = (viewer.scrollWidth - viewer.clientWidth) / 2;
+                viewer.scrollTop = (viewer.scrollHeight - viewer.clientHeight) / 2;
+            })
+            
+        }
+    }
 
     function viewerMouseDown(event){
         console.log("mouse down");
@@ -125,6 +141,36 @@
 
 <div class="scene-container" bind:this={container}>
 
+    <div class="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h1>Scene</h1>
+            </div>
+            <div class="sidebar-body">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-row">
+                        <h2 class="property-name">Width:</h2>
+                        <input type="number" bind:value={stageSize.width} class="value-input"/>
+                    </div>
+                    <div class="sidebar-section-row">
+                        <h2 class="property-name">Height:</h2>
+                        <input type="number" bind:value={stageSize.height} class="value-input"/>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h2 class="section-header">
+                        Grid
+                    </h2>
+                    <div class="sidebar-section-row">
+                        <h2 class="property-name">Grid Size:</h2>
+                        <input type="number" bind:value={gridSize} class="value-input"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="selection-box" bind:this={selectionBox} class:visible={selecting}></div>
     <div class="currently-selected-box" bind:this={currentlySelectedBox} class:visible={selectedItems.length > 0}></div>
 
@@ -138,6 +184,72 @@
 
 
 <style>
+
+    .value-input{
+        width: 100%;
+        height: 1.5rem;
+        border-radius: 0.2rem;
+        border: none;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        padding: 0.2rem;
+        font-size: 0.8rem;
+    }
+
+    .property-name{
+        font-size: 0.8rem;
+        color: var(--text-color);
+    }
+
+    .sidebar-section-row{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sidebar-body{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        width: 100%;
+
+        padding: 1rem;
+    }
+
+    .sidebar-section{
+        width: 100%;
+        margin-bottom: 1rem;
+
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .sidebar-header{
+        font-size: 0.8rem;
+        
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        color: var(--text-color);
+
+        padding: 0.2rem;
+
+        width: 100%;
+        
+        border-radius: var(--general-border-radius);
+        background-color: var(--foreground-color);
+    }
+
+    .section-header{
+        font-size: 1.2rem;
+        color: var(--text-color);
+        text-align: center;
+    }
+
     .visible{
         display: block;
     }
@@ -146,6 +258,25 @@
         background-color: var(--foreground-color);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         margin: 20rem;
+        pointer-events: none;
+    }
+
+    .sidebar{
+        width: 15rem;
+        height: 94%;
+        background-color: var(--midground-color);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+
+        position: absolute;
+
+        left: 2%;
+        top: 3%;
+
+        z-index: 1000;
+
+        border-radius: var(--general-border-radius);
+
+
     }
 
     .currently-selected-box{
@@ -189,6 +320,7 @@
         height: 100%;
 
         pointer-events: all;
+        position: relative;
     }
 
     .scrollable-viewer{
