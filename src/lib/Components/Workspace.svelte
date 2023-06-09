@@ -5,8 +5,9 @@
     import { each } from "svelte/internal";
     import FlowchartEditor from "./Editors/FlowchartEditor.svelte";
     import ScriptEditor from "./Editors/ScriptEditor.svelte";
-  import ObjectEditor from "./Editors/ObjectEditor.svelte";
-  import SpriteEditor from "./Editors/SpriteEditor.svelte";
+    import ObjectEditor from "./Editors/ObjectEditor.svelte";
+    import SpriteEditor from "./Editors/SpriteEditor.svelte";
+    import SceneEditor from "./Editors/SceneEditor.svelte";
 
     interface ITab {
         file: string;
@@ -69,6 +70,8 @@
                 <!-- <ObjectEditor file={tab.file} bind:this={editors[index]}></ObjectEditor> -->
             {:else if tab.type == FileTypes.sprite}
                 <SpriteEditor filePath={tab.file} bind:this={editors[index]}></SpriteEditor>
+            {:else if tab.type == FileTypes.scene}
+                <SceneEditor filePath={tab.file} bind:this={editors[index]}></SceneEditor>
             {/if}
         </div>
     {/each}
@@ -212,5 +215,6 @@
         user-select: none;
 
         /* border-radius: var(--general-border-radius); */
+        z-index: 5;
     }
 </style>

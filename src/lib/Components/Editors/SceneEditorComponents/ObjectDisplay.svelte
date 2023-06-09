@@ -4,7 +4,8 @@
 
     export let object: FSFile;
     export let position: {x: number, y: number};
-    export let size: {width: number, height: number} = {width: 35, height: 35};
+    export let scale: {width: number, height: number} = {width: 35, height: 35};
+    export let rotation: number = 0;
 
     let spritePath = getSpritePath()
     if (!spritePath) {
@@ -55,7 +56,7 @@
 
 
 
-<div class="object-container" style={`left: ${position.x}px; top: ${position.y}px; width: ${size.width}px; height: ${size.height}px;`}>
+<div class="object-container" style={`left: ${position.x}px; top: ${position.y}px; width: ${scale.width}px; height: ${scale.height}px;`}>
     <!-- svelte-ignore a11y-missing-attribute -->
     <img src={spritePath} class="sprite-display">
 </div>

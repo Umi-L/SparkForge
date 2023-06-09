@@ -2,10 +2,10 @@
     import Icon from "@iconify/svelte";
     import { FS, FileTypes, type FSFile, getFileTypeIcon } from "../../../FileSystem";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
-  import { onMount } from "svelte";
-  import { createToast } from "../../../ToastManager";
-  import Toast from "../../Toast.svelte";
-  import { ToastPosition, ToastType } from "../../../Types";
+    import { onMount } from "svelte";
+    import { createToast } from "../../../ToastManager";
+    import Toast from "../../Toast.svelte";
+    import { ToastPosition, ToastType } from "../../../Types";
 
     interface Frame{
         path: string;

@@ -55,7 +55,7 @@ export let fileTypeDefaultComponents = {
         {name: "Image", properties: [
             {name: "Image", value: "", type: PropertyTypes.Image, isModifiable: true},
         ]}
-    ] as Array<Component>,
+    ] as Array<Component>
 }
 
 export function getFileTypeIcon(type: FileTypes): string{

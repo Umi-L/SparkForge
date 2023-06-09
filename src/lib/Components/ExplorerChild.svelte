@@ -9,7 +9,7 @@
   import { get_current_component } from "svelte/internal";
   import type ExplorerChild from "./ExplorerChild.svelte";
   import { clearProperties, getPropertiesOfFile, setProperties } from "../../PropertiesSystem";
-  import { openTabs } from "../../globals";
+  import { openTabs, rootScene } from "../../globals";
   import { showUploadWindow } from "../../UploadPopoverManager";
   import { addFilesToDirectory } from "../../Utils";
 
@@ -32,6 +32,11 @@
 
     let dragging = false;
     let possibleDragging = false;
+    let rootScenePath: string;
+
+    rootScene.subscribe((value)=>{
+        rootScenePath = value;
+    })
 
     let position: {x: number, y: number} = {x: 0, y: 0};
 
@@ -179,7 +184,7 @@
             if ((event.target === container || event.target === fileElement) && file){
                 selected = true;
                 
-                setProperties(getPropertiesOfFile(file));
+                setProperties(getPropertiesOfFile(file), file);
                 
             }
         })
@@ -392,6 +397,26 @@
     function onDragLeave(event){
         selected = false;
     }
+
+    function showSceneOrderMenu(event: MouseEvent){
+        let menuOptions: Array<IMenuOption> = [
+            {
+                label: "Make Root",
+                action: ()=>{
+                    rootScene.update((rootScene)=>{
+                        rootScene = getPath();
+                        return rootScene;
+                    })
+                },
+                avalableCheck: ()=>{
+                    return rootScenePath !== getPath();
+                },
+                icon: "mdi-home"
+            },
+        ];
+        
+        openContextMenu(event.clientX, event.clientY, menuOptions);   
+    }
 </script>
 
 
@@ -411,9 +436,9 @@
             </div>
 
             {#if showChildren}
-            <Icon icon="material-symbols:folder-outline" class="icon"/>
+                <Icon icon="material-symbols:folder-outline" class="icon"/>
             {:else}
-            <Icon icon="material-symbols:folder" class="icon"/>
+                <Icon icon="material-symbols:folder" class="icon"/>
             {/if}
 
             <h3>
@@ -436,8 +461,21 @@
         
     {:else if file && !renaming}
         <div class="file" bind:this={fileElement} on:dblclick={openFileInWorkspace}>
-            <Icon icon={getFileTypeIcon(file.fileType)} class="icon"/>
-            <h3>{file.name}</h3>
+            <div class="icon-name-wrapper">
+                <Icon icon={getFileTypeIcon(file.fileType)} class="icon"/>
+                <h3>{file.name}</h3>
+            </div>
+            
+            {#if file.fileType == FileTypes.scene}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="scene-order-button" on:click={showSceneOrderMenu}>
+                    {#if rootScenePath !== getPath()}
+                        <Icon icon="mdi-dots-grid" class="icon"/>
+                    {:else}
+                        <Icon icon="mdi-home" class="icon"/>
+                    {/if}
+                </div>
+            {/if}
             <!-- <div class="sep"></div> -->
         </div>
     {/if}
@@ -473,6 +511,21 @@
 
 
 <style>
+
+    .scene-order-button{
+        cursor: pointer;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .icon-name-wrapper{
+        display: flex;
+        flex-direction: row;
+        gap:5px;
+        user-select: none;
+        pointer-events: none;
+    }
 
     .selected{
         outline: 1px solid var(--highlight-color);
@@ -521,7 +574,7 @@
     .file{
         display: flex;
         flex-direction: row;
-        gap: 5px;
+        justify-content: space-between;
     }
 
     .arrow{

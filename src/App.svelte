@@ -7,7 +7,6 @@
   import Properties from "./lib/Components/Properties.svelte";
   import Explorerer from "./lib/Components/Explorerer.svelte";
   import Game from "./lib/Components/Game.svelte";
-  import SceneEditor from "./lib/Components/Editors/SceneEditor.svelte";
 </script>
 
 
@@ -20,7 +19,7 @@
 
     <div id="panel_indicator"></div>
 
-    <Panel tabs={[{name:"workspace", component: Workspace}, {name: "scene", component: SceneEditor}, {name: "game", component: Game}]} defaultTransform={{left: 0.2, top: 0, width: 0.6, height: 0.8}}></Panel>
+    <Panel tabs={[{name:"workspace", component: Workspace}, {name: "game", component: Game}]} defaultTransform={{left: 0.2, top: 0, width: 0.6, height: 0.8}}></Panel>
     <Panel tabs={[{name:"output", component: Output}]} defaultTransform={{left: 0.2, top: 0.8, width: 0.6, height: 0.2}}></Panel>
     <Panel tabs={[{name:"toolbox", component: Toolbox}]} defaultTransform={{left: 0, top: 0, width: 0.2, height: 1}}></Panel>
     <Panel tabs={[{name:"explorer", component: Explorerer}]} defaultTransform={{left: 0.8, top: 0, width: 0.2, height: 0.5}}></Panel>
