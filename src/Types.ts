@@ -1,5 +1,7 @@
 import { print } from "./API"
+import type { FSFile } from "./FileSystem"
 import { Template } from "./Templates"
+import type ObjectDisplay from "./lib/Components/Editors/SceneEditorComponents/ObjectDisplay.svelte"
 
 export interface Point {
     x: number
@@ -7,6 +9,44 @@ export interface Point {
 
     name?: string
 }
+
+export interface ISceneObject{
+    object: FSFile,
+    position: {
+        x: number,
+        y: number
+    },
+    rotation: number,
+    scale: {
+        width: number,
+        height: number
+    },
+    displayObject: ObjectDisplay
+}
+
+export interface SceneFileContent{
+    objects: Array<ISceneObject>,
+    backgroundColor: string
+}
+
+export interface ScriptFileContent{
+    code: string
+}
+
+export interface FlowchartFileContent{
+    nodes: Array<SavedNode>,
+    connections: Array<SavedConnection>,
+    extenderPosition: {x: string, y: string},
+    compiledCode?: string,
+}
+
+export interface Frame{
+    path: string;
+}
+export interface SpriteFileContent{
+    frames: Array<Frame>;
+}
+
 
 export interface ScriptData {
     content: string
@@ -130,10 +170,26 @@ export const NodeTypes: NodeDefs = {
         name: "start",
         inputs: [],
         outputs: [{ label: "out", type: FlowDataType.Flow }],
+        template: new Template("function start(){{b1}}"),
         literals: [],
         category: NodeCatagories.Events,
     },
-
+    OnClick: {
+        name: "on click",
+        inputs: [],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        template: new Template("function onClick(){{b1}}"),
+        literals: [],
+        category: NodeCatagories.Events,
+    },
+    OnUpdate: {
+        name: "on update",
+        inputs: [],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        template: new Template("function onUpdate(){{b1}}"),
+        literals: [],
+        category: NodeCatagories.Events,
+    },
     If: {
         name: "if",
         inputs: [

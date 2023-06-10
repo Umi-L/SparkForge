@@ -419,6 +419,7 @@
 
         font-size: 0.85em;
         padding-left: 5px;
+        padding-right: 10px;
 
         border-radius: var(--general-border-radius);
 

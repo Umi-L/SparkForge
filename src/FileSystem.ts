@@ -49,7 +49,8 @@ export let fileTypeDefaultComponents = {
     object: [
         {name: "Sprite", properties: [
             {name: "Sprite", value: "", type: PropertyTypes.Sprite, isModifiable: true},
-        ]}
+        ]},
+        {name: "Scripts", properties: []}
     ] as Array<Component>,
     sprite: [
         {name: "Image", properties: [

@@ -6,6 +6,7 @@
   import FileTypeSelect from "./FileTypeSelect.svelte";
   import { FS, FileTypes, getFileTypeIcon, type FSFile } from "../../FileSystem";
   import { openContextMenu, type IMenuOption } from "../../ContextMenu";
+  import { getComponent } from "../../Utils";
 
     let myself = get_current_component();
     
@@ -49,7 +50,20 @@
     }
 
     function addScriptToObject(object: FSFile, scriptFile: FSFile){
-        
+        let scriptsComponent = getComponent(object, "Scripts");
+
+        // check if there is already a 
+        scriptsComponent.properties.push({
+            name: FS.getPath(scriptFile),
+            type: PropertyTypes.String,
+            value: FS.getPath(scriptFile),
+            isModifiable: false,
+            onChange: (newValue) => {
+                console.error("Tried to change a script path, this should never happen");
+            }
+        });
+
+
     }
 </script>
 
@@ -101,6 +115,7 @@
     <!-- TODO: Refactor this -->
     {:else if properties.find((catagory) => catagory.name == "File" && catagory.properties.find((property) => property.name == "Type").value == "object")}
         <!-- svelte-ignore a11y-missing-attribute -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="add-component-button" on:click={showAddComponentWindow}>
             <h1 class="add-component-button-text">Add Component</h1>
         </div>

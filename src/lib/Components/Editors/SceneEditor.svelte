@@ -6,30 +6,14 @@
     import { get_current_component } from "svelte/internal";
     import ObjectDisplay from "./SceneEditorComponents/ObjectDisplay.svelte";
     import { createToast } from "../../../ToastManager";
-    import { ToastPosition, ToastType } from "../../../Types";
-    
-    interface SceneFileContent{
-        objects: Array<ISceneObject>
-    }
-    
-    interface ISceneObject{
-        object: FSFile,
-        position: {
-            x: number,
-            y: number
-        },
-        rotation: number,
-        scale: {
-            width: number,
-            height: number
-        },
-        displayObject: ObjectDisplay
-    }
+    import { ToastPosition, ToastType, type ISceneObject, type SceneFileContent } from "../../../Types";
+
     
     let myself = get_current_component();
     
     let container: HTMLDivElement;
     let viewer: HTMLDivElement;
+    let stage: HTMLDivElement;
     
     let selecting = false;
     let selectedItems = [];
@@ -47,6 +31,8 @@
     let pulloutOpen = true;
     
     let objects: Array<ISceneObject> = [];
+
+    let backgroundColor = "#52d9d7";
     
     export let filePath;
     
@@ -87,7 +73,7 @@
             
             for (let object of content.objects){
                 let displayObject = new ObjectDisplay({
-                    target: viewer,
+                    target: stage,
                     props: {
                         object: object.object,
                         position: object.position,
@@ -104,6 +90,8 @@
                     displayObject: displayObject
                 })
             }
+
+            backgroundColor = content.backgroundColor;
         }
         
         function save(){
@@ -117,6 +105,7 @@
             let content = fsFile.content as SceneFileContent;
             
             content.objects = objects;
+            content.backgroundColor = backgroundColor;
        
         }
         
@@ -174,12 +163,12 @@
             
             // current scroll position of the workfield
             let scrollPos = {
-                x: viewer.scrollLeft,
-                y: viewer.scrollTop
+                x: stage.scrollLeft,
+                y: stage.scrollTop
             }
             
-            workfieldPos.x = mousePos.x - viewer.getBoundingClientRect().x;
-            workfieldPos.y = mousePos.y - viewer.getBoundingClientRect().y;
+            workfieldPos.x = mousePos.x - stage.getBoundingClientRect().x;
+            workfieldPos.y = mousePos.y - stage.getBoundingClientRect().y;
             
             // add the scroll position to the position
             workfieldPos.x += scrollPos.x;
@@ -242,14 +231,14 @@
 
             // create objectDisplay
             let objectDisplay = new ObjectDisplay({
-                target: viewer,
+                target: stage,
                 props: {
                     object: file,
                     position: localPos,
                     rotation: 0,
                     scale: {width: gridSize, height: gridSize},
                 }
-            })
+            });
 
             let objProps = {
                 object: file,
@@ -257,12 +246,14 @@
                 rotation: 0,
                 scale: {width: gridSize, height: gridSize},
                 displayObject: objectDisplay,
-            } as ISceneObject
+            } as ISceneObject;
 
             objects.push(objProps);
 
             save();
         }
+
+         
     </script>
     
     
@@ -284,11 +275,15 @@
                     <div class="sidebar-section">
                         <div class="sidebar-section-row">
                             <h2 class="property-name">Width:</h2>
-                            <input type="number" bind:value={stageSize.width} class="value-input"/>
+                            <input type="number" bind:value={stageSize.width} on:change={save} class="value-input"/>
                         </div>
                         <div class="sidebar-section-row">
                             <h2 class="property-name">Height:</h2>
-                            <input type="number" bind:value={stageSize.height} class="value-input"/>
+                            <input type="number" bind:value={stageSize.height} on:change={save} class="value-input"/>
+                        </div>
+                        <div class="sidebar-section-row">
+                            <h2 class="property-name">Background Color:</h2>
+                            <input type="color" bind:value={backgroundColor} on:change={save} class="value-input"/>
                         </div>
                     </div>
                     
@@ -309,8 +304,8 @@
         <div class="currently-selected-box" bind:this={currentlySelectedBox} class:visible={selectedItems.length > 0}></div>
         
         <div class="scrollable-viewer" bind:this={viewer} on:mousedown={viewerMouseDown} on:mousemove={viewerMouseMove} on:mouseup={viewerMouseUp}>
-            <div class="stage" style={`width: ${stageSize.width*gridSize}px; height: ${stageSize.height*gridSize}px; background-size: ${gridSize}px ${gridSize}px;`}>
-                
+            <div class="stage" bind:this={stage} style={`width: ${stageSize.width*gridSize}px; height: ${stageSize.height*gridSize}px; background-size: ${gridSize}px ${gridSize}px; background-color: ${backgroundColor};`}>
+                <div class="grid" style={`width: ${stageSize.width*gridSize}px; height: ${stageSize.height*gridSize}px; background-size: ${gridSize}px ${gridSize}px;`}></div>
             </div>
         </div>
     </div>
@@ -419,10 +414,10 @@
         }
         
         .stage{
-            background-color: var(--foreground-color);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             margin: 20rem;
             pointer-events: none;
+            position: relative;
         }
         
         .sidebar{
@@ -497,16 +492,20 @@
             
             position: relative;
         }
+
+        .grid{
+            opacity: 0.5;
+        }
         
         
         
         @media (prefers-color-scheme: dark){
-            .stage{
+            .grid{
                 background-image: url("/grid-dark.svg");
             }
         }
         @media (prefers-color-scheme: light){
-            .stage{
+            .grid{
                 background-image: url("/grid-light.svg");
             }
         }

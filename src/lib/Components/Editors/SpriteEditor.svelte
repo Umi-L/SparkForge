@@ -5,18 +5,14 @@
     import { onMount } from "svelte";
     import { createToast } from "../../../ToastManager";
     import Toast from "../../Toast.svelte";
-    import { ToastPosition, ToastType } from "../../../Types";
+    import { ToastPosition, ToastType, type SpriteFileContent, type Frame } from "../../../Types";
 
-    interface Frame{
-        path: string;
-    }
-    interface SpriteContent{
-        frames: Array<Frame>;
-    }
-
+   
     onMount(() => {
         load();
     })
+    
+    let selectedFrame: number = 0;
 
     export let filePath: string;
     let frames: Array<Frame> = [];
@@ -24,7 +20,7 @@
     function save(){
         let fsFile = FS.getAtPath(filePath) as FSFile;
 
-        let spriteContnet = fsFile.content as SpriteContent
+        let spriteContnet = fsFile.content as SpriteFileContent
 
         spriteContnet.frames = frames;
     }
@@ -32,7 +28,7 @@
     function load(){
         let fsFile = FS.getAtPath(filePath) as FSFile;
 
-        let spriteContnet = fsFile.content as SpriteContent
+        let spriteContnet = fsFile.content as SpriteFileContent
 
         if (!spriteContnet.frames) return;
 
@@ -80,8 +76,9 @@
     <div class="topbar">
 
         <div class="frames">
-            {#each frames as frame}
-                <div class="frame">
+            {#each frames as frame, i}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="frame" on:click={()=>{selectedFrame = i}}>
                     <img src={getFrameImage(frame)} alt="" class="frame-thumbnail">
                 </div>
             {/each}
@@ -95,7 +92,7 @@
 
     <div class="image-viewer">
         {#if frames.length > 0}
-            <img src={frames[0].path} alt="">
+            <img src={getFrameImage(frames[selectedFrame])} alt="" class="frame-thumbnail">
         {:else}
             <h1 class="no-frames-text">There Are No Frames <br> Click "+" or Drag Images Into The Toolbar to Add Frames</h1>
         {/if}
@@ -107,9 +104,9 @@
 <style>
 
     .frame-thumbnail{
-        width: 100%;
         height: 100%;
-        object-fit: contain;
+
+        image-rendering: pixelated;
     }
 
     .frames{
@@ -148,6 +145,8 @@
         background-color: var(--foreground-color);
         border-radius: var(--general-border-radius);
         box-shadow: 0 0 5px rgba(0,0,0,0.1);
+
+        overflow: hidden;
     }
 
     .sprite-editor-body{

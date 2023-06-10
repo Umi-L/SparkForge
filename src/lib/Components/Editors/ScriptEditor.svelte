@@ -6,7 +6,7 @@
 	import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
 	import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 	import { FS, type FSFile } from "../../../FileSystem";
-	import type { ScriptData } from "../../../Types";
+	import type { ScriptFileContent } from "../../../Types";
 	
 	export let file: string;
 	
@@ -28,13 +28,8 @@
 	let content = "// Write your code here";
 	onMount(async () => {
 		
-		// get file content
-		let fsFile = FS.getAtPath(file) as FSFile;
-		if (fsFile) {
-			
-			if (fsFile.content["content"] && fsFile.content["content"].length > 0)
-			content = fsFile.content["content"];
-		}
+		// load file content
+		load();
 		
 		self.MonacoEnvironment = {
 			getWorker: function (_moduleId, label) {
@@ -69,8 +64,8 @@
 			const text = editor.getValue();
 			
 			let data = {
-				content: text,
-			} as ScriptData;
+				code: text,
+			} as ScriptFileContent;
 			
 			FS.writeData(file, data);
 		});
@@ -115,6 +110,17 @@
 			},
 		});
 		Monaco.editor.setTheme("brainbox-theme");
+	}
+
+	function load(){
+		let fsFile = FS.getAtPath(file) as FSFile;
+		if (fsFile) {
+
+			let fileContent = fsFile.content as ScriptFileContent;
+			
+			if (fileContent.code && fileContent.code.length > 0)
+				content = fileContent.code
+		}
 	}
 </script>
 

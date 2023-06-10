@@ -3,7 +3,7 @@
     import { onDestroy, onMount } from "svelte";
     import { get_current_component, stop_immediate_propagation } from "svelte/internal";
     import Node from "../../Node.svelte";
-    import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData, type SavedNode, type SavedConnection } from "../../../Types";
+    import { ToastType, type Point, ToastPosition, FlowDataType, NodeTypes, type NodeData, type SavedNode, type SavedConnection, type FlowchartFileContent } from "../../../Types";
     import { AST, ASTConnection, ASTNode } from "../../../AbstractSyntaxTree";
     import { createToast } from "../../../ToastManager";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
@@ -942,7 +942,7 @@
                     node: nodes.indexOf(connection.to.node),
                     inputNumber: connection.to.inputNumber
                 }
-            }
+            } as SavedConnection;
 
             connectionData.push(connectionDataItem);
         }
@@ -951,8 +951,9 @@
         FS.writeData(file, {
             nodes: nodeData,
             connections: connectionData,
-            extenderPosition: {x: panelExtender.style.left, y: panelExtender.style.top}
-        });
+            extenderPosition: {x: panelExtender.style.left, y: panelExtender.style.top},
+            compiledCode: "" // The data must have changed for the file to be saved so the compiled code is invalid
+        } as FlowchartFileContent);
     }
 </script>
 

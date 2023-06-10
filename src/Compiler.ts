@@ -3,7 +3,7 @@ import { FS, FileTypes } from "./FileSystem";
 import { OutputTypes, addOutputMessage } from "./OutputSystem";
 import { Template } from "./Templates";
 import { createToast } from "./ToastManager";
-import { NodeTypes, ToastPosition, ToastType, type SavedNode, type SavedConnection } from "./Types";
+import { NodeTypes, ToastPosition, ToastType, type SavedNode, type SavedConnection, NodeCatagories, type FlowchartFileContent } from "./Types";
 
 function flowchartDataToASTs(data: any): Array<AST> {
 
@@ -16,7 +16,7 @@ function flowchartDataToASTs(data: any): Array<AST> {
     for (let i = 0; i < nodes.length; i++) {
         let node = nodes[i];
 
-        if (node.type == NodeTypes.Start) {
+        if (node.type.category == NodeCatagories.Events) {
             startNodes.push(node);
         }
     }
@@ -213,9 +213,19 @@ export function compileAll(){
     for (let file of files){
         let asts = flowchartDataToASTs(file.content);
 
+        let code = "";
+
+        // TODO: Error handling
         for (let ast of asts){
-            Compile(ast);
+            code += Compile(ast) + "\n";
         }
 
+        // get current flowchart data
+        let flowchartData = file.content as FlowchartFileContent;
+
+        flowchartData.compiledCode = code;
+
+        console.log("flowchart compiled:")
+        console.log(file)
     }
 }
