@@ -3,11 +3,12 @@
 	import { getQuickJS, type QuickJSContext, type QuickJSWASMModule } from "quickjs-emscripten";
 	import { NodeTypes, ToastPosition, ToastType, type SceneFileContent, type ISceneObject, type SpriteFileContent, type ScriptFileContent, type FlowchartFileContent } from "../../Types";
 	import * as PIXI from "pixi.js";
-	import { gameRunning, rootScene } from "../../globals";
+	import { currentVM, gameRunning, rootScene } from "../../globals";
 	import { FileTypes, FS, type FSFile } from "../../FileSystem";
 	import { createToast } from "../../ToastManager";
 	import Toast from "../Toast.svelte";
 	import { getProperty } from "../../Utils";
+  import { exportedClasses } from "../../API";
 	
 	interface Component {
 		name: string;
@@ -22,6 +23,13 @@
 			height: number;
 		}
 	}
+
+	interface scriptComponent extends Component {
+		name: "Script";
+		data: {
+			code: string;
+		}
+	}
 	
 	interface Entity {
 		id: string;
@@ -33,7 +41,6 @@
 	let resizeFunc: Function;
 	let app: PIXI.Application;
 	let QuickJS: QuickJSWASMModule;
-	let vm: QuickJSContext;
 	
 	let entities: Array<Entity> = [];
 		
@@ -69,7 +76,6 @@
 		async function init() {
 			// ----- init sandbox -----
 			QuickJS = await getQuickJS();
-			loadVm();
 			
 			let color = getComputedStyle(document.documentElement).getPropertyValue('--midground-color');
 			
@@ -95,8 +101,8 @@
 			}, 0);
 		}
 		
-		function loadVm(){
-			vm = QuickJS.newContext();
+		function newVM(){
+			let vm = QuickJS.newContext();
 			
 			//foreach node definition
 			for (const nodeType in NodeTypes) {
@@ -106,18 +112,26 @@
 					// expose it to the vm
 					let funcHandle = vm.newFunction(node.func.name, (...args) => node.func(...args));
 					vm.setProp(vm.global, node.func.name, funcHandle);
+					funcHandle.dispose();
 					
-					console.log(node.func.name, "exposed to vm")
+					// console.log(node.func.name, "exposed to vm")
 				}
 			}
+
+			currentVM.update((_) => {
+				return vm;
+			})
+
+			return vm
+		}
+
+		function disposeVM(vm: QuickJSContext){
+			vm.dispose();
 		}
 		
 		export function run(){
 			// reset pixi
 			app.stage.removeChildren();
-			
-			// reload vm
-			loadVm();
 			
 			// check if scene exists
 			let sceneFile = FS.getAtPath(baseScene) as FSFile;
@@ -131,12 +145,63 @@
 			
 			// load scene
 			loadScene(sceneFile);
+
+			// start call
+			// foreach entity
+			for (const entity of entities) {
+				callEventOnEntity(entity, "start")
+			}
 			
 			// main loop
 			app.ticker.add((dt) => {
-				
+				// foreach entity
+				for (const entity of entities) {
+					callEventOnEntity(entity, "update")
+				}
 			})
 			
+		}
+
+		function callFuncOnVM(vm: QuickJSContext, functionName: string){
+			let funcHandle = vm.getProp(vm.global, functionName);
+			
+			if (funcHandle.value == undefined){
+				ERORR(`Function ${functionName} does not exist!`);
+				return;
+			}
+			
+			let result = vm.callFunction(funcHandle, vm.undefined, vm.undefined);
+			
+			if (result.error){
+				console.error(vm.dump(result.error));
+				result.error.dispose();
+			}
+			
+			funcHandle.dispose();
+		}
+
+		function attachScriptToVM(vm: QuickJSContext, script: scriptComponent){
+			let funcHandle = vm.evalCode(script.data.code);
+			
+			if (funcHandle.error){
+				console.error(vm.dump(funcHandle.error));
+				funcHandle.error.dispose();
+				return;
+			}
+		}
+
+		function callEventOnEntity(entity: Entity, event: string){
+			// foreach component
+			for (const component of entity.components) {
+				if (component.name == "Script"){
+					let scriptComponent = component as scriptComponent;
+					
+					let vm = newVM();
+					attachScriptToVM(vm, scriptComponent);
+					callFuncOnVM(vm, event);
+					disposeVM(vm);
+				}
+			}
 		}
 		
 		function loadScene(scene: FSFile){
@@ -182,7 +247,7 @@
 						console.log(sprite)
 					}
 					else if (component.name == "Script"){
-						
+
 					}
 				}
 			}
