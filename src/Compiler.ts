@@ -3,7 +3,7 @@ import { FS, FileTypes } from "./FileSystem";
 import { OutputTypes, addOutputMessage } from "./OutputSystem";
 import { Template } from "./Templates";
 import { createToast } from "./ToastManager";
-import { NodeTypes, ToastPosition, ToastType, type SavedNode, type SavedConnection, NodeCatagories, type FlowchartFileContent } from "./Types";
+import { NodeTypes, ToastPosition, ToastType, type SavedNode, type SavedConnection, NodeCatagories, type FlowchartFileContent, FlowDataType } from "./Types";
 
 function flowchartDataToASTs(data: any): Array<AST> {
 
@@ -128,14 +128,35 @@ export function Compile(ast: AST) {
     let rootNode = ast.root;
 
     // recursively process all in connections
-    function processNodeInConnections(node: ASTNode): string {
+    function processNodeInConnections(node: ASTNode, inConnection: ASTConnection): string {
         let inputs = [];
+
+        // if there are any params
+        if (node.data.parameters) {
+            // check the index of the from connection
+            let index = inConnection.from.outputNumber;
+
+            console.log("inconnect", inConnection)
+            
+            console.log("index", index)
+
+            console.log(node.data.parameters)
+
+            // foreach param
+            for (const param of node.data.parameters) {
+                // if the param is the same index as the from connection
+                if (param.outputNumber == index) {
+                    // add the param to the inputs array
+                    return param.label;
+                }
+            }
+        }
 
         console.log(node)
         let template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...})`);
 
         for (let connection of node.inConnections) {
-            let input = processNodeInConnections(connection.from.node);
+            let input = processNodeInConnections(connection.from.node, connection);
             inputs.push(input);
         }
 
@@ -146,7 +167,7 @@ export function Compile(ast: AST) {
         let inputs = [];
 
         for (let connection of node.inConnections) {
-            let input = processNodeInConnections(connection.from.node);
+            let input = processNodeInConnections(connection.from.node, connection);
             inputs.push(input);   
         }
 
@@ -177,6 +198,12 @@ export function Compile(ast: AST) {
         
         // for every output connection
         for (let connection of node.outConnections) {
+            
+            // only process if its a flow connection
+            if (node.data.outputs[connection.from.outputNumber].type != FlowDataType.Flow) {
+                continue;
+            }
+
             // recursively process the node and add the body to the bodies array
             bodies.push(processNode(connection.to.node));
         }

@@ -9,9 +9,7 @@
 	import Toast from "../Toast.svelte";
 	import { ERORR, getProperty } from "../../Utils";
   	import { app, Entity, initPIXIApp, initQuickJS, QuickJS, type spriteComponent } from "../../gameRuntime";
-	
-	
-	
+		
 	let gameContainer: HTMLDivElement;
 	
 	let resizeFunc: Function;
@@ -81,6 +79,22 @@
 			setTimeout(() => {
 				resizeFunc();
 			}, 0);
+
+			// add keydown listener
+			window.addEventListener("keydown", (e) => {
+				// foreach entity
+				for (const entity of entities) {
+					entity.callFunction("keyDown", [e.key]);
+				}
+			})
+
+			// add keyup listener
+			window.addEventListener("keyup", (e) => {
+				// foreach entity
+				for (const entity of entities) {
+					entity.callFunction("keyUp", [e.key]);
+				}
+			})
 		}
 		
 		
@@ -113,6 +127,8 @@
 				// foreach entity
 				for (const entity of entities) {
 					entity.callFunction("update");
+
+
 				}
 			})
 			

@@ -142,7 +142,13 @@ export interface NodeDefs {
     specialCase?: boolean;
     template?: Template;
     category: NodeCatagories;
+    parameters?: Array<NodeParameter>;
   };
+}
+
+export interface NodeParameter {
+    label: string;
+    outputNumber: number;
 }
 
 export interface NodeData {
@@ -154,6 +160,7 @@ export interface NodeData {
   specialCase?: boolean;
   template?: Template;
   category: NodeCatagories;
+  parameters?: Array<NodeParameter>;
 }
 
 export interface IOPoint {
@@ -175,7 +182,7 @@ export const NodeTypes: NodeDefs = {
         literals: [],
         category: NodeCatagories.Events,
     },
-    OnClick: {
+    Click: {
         name: "click",
         inputs: [],
         outputs: [{ label: "out", type: FlowDataType.Flow }],
@@ -183,12 +190,40 @@ export const NodeTypes: NodeDefs = {
         literals: [],
         category: NodeCatagories.Events,
     },
-    OnUpdate: {
+    Update: {
         name: "update",
         inputs: [],
         outputs: [{ label: "out", type: FlowDataType.Flow }],
         template: new Template("function update(){{b1}}"),
         literals: [],
+        category: NodeCatagories.Events,
+    },
+    KeyDown: {
+        name: "key down",
+        inputs: [],
+        outputs: [
+            { label: "out", type: FlowDataType.Flow },
+            { label: "key", type: FlowDataType.String }
+        ],
+        template: new Template("function keyDown(key){{b1}}"),
+        literals: [],
+        parameters: [
+            {label: "key", outputNumber: 1}
+        ],
+        category: NodeCatagories.Events,
+    },
+    KeyUp: {
+        name: "key up",
+        inputs: [],
+        outputs: [
+            { label: "out", type: FlowDataType.Flow },
+            { label: "key", type: FlowDataType.String }
+        ],
+        template: new Template("function keyUp(key){{b1}}"),
+        literals: [],
+        parameters: [
+            {label: "key", outputNumber: 1}
+        ],
         category: NodeCatagories.Events,
     },
     MoveTo: {

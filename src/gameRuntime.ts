@@ -95,6 +95,9 @@ export class Entity {
 
                 sprite.position.x = this.position.x;
                 sprite.position.y = this.position.y;
+
+                sprite.anchor.x = 0.5;
+                sprite.anchor.y = 0.5;
                 
                 app.stage.addChild(sprite);
 
@@ -121,7 +124,7 @@ export class Entity {
         }
     }
 
-    public callFunction(event: string){
+    public callFunction(event: string, args: Array<any> = undefined){
 
         console.log("start of func call " + event + " on vm")
         console.log(this.components)
@@ -140,9 +143,13 @@ export class Entity {
                     return scriptComponent.data.vm;
                 })
 
-                console.log("calling function " + event + " on vm")
+                if (args == undefined){
+                    args = [scriptComponent.data.vm.undefined];
+                }
 
-                callFuncOnVM(scriptComponent.data.vm, event);
+                console.log("calling function " + event + " on vm with args ", args)
+
+                callFuncOnVM(scriptComponent.data.vm, event, args);
             }
         }
     }
@@ -194,15 +201,30 @@ export class Entity {
     }
 }
 
-export function callFuncOnVM(vm: QuickJSContext, functionName: string){
+export function callFuncOnVM(vm: QuickJSContext, functionName: string, args: Array<any> = [vm.undefined]){
     let funcHandle = vm.getProp(vm.global, functionName);
     
     if (funcHandle.value == undefined){
         // ERORR(`Function ${functionName} does not exist!`);
         return;
     }
-    
-    let result = vm.callFunction(funcHandle, vm.undefined, vm.undefined);
+
+    console.log("calling function " + functionName + " on vm with args ", args)
+
+    // create handles for args
+    let argHandles = args.map((arg) => {
+        if (typeof arg == "string"){
+            return vm.newString(arg);
+        }
+        else if (typeof arg == "number"){
+            return vm.newNumber(arg);
+        }
+        return vm.newString(arg);
+
+    });
+
+    // call with args
+    let result = vm.callFunction(funcHandle, vm.undefined, ...argHandles);
     
     if (result.error){
         // console.error(vm.dump(result.error));
