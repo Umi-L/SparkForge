@@ -23,7 +23,7 @@ export function numToPrecision(number: number, precision: number) {
     return roundedTempNumber / factor;
 };
 
-export function addFilesToDirectory(files: FileList, path: string){
+export async function addFilesToDirectory(files: FileList, path: string){
     // for each file
     for (let i = 0; i < files.length; i++){
         let file = files[i];
@@ -37,7 +37,7 @@ export function addFilesToDirectory(files: FileList, path: string){
         reader.readAsText(file);
 
         // when the file is read
-        reader.onload = ()=>{
+        reader.onload = async ()=>{
 
             // get filetype
             let fileType = file.name.split(".").pop();
@@ -59,7 +59,7 @@ export function addFilesToDirectory(files: FileList, path: string){
             }
 
             let content = {
-                data: URL.createObjectURL(file),
+                data: await fileToDataURI(file),
             }
 
             // add the file to the file system
@@ -67,6 +67,15 @@ export function addFilesToDirectory(files: FileList, path: string){
         }
     }
 }
+
+function fileToDataURI(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }
 
 export function getComponent(file: FSFile, componentName: string){
     for (let component of file.components){
@@ -82,4 +91,9 @@ export function getProperty(component: Component, propertyName: string){
     }
 
     return null;
+}
+
+export function ERORR(text: string){
+    console.error(text);
+    createToast(text, ToastType.Error, ToastPosition.BottomRight);
 }

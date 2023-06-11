@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Compile, compileAll } from "../Compiler";
     import { openContextMenu, type IMenuOption } from "../ContextMenu";
+  import { loadFileSystemFromJson, saveFileSystemToJson } from "../FileSystem";
   import { changeAllPanelsTabIfPossible } from "../WindowManager";
   import { gameRunning } from "../globals";
     import { getElementFromDomElement } from "../main";
@@ -21,7 +22,7 @@
         {
             label: "Open",
             action: () => {
-                console.log("Open");
+                loadFileSystemFromJson();
             },
             avalableCheck: () => {
                 return true;
@@ -31,7 +32,7 @@
         {
             label: "Save As File",
             action: () => {
-                console.log("Save As");
+                saveFileSystemToJson();
             },
             avalableCheck: () => {
                 return true;

@@ -1,4 +1,4 @@
-import { print } from "./API"
+import { print, moveBy, moveTo, rotateTo, rotateBy, sizeBy, sizeTo, random } from "./API"
 import type { FSFile } from "./FileSystem"
 import { Template } from "./Templates"
 import type ObjectDisplay from "./lib/Components/Editors/SceneEditorComponents/ObjectDisplay.svelte"
@@ -11,7 +11,7 @@ export interface Point {
 }
 
 export interface ISceneObject{
-    object: FSFile,
+    object: string,
     position: {
         x: number,
         y: number
@@ -129,6 +129,7 @@ export enum NodeCatagories {
     literals = 'literals',
     Events = 'events',
     debug = 'debug',
+    Movement = 'movement',
 }
 
 export interface NodeDefs {
@@ -190,6 +191,87 @@ export const NodeTypes: NodeDefs = {
         literals: [],
         category: NodeCatagories.Events,
     },
+    MoveTo: {
+        name: "move to",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "x", type: FlowDataType.Number },
+            { label: "y", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        func: moveTo,
+        category: NodeCatagories.Movement,
+    },
+    MoveBy: {
+        name: "move by",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "x", type: FlowDataType.Number },
+            { label: "y", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        func: moveBy,
+        category: NodeCatagories.Movement,
+    },
+    RotateTo: {
+        name: "rotate to",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "angle", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        func: rotateTo,
+        category: NodeCatagories.Movement,
+    },
+    RotateBy: {
+        name: "rotate by",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "angle", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        func: rotateBy,
+        category: NodeCatagories.Movement,
+    },
+    SizeTo: {
+        name: "size to",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "x", type: FlowDataType.Number },
+            { label: "y", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        func: sizeTo,
+        category: NodeCatagories.Movement,
+    },
+    SizeBy: {
+        name: "scale by",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "x", type: FlowDataType.Number },
+            { label: "y", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [],
+        func: sizeBy,
+        category: NodeCatagories.Movement,
+    },
+    Random: {
+        name: "random",
+        inputs: [
+            { label: "min", type: FlowDataType.Number },
+            { label: "max", type: FlowDataType.Number },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Number }],
+        literals: [],
+        func: random,
+        category: NodeCatagories.Operators,
+    },
     If: {
         name: "if",
         inputs: [
@@ -206,7 +288,6 @@ export const NodeTypes: NodeDefs = {
         template: new Template("if({p1}){{b1}}else{{b2}}{b3}"),
         category: NodeCatagories.Control,
     },
-
     Log: {
         name: "print",
         inputs: [

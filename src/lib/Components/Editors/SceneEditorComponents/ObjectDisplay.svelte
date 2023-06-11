@@ -2,10 +2,12 @@
     import { FS, type FSFile } from "../../../../FileSystem";
   import { getComponent, getProperty } from "../../../../Utils";
 
-    export let object: FSFile;
+    export let objectPath: string;
     export let position: {x: number, y: number};
     export let scale: {width: number, height: number} = {width: 35, height: 35};
     export let rotation: number = 0;
+
+    let object = FS.getAtPath(objectPath) as FSFile;
 
     let spritePath = getSpritePath()
     if (!spritePath) {

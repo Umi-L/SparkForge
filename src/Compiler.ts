@@ -131,6 +131,7 @@ export function Compile(ast: AST) {
     function processNodeInConnections(node: ASTNode): string {
         let inputs = [];
 
+        console.log(node)
         let template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...})`);
 
         for (let connection of node.inConnections) {
@@ -164,7 +165,7 @@ export function Compile(ast: AST) {
         let template: Template;
 
         if (node.data.func){
-            template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...});\n{b1}`);
+            template = (node.data.specialCase) ? node.data.template : new Template(`${node.data.func.name}({p...})\n{b1}`);
         }
         else if (node.data.template) {
             template = node.data.template;

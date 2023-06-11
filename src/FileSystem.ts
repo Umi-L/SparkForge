@@ -1,5 +1,5 @@
 import type { Component } from "./PropertiesSystem"
-import { PropertyTypes } from "./Types"
+import { PropertyTypes, type FlowchartFileContent, NodeTypes } from "./Types"
 
 export interface FSFile{
     type: "file"
@@ -336,3 +336,82 @@ export let FS = new FileSystem([
     {name: "scripts", children: [], type: "directory"},
     {name: "sprites", children: [], type: "directory"},
 ]);
+
+export function saveFileSystemToJson(){
+
+    let rootWithoutParents = {...FS.root}
+
+    // remove parents
+    function removeParents(dir: FSDirectory){
+        dir.children.forEach(c => {
+            if(c.type == "directory"){
+                removeParents(c as FSDirectory)
+            }
+            c.parent = null
+        })
+    }
+
+    removeParents(rootWithoutParents);
+
+    let json = JSON.stringify(rootWithoutParents)
+    
+    // download file
+    let a = document.createElement("a")
+    let file = new Blob([json], {type: "application/json"})
+    a.href = URL.createObjectURL(file)
+    a.download = "filesystem.json"
+    a.click()
+
+    // remove element
+    a.remove()
+}
+
+export function loadFileSystemFromJson(){
+    let input = document.createElement("input")
+    input.type = "file"
+    input.accept = ".json"
+    input.onchange = () => {
+        if(input.files && input.files.length > 0){
+            let file = input.files[0]
+            let reader = new FileReader()
+            reader.onload = () => {
+                let json = reader.result as string
+                let obj = JSON.parse(json)
+                FS.root = obj
+
+                // add parents
+                function addParents(dir: FSDirectory){
+                    dir.children.forEach(c => {
+                        if(c.type == "directory"){
+                            addParents(c as FSDirectory)
+                        }
+                        c.parent = dir
+                    })
+                }
+                addParents(FS.root)
+
+                // foreach flowchart file
+                FS.getAllOfType(FileTypes.flowchart).forEach(f => {
+                    let content = f.content as FlowchartFileContent;
+
+                    content.nodes.forEach(n => {
+                        let name = n.type.name;
+
+                        // get the node data for that type
+                        let nodeData = Object.values(NodeTypes).find(n => n.name == name);
+
+                        // set the node type to that
+                        n.type = nodeData;
+                    });
+                })
+
+                FS.update()
+            }
+            reader.readAsText(file)
+        }
+
+        // remove element
+        input.remove()
+    }
+    input.click()
+}

@@ -66,6 +66,8 @@
             return;
         }
 
+        console.log(fsFile);
+
         return fsFile.content["data"];
     }
 </script>

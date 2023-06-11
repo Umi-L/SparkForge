@@ -75,7 +75,7 @@
                 let displayObject = new ObjectDisplay({
                     target: stage,
                     props: {
-                        object: object.object,
+                        objectPath: object.object,
                         position: object.position,
                         rotation: object.rotation,
                         scale: object.scale
@@ -103,8 +103,20 @@
             }
             
             let content = fsFile.content as SceneFileContent;
+
+            let objectsWithoutDisplayObjects = [];
+
+            // remove display objects from objects
+            for (let object of objects){
+                objectsWithoutDisplayObjects.push({
+                    object: object.object,
+                    position: object.position,
+                    rotation: object.rotation,
+                    scale: object.scale
+                })
+            }
             
-            content.objects = objects;
+            content.objects = objectsWithoutDisplayObjects;
             content.backgroundColor = backgroundColor;
        
         }
@@ -227,13 +239,14 @@
             // add the object to the scene at the drop position
             let localPos = globalMousePosToViewerPos(mousePos);
             
-            
+            // get file path
+            let filePath = FS.getPath(file);
 
             // create objectDisplay
             let objectDisplay = new ObjectDisplay({
                 target: stage,
                 props: {
-                    object: file,
+                    objectPath: filePath,
                     position: localPos,
                     rotation: 0,
                     scale: {width: gridSize, height: gridSize},
@@ -241,7 +254,7 @@
             });
 
             let objProps = {
-                object: file,
+                object: filePath,
                 position: localPos,
                 rotation: 0,
                 scale: {width: gridSize, height: gridSize},
