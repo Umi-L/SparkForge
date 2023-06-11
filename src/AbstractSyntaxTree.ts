@@ -12,6 +12,11 @@ export class ASTNode {
         this.outConnections = outConnections;
         this.inConnections = inConnections;
         this.parent = parent;
+        this.literals = literals;
+    }
+
+    public setLiterals(literals: any[]) {
+        this.literals = literals;
     }
 
     public parentHasOutConnection(inputNumber: number): boolean {
@@ -54,8 +59,6 @@ export class ASTConnection {
 
 export class AST {
     public root: ASTNode;
-
-
 
     constructor(root: ASTNode) {
         this.root = root;

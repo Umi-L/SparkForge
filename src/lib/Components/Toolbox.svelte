@@ -4,7 +4,15 @@
     import Node from "../Node.svelte";
     import { afterUpdate, onMount } from "svelte";
     import Panel from "../Panel.svelte";
-  import { toTitle } from "../../Utils";
+    import { ERORR, toTitle } from "../../Utils";
+  import { showCreateVariablePopover } from "../../CreateVariablePopoverManager";
+  import { currentLocalVariables } from "../../globals";
+
+
+    let localVariables = [];
+    currentLocalVariables.subscribe((value) => {
+        localVariables = value;
+    });
 
     // sort the node types by category
     const nodeTypesByCategory = Object.values(NodeTypes).reduce((acc: any, nodeType: NodeData) => {
@@ -16,6 +24,16 @@
 
         return acc;
     }, {});
+
+    function openCreateVariableMenu(){
+
+        if (!localVariables){
+            ERORR("You must have a flowchart open to create a variable.")
+            return;
+        }
+
+        showCreateVariablePopover();
+    }
 </script>
 
 
@@ -29,6 +47,13 @@
                 <Node type={nodeType} factory={true}/>
             {/each}
 
+            <!-- if catagory is variables -->
+            {#if category === "variables"}
+                <div class="create-variable-button" on:click={openCreateVariableMenu}>
+                    <h1 class="create-variable-text">Create Variable</h1>
+                </div>
+            {/if}
+
             <!-- <div class="separator"></div> -->
         </div>
     {/each}
@@ -37,6 +62,32 @@
 
 
 <style>
+
+    .create-variable-button{
+        width: 95%;
+        height: 1.8rem;
+        background-color: var(--foreground-color-2);
+        border-radius: var(--general-border-radius);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0.2rem;
+
+        cursor: pointer;
+
+        transition: 0.05s;
+
+        box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.2);
+    }
+
+    .create-variable-button:hover{
+        outline: 1px solid var(--text-color);
+    }
+
+    .create-variable-text{
+        color: var(--text-color);
+        font-size: 0.8rem;
+    }
 
     .node-menu {
         display: flex;

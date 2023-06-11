@@ -8,6 +8,7 @@
     import { createToast } from "../../../ToastManager";
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
     import { FS, type FSFile } from "../../../FileSystem";
+  import { currentFlowchart, currentLocalVariables } from "../../../globals";
   
     export let file: string;
     export const onResize = ()=>{};
@@ -48,6 +49,20 @@
     let selecting = false;
     let selectingStartPos:Point = {x: 0, y: 0};
     let selectedNodes: Array<Node> = []
+    let localVariables: Array<string> = ["myVariable"];
+    let currentlySelectedFlowchartFile = "";
+
+    currentFlowchart.subscribe((flowchart)=>{
+        currentlySelectedFlowchartFile = flowchart;
+    });
+
+    currentLocalVariables.subscribe((localVars)=>{
+        
+        if (currentlySelectedFlowchartFile != file)
+            return;
+
+        localVariables = localVars;
+    });
 
     let hasBeenSelected = false;
 
@@ -71,6 +86,15 @@
     }
 
     export const onSelect = ()=>{
+
+        currentFlowchart.update((flowchart)=>{
+            return file;
+        });
+
+        currentLocalVariables.update((localVars)=>{
+            return localVariables;
+        });
+
         if (hasBeenSelected) return;
         
         hasBeenSelected = true;
@@ -152,8 +176,10 @@
         
         console.log("loading flowchart from file");
 
-        let savedNodes: Array<SavedNode> = fsFile.content["nodes"];
-        let savedConnections: Array<SavedConnection> = fsFile.content["connections"];
+        let content = fsFile.content as FlowchartFileContent;
+
+        let savedNodes: Array<SavedNode> = content.nodes;
+        let savedConnections: Array<SavedConnection> = content.connections;
 
         for (let savedNode of savedNodes) {
             let node = new Node({
@@ -178,11 +204,12 @@
             );
         }
 
-        panelExtender.style.left = fsFile.content["extenderPosition"].x;
-        panelExtender.style.top = fsFile.content["extenderPosition"].y;
+        panelExtender.style.left = content.extenderPosition.x;
+        panelExtender.style.top = content.extenderPosition.y;
 
-
-    
+        currentLocalVariables.update((localVars)=>{
+            return content.localVariables;
+        });
     }
 
     export function updateNodePosition(node: Node){
@@ -927,6 +954,8 @@
                 literals: node.getLiteralValues()
             }
 
+            console.log(nodeDataItem)
+
             nodeData.push(nodeDataItem);
         }
 
@@ -952,7 +981,8 @@
             nodes: nodeData,
             connections: connectionData,
             extenderPosition: {x: panelExtender.style.left, y: panelExtender.style.top},
-            compiledCode: "" // The data must have changed for the file to be saved so the compiled code is invalid
+            compiledCode: "", // The data must have changed for the file to be saved so the compiled code is invalid
+            localVariables: localVariables
         } as FlowchartFileContent);
     }
 </script>

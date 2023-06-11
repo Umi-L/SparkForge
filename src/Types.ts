@@ -37,6 +37,7 @@ export interface FlowchartFileContent{
     nodes: Array<SavedNode>,
     connections: Array<SavedConnection>,
     extenderPosition: {x: string, y: string},
+    localVariables: Array<string>,
     compiledCode?: string,
 }
 
@@ -115,12 +116,13 @@ export enum FlowDataType {
     Object = 'object',
     Array = 'array',
     Any = 'any',
-    Vector2 = "vector2"
+    Vector2 = "vector2",
 }
 export enum FlowLiteralType {
     String = 'text',
     Number = 'number',
     Boolean = 'checkbox',
+    Variable = 'variable',
 }
 
 export enum NodeCatagories {
@@ -130,6 +132,7 @@ export enum NodeCatagories {
     Events = 'events',
     debug = 'debug',
     Movement = 'movement',
+    Variables = 'variables',
 }
 
 export interface NodeDefs {
@@ -467,6 +470,31 @@ export const NodeTypes: NodeDefs = {
         specialCase: true,
         template: new Template("new Vector2({l1}, {l2})"),
         category: NodeCatagories.literals,
+    },
+    Variable: {
+        name: "variable",
+        inputs: [],
+        outputs: [{ label: "variable", type: FlowDataType.Any }],
+        literals: [
+            { label: "variable", type: FlowLiteralType.Variable },
+        ],
+        specialCase: true,
+        template: new Template("{l1}"),
+        category: NodeCatagories.Variables,
+    },
+    SetVariable: {
+        name: "set variable",
+        inputs: [
+            { label: "in", type: FlowDataType.Flow },
+            { label: "variable", type: FlowDataType.Any },
+        ],
+        outputs: [{ label: "out", type: FlowDataType.Flow }],
+        literals: [
+            { label: "variable", type: FlowLiteralType.Variable },
+        ],
+        specialCase: true,
+        template: new Template("{l1} = {p1}"),
+        category: NodeCatagories.Variables,
     },
 };
 

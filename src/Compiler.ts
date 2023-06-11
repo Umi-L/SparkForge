@@ -60,6 +60,7 @@ function flowchartDataToASTs(data: any): Array<AST> {
                 let nodeData = nodes[node].type;
 
                 let newNode = new ASTNode(nodeData, [], astNode);
+                newNode.setLiterals(nodes[node].literals);
 
                 let astConnection = new ASTConnection(astNode, connection.from.outputNumber, newNode, connection.to.inputNumber);
 
@@ -84,7 +85,7 @@ function flowchartDataToASTs(data: any): Array<AST> {
             let literalValues = node.literals;
 
             let newNode = new ASTNode(nodeData, [], astNode);
-            newNode.literals = literalValues;
+            newNode.setLiterals(literalValues);
 
             let astConnection = new ASTConnection(newNode, connection.from.outputNumber, astNode, connection.to.inputNumber);
 
@@ -239,9 +240,19 @@ export function compileAll(){
     let files = FS.getAllOfType(FileTypes.flowchart);
 
     for (let file of files){
+        console.log("compiling flowchart", file)
         let asts = flowchartDataToASTs(file.content);
 
         let code = "";
+
+        let flowchartContent = file.content as FlowchartFileContent;
+
+        // foreach local variable define it
+        for (let variable of flowchartContent.localVariables){
+            code += `let ${variable}\n`;
+        }
+
+        code += "\n";
 
         // TODO: Error handling
         for (let ast of asts){

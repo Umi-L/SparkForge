@@ -8,6 +8,7 @@
     import { openContextMenu, type IMenuOption } from "../ContextMenu";
     import { toTitle } from "../Utils";
     import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
+  import NodeLiteral from "./NodeLiteral.svelte";
 
     let myself = get_current_component() as Node;
     const dispatch = createEventDispatcher();
@@ -28,7 +29,7 @@
     let outputElements: Array<HTMLDivElement> = [];
 
     let nodeBody: HTMLDivElement;
-    let literalInputs: Array<HTMLInputElement> = [];
+    let literalInputs: Array<NodeLiteral> = [];
 
     let inWorkspace = false;
     let selected = false;
@@ -93,7 +94,7 @@
         } 
         else{
             literalInputs.forEach(literalInput => {
-                if (literalInput != event.target){
+                if (literalInput.getInputElement() != event.target){
                     literalInput.blur();
                 }
             });
@@ -116,6 +117,8 @@
     function updateParent(){
         // console.log("updating parent");
         dispatch("update", {uuid: uuid, data: type});
+
+        console.log("updating parent", getLiteralValues());
     }
 
     function nodeBodyMouseDown(event){
@@ -150,7 +153,7 @@
             // else if none of the input elements are having the mouse up
             let onLiteral = false;
             literalInputs.forEach(literalInput => {
-                if (literalInput != event.target){
+                if (literalInput.getInputElement() != event.target){
                     literalInput.blur();
                 }
                 else{
@@ -279,12 +282,7 @@
         let values = [];
 
         literalInputs.forEach(literalInput => {
-            if (literalInput.type == "text")
-                values.push(literalInput.value);
-            else if (literalInput.type == "number")
-                values.push(parseFloat(literalInput.value));
-            else if (literalInput.type == "checkbox")
-                values.push(literalInput.checked);
+            values.push(literalInput.getValue())
         });
 
         return values;
@@ -292,12 +290,7 @@
 
     export function setLiteralValues(values){
         literalInputs.forEach((literalInput, index) => {
-            if (literalInput.type == "text")
-                literalInput.value = values[index];
-            else if (literalInput.type == "number")
-                literalInput.value = values[index];
-            else if (literalInput.type == "checkbox")
-                literalInput.checked = values[index];
+            literalInput.setValue(values[index]);
         });
     }
 
@@ -371,7 +364,7 @@
 
                     <!-- draw a circle -->
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <input type={literals[i].type} class="input" bind:this={literalInputs[i]} on:change={updateParent} on:input={updateParent}>
+                    <NodeLiteral on:valueChange={updateParent} type={literals[i].type} bind:this={literalInputs[i]}></NodeLiteral>
 
                     <p class="description-text">{literal.label}</p>
                 </div>
@@ -532,23 +525,6 @@
         /* pointer-events: none; */
 
 
-    }
-
-    .input{
-        max-width: 80px;
-        height: 20px;
-
-        border-radius: var(--general-border-radius);
-
-        border: 1px solid var(--foreground-color);
-
-        background-color: var(--midground-color);
-
-        color: var(--text-color);
-
-        padding: 5px;
-
-        pointer-events: all;
     }
 
     .input-points{
