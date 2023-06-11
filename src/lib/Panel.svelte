@@ -252,6 +252,13 @@
 
     function setFullscreen(value: boolean){
         fullscreen = value;
+
+        // resize
+        for (let tab of tabComponents){
+            if (tab.onResize)
+                tab.onResize();
+        }
+        
     }
 </script>
 

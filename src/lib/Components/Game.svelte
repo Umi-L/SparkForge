@@ -45,6 +45,10 @@
 		
 		export function onResize(){
 			resizeFunc();
+
+			requestAnimationFrame(() =>{
+				resizeFunc();
+			})
 		}
 		
 		export function onFocus(){
