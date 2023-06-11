@@ -26,6 +26,7 @@
     
     let panelContainer:HTMLDivElement;
     let dragging = false;
+    let fullscreen = false;
 
     let tabComponents = [];
 
@@ -248,11 +249,15 @@
         relativeSize.width = width;
         relativeSize.height = height;
     }
+
+    function setFullscreen(value: boolean){
+        fullscreen = value;
+    }
 </script>
 
 
 
-<div class="panel-container" bind:this={panelContainer} class:dragging={dragging}>
+<div class="panel-container" bind:this={panelContainer} class:dragging={dragging} class:fullscreen={fullscreen}>
     <div class="panel-header" bind:this={panelHeader}>
 
         <div class="tabs-container">
@@ -266,12 +271,16 @@
 
         <div class="panel-buttons">
             <!-- svelte-ignore a11y-missing-attribute -->
-            <!-- <span class="iconify" data-icon="mdi-minus"></span> -->
-            <a class="min-close-button"><Icon icon="mdi-minus" /></a>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            {#if !fullscreen}
+                <a class="header-button" on:click={()=>{setFullscreen(true)}}><Icon icon="mdi-fullscreen" /></a>
+            {:else}
+                <a class="header-button" on:click={()=>{setFullscreen(false)}}><Icon icon="mdi-fullscreen-exit" /></a>
+            {/if}
 
             <!-- svelte-ignore a11y-missing-attribute -->
             <!-- <span class="iconify" data-icon="mdi-close"></span> -->
-            <a class="min-close-button"><Icon icon="mdi-close" /></a>
+            <a class="header-button"><Icon icon="mdi-close" /></a>
         </div>
     </div>
     <div class="panel-body" bind:this={panelBody}>
@@ -286,6 +295,18 @@
 
 
 <style>
+
+    .fullscreen{
+        position: fixed !important;
+        top: 0 !important;
+        left: 0!important;
+        width: 100% !important;
+        height: 100% !important;
+
+        border-radius: 0 !important;
+
+        z-index: 5000;
+    }
 
     .active-tab-header{
 
@@ -413,7 +434,7 @@
         gap: 5px;
     }
 
-    .min-close-button:hover{
+    .header-button:hover{
         color: var(--primary-color);
     }
 
