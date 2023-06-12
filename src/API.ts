@@ -1,7 +1,7 @@
 import type { QuickJSContext, QuickJSHandle, SuccessOrFail, WeakLifetime } from "quickjs-emscripten";
 import { addOutputMessage } from "./OutputSystem";
 import { currentEntity, currentVM } from "./globals";
-import type { Entity } from "./gameRuntime";
+import { keysPressed, type Entity } from "./gameRuntime";
 
 let vm: QuickJSContext = undefined;
 let entity: Entity = undefined;
@@ -72,6 +72,16 @@ export function random(minin, maxin) {
     return vm.newNumber(Math.floor(Math.random() * (max - min + 1)) + min);
 }
 
+export function isKeyPressed(keyin){
+    let key = vm.getString(keyin);
+
+    // if key in keysPressed
+    if (keysPressed.has(key)) {
+        return vm.true;
+    }
+    
+    return vm.false;
+}
 
 
 export class Vector2{
@@ -81,5 +91,17 @@ export class Vector2{
     constructor(x: number, y: number){
         this.x = x;
         this.y = y;
+    }
+}
+
+export class Color {
+    r: number;
+    g: number;
+    b: number;
+
+    constructor(r: number, g: number, b: number, a: number){
+        this.r = r;
+        this.g = g;
+        this.b = b;
     }
 }

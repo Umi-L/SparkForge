@@ -6,6 +6,7 @@ import { NodeTypes } from "./Types";
 
 export let QuickJS: QuickJSWASMModule;
 export let app: PIXI.Application;
+export let keysPressed = new Set<string>();
 
 let entities: Array<Entity> = [];
 

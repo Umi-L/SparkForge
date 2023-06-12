@@ -2,17 +2,17 @@
   - [x] write a compiler
   - [x] base GUI
   - [x] Toasts (kind of buggy right now)
-  - [ ] game display and sandbox
-  - [ ] api functions exposed to code
+  - [x] game display and sandbox
+  - [x] api functions exposed to code
   - [x] code text editor (Monaco?)
   - [x] tabs on workspaces
   - [x] output
   - [x] tabs on panels (no movement yet)
   - [x] file system
   - [ ] fix that stupid panel arrangement bug
-  - [ ] file system integration
-  - [ ] saving and loading
-  - [ ] scene editor
+  - [x] file system integration
+  - [x] saving and loading
+  - [x] scene editor
   - [ ] documentation
   - [x] selection
   - [x] custom context menu

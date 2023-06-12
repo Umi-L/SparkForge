@@ -1,10 +1,10 @@
 <script lang="ts">
     import { Compile, compileAll } from "../Compiler";
     import { openContextMenu, type IMenuOption } from "../ContextMenu";
-  import { loadFileSystemFromJson, saveFileSystemToJson } from "../FileSystem";
   import { changeAllPanelsTabIfPossible } from "../WindowManager";
   import { gameRunning } from "../globals";
     import { getElementFromDomElement } from "../main";
+  import { loadProjectFromJson, saveProjectToJson } from "../saveAndLoad";
     import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
     import Icon from "@iconify/svelte";
 
@@ -22,7 +22,7 @@
         {
             label: "Open",
             action: () => {
-                loadFileSystemFromJson();
+                loadProjectFromJson();
             },
             avalableCheck: () => {
                 return true;
@@ -32,7 +32,7 @@
         {
             label: "Save As File",
             action: () => {
-                saveFileSystemToJson();
+                saveProjectToJson();
             },
             avalableCheck: () => {
                 return true;

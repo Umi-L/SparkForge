@@ -3,7 +3,7 @@ import type { FlowDataType } from "./Types";
 
 export let openTabs = writable([]);
 export let gameRunning: Writable<boolean> = writable(false);
-export let rootScene = writable(null);
+export let rootScene:Writable<string> = writable(null);
 export let currentFlowchart: Writable<string> = writable(null);
 export let currentLocalVariables: Writable<Array<string>> = writable(null);
 

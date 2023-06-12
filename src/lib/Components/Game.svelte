@@ -8,7 +8,7 @@
 	import { createToast } from "../../ToastManager";
 	import Toast from "../Toast.svelte";
 	import { ERORR, getProperty } from "../../Utils";
-  	import { app, Entity, initPIXIApp, initQuickJS, QuickJS, type spriteComponent } from "../../gameRuntime";
+  	import { app, Entity, initPIXIApp, initQuickJS, keysPressed, QuickJS, type spriteComponent } from "../../gameRuntime";
 		
 	let gameContainer: HTMLDivElement;
 	
@@ -86,6 +86,9 @@
 
 			// add keydown listener
 			window.addEventListener("keydown", (e) => {
+
+				keysPressed.add(e.key);
+
 				// foreach entity
 				for (const entity of entities) {
 					entity.callFunction("keyDown", [e.key]);
@@ -94,6 +97,9 @@
 
 			// add keyup listener
 			window.addEventListener("keyup", (e) => {
+
+				keysPressed.delete(e.key);
+
 				// foreach entity
 				for (const entity of entities) {
 					entity.callFunction("keyUp", [e.key]);

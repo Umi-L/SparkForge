@@ -1,4 +1,4 @@
-import { print, moveBy, moveTo, rotateTo, rotateBy, sizeBy, sizeTo, random } from "./API"
+import { print, moveBy, moveTo, rotateTo, rotateBy, sizeBy, sizeTo, random, isKeyPressed } from "./API"
 import type { FSFile } from "./FileSystem"
 import { Template } from "./Templates"
 import type ObjectDisplay from "./lib/Components/Editors/SceneEditorComponents/ObjectDisplay.svelte"
@@ -125,6 +125,7 @@ export enum FlowLiteralType {
     Variable = 'variable',
 }
 
+
 export enum NodeCatagories {
     Control = 'control',
     Operators = 'operators',
@@ -133,6 +134,7 @@ export enum NodeCatagories {
     debug = 'debug',
     Movement = 'movement',
     Variables = 'variables',
+    Input = "input"
 }
 
 export interface NodeDefs {
@@ -298,6 +300,16 @@ export const NodeTypes: NodeDefs = {
         literals: [],
         func: sizeBy,
         category: NodeCatagories.Movement,
+    },
+    isKeyPressed: {
+        name: "is key pressed",
+        inputs: [
+            { label: "key", type: FlowDataType.String },
+        ],
+        outputs: [{ label: "is key pressed", type: FlowDataType.Boolean }],
+        literals: [],
+        func: isKeyPressed,
+        category: NodeCatagories.Input,
     },
     Random: {
         name: "random",

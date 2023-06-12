@@ -25,7 +25,17 @@
 	let divEl;
 	let editor;
 	let Monaco;
-	let content = "// Write your code here";
+	let content = `// this is the start function
+// it is ran when the object is created
+function start(){
+	// . . .
+}
+
+// this is the update function
+// it is ran every frame
+function update(){
+	// . . .
+}`;
 	onMount(async () => {
 		
 		// load file content
