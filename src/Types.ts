@@ -306,7 +306,7 @@ export const NodeTypes: NodeDefs = {
         inputs: [
             { label: "key", type: FlowDataType.String },
         ],
-        outputs: [{ label: "is key pressed", type: FlowDataType.Boolean }],
+        outputs: [{ label: "is pressed", type: FlowDataType.Boolean }],
         literals: [],
         func: isKeyPressed,
         category: NodeCatagories.Input,

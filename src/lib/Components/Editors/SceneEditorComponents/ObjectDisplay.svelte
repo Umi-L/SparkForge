@@ -1,13 +1,17 @@
 <script lang="ts">
+    import { createEventDispatcher } from "svelte";
     import { FS, type FSFile } from "../../../../FileSystem";
-  import { getComponent, getProperty } from "../../../../Utils";
+    import { getComponent, getProperty, type Rect } from "../../../../Utils";
 
     export let objectPath: string;
     export let position: {x: number, y: number};
     export let scale: {width: number, height: number} = {width: 35, height: 35};
     export let rotation: number = 0;
 
+    let dispatch = createEventDispatcher();
+
     let object = FS.getAtPath(objectPath) as FSFile;
+    let objectContainer: HTMLDivElement;
 
     let spritePath = getSpritePath()
     if (!spritePath) {
@@ -54,12 +58,28 @@
         return spritePath;
     }
 
+    export function getBounds(): Rect{
+        return {
+            x: position.x,
+            y: position.y,
+            width: scale.width,
+            height: scale.height
+        }
+    }
+
+    function onClick(){
+        dispatch("click");
+        console.log("click");
+    }
+
 </script>
 
 
 
-<div class="object-container" style={`left: ${position.x}px; top: ${position.y}px; width: ${scale.width}px; height: ${scale.height}px;`}>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="object-container" style={`left: ${position.x}px; top: ${position.y}px; width: ${scale.width}px; height: ${scale.height}px;`} on:click={onClick} bind:this={objectContainer}>
     <!-- svelte-ignore a11y-missing-attribute -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <img src={spritePath} class="sprite-display">
 </div>
 
@@ -68,6 +88,9 @@
 <style>
     .object-container{
         position: absolute;
+        pointer-events: all;
+
+        cursor: pointer;
     }
 
     .sprite-display{

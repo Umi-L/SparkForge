@@ -9,6 +9,7 @@
     import { openContextMenu, type IMenuOption } from "../../../ContextMenu";
     import { FS, type FSFile } from "../../../FileSystem";
   import { currentFlowchart, currentLocalVariables } from "../../../globals";
+  import { getContainingBoxOfBoxes, type Rect } from "../../../Utils";
   
     export let file: string;
     export const onResize = ()=>{};
@@ -764,50 +765,17 @@
 
     function getSelectedNodesBox(){
         // get the box that contains all the selected nodes
-        // get this by using the point that has the lowest x and y and the point that has the highest x and y
 
-        let box = {
-            x: undefined,
-            y: undefined,
-            width: undefined,
-            height: undefined,
-        }
+        let nodeBoxes: Array<Rect> = [];
 
         for (let i = 0; i < selectedNodes.length; i++) {
             let node = selectedNodes[i];
 
-            let nodeBox = node.getBox();
-
-            // if any of the nodeBox points are outside the box then move the box to include them
-            if (box.x == undefined || nodeBox.x < box.x) {
-                box.x = nodeBox.x;
-            }
-
-            if (box.y == undefined || nodeBox.y < box.y) {
-                box.y = nodeBox.y;
-            }
-
-            if (box.width == undefined || nodeBox.x + nodeBox.width > box.x + box.width) {
-                box.width = nodeBox.x + nodeBox.width - box.x;
-            }
-
-            if (box.height == undefined || nodeBox.y + nodeBox.height > box.y + box.height) {
-                box.height = nodeBox.y + nodeBox.height - box.y;
-            }
+            nodeBoxes.push(node.getBox());
         }
 
-        // Compute the maximum x and y coordinates of all the node boxes
-        let maxX = box.x;
-        let maxY = box.y;
-        for (let i = 0; i < selectedNodes.length; i++) {
-            let nodeBox = selectedNodes[i].getBox();
-            maxX = Math.max(maxX, nodeBox.x + nodeBox.width);
-            maxY = Math.max(maxY, nodeBox.y + nodeBox.height);
-        }
+        let box = getContainingBoxOfBoxes(nodeBoxes);
 
-        // Compute the width and height of the bounding box
-        box.width = maxX - box.x;
-        box.height = maxY - box.y;
 
         // add 10px padding
         box.x -= 10;

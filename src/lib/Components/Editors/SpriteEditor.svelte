@@ -6,6 +6,7 @@
     import { createToast } from "../../../ToastManager";
     import Toast from "../../Toast.svelte";
     import { ToastPosition, ToastType, type SpriteFileContent, type Frame } from "../../../Types";
+  import { currentEntity } from "../../../globals";
 
    
     onMount(() => {
@@ -13,6 +14,8 @@
     })
     
     let selectedFrame: number = 0;
+    let frameElements: Array<HTMLDivElement> = [];
+    let frameTime = 0.1; // time between frames in seconds
 
     export let filePath: string;
     let frames: Array<Frame> = [];
@@ -49,7 +52,7 @@
 
                     save();
                 },
-                avalableCheck: () => !frames.find(frame => frame.path == FS.getPath(imageFile)),
+                avalableCheck: () => true,
                 icon: getFileTypeIcon(imageFile.fileType)
 
             })
@@ -59,6 +62,10 @@
     }
 
     function getFrameImage(frame: Frame){
+
+        // if the frame is not in frames return
+        if (!frames.includes(frame)) return;
+
         let fsFile = FS.getAtPath(frame.path) as FSFile;
 
         if (!fsFile) {
@@ -70,6 +77,19 @@
 
         return fsFile.content["data"];
     }
+
+    function removeFrame(index: number){
+        frames.splice(index, 1);
+
+        frames = [...frames]; // force each update
+
+        // ensure selected frame is still in range
+        if (selectedFrame >= frames.length) selectedFrame = frames.length - 1;
+
+        console.log(frames, selectedFrame)
+
+        save();
+    }
 </script>
 
 
@@ -80,8 +100,16 @@
         <div class="frames">
             {#each frames as frame, i}
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div class="frame" on:click={()=>{selectedFrame = i}}>
+                <div class="frame" on:click={(event)=>{
+                    if (event.target == frameElements[i])
+                        selectedFrame = i
+                    }} 
+                    class:selected={selectedFrame==i}
+                    bind:this={frameElements[i]}>
                     <img src={getFrameImage(frame)} alt="" class="frame-thumbnail">
+                    <div class="delete-button" on:click={()=>{removeFrame(i)}}>
+                        <Icon icon="mdi-close" class="icon"></Icon>
+                    </div>
                 </div>
             {/each}
 
@@ -90,6 +118,14 @@
                 <Icon icon="mdi-plus"></Icon>
             </div>
         </div>
+
+        <div class="frame-settings">
+            <p class="frame-settings-text">
+                Frame Time:
+            </p>
+            <input type="number" step="0.1" min="0" bind:value={frameTime} class="frame-time">
+        </div>
+        
     </div>
 
     <div class="image-viewer">
@@ -105,16 +141,54 @@
 
 <style>
 
+    .frame-settings-text{
+        color: var(--text-color);
+        font-size: 0.6rem;
+        font-weight: 500;
+    }
+
+    .frame-settings{
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        position: absolute;
+        top: 5px;
+        right: 5px;
+
+        width: 5rem;
+        height: 1rem;
+    }
+
+    .frame-time{
+        width: 100%;
+        height: 100%;
+
+        background-color: var(--foreground-color);
+        outline: 1px solid var(--text-color);
+        border: none;
+        border-radius: 5px;
+
+        color: var(--text-color);
+        font-size: 0.8rem;
+        font-weight: 500;
+
+        padding: 0.2rem;
+    }
+
     .frame-thumbnail{
         height: 100%;
 
         image-rendering: pixelated;
+
+        pointer-events: none;
     }
 
     .frames{
         display: flex;
         flex-direction: row;
-        overflow-x: auto;
+        overflow-x: scroll;
 
         height: 100%;
         width: 100%;
@@ -124,7 +198,8 @@
         gap: 10px;
     }
 
-    .add{
+    .selected{
+        outline: 2px solid var(--primary-color);
     }
 
     .no-frames-text{
@@ -132,6 +207,34 @@
         font-size: 1rem;
         font-weight: 500;
         text-align: center;
+    }
+
+    .delete-button{
+        position: absolute;
+        top: 2px;
+        right: 2px;
+
+        width: 1rem;
+        height: 1rem;
+
+
+        background-color: var(--midground-color);
+        border-radius: 50%;
+        border: 1px solid var(--background-color);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        cursor: pointer;
+
+        opacity: 0;
+
+        transition: 0.1s ease-in-out;
+    }
+
+    .frame:hover .delete-button{
+        opacity: 0.9;
     }
 
     .frame{
@@ -145,13 +248,15 @@
         align-items: center;
 
         background-color: var(--foreground-color);
-        border-radius: var(--general-border-radius);
+        /* border-radius: var(--general-border-radius); */
         box-shadow: 0 0 5px rgba(0,0,0,0.1);
 
-        overflow: hidden;
+        position: relative;
     }
 
     .sprite-editor-body{
+        position: relative;
+
         width: 100%;
         height: 100%;
 
@@ -163,6 +268,9 @@
     .topbar{
         height: 10rem;
         width: 100%;
+
+        display: flex;
+        flex-direction: row;
     }
 
     .image-viewer{

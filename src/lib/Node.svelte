@@ -6,7 +6,7 @@
     import { get_current_component } from "svelte/internal";
     import { genUUID } from "../uuid";
     import { openContextMenu, type IMenuOption } from "../ContextMenu";
-    import { toTitle } from "../Utils";
+    import { toTitle, type Rect } from "../Utils";
     import type FlowchartEditor from "./Components/Editors/FlowchartEditor.svelte";
   import NodeLiteral from "./NodeLiteral.svelte";
 
@@ -294,7 +294,7 @@
         });
     }
 
-    export function getBox(){
+    export function getBox(): Rect{
         let clientRect = nodeBody.getBoundingClientRect();
 
         return {
@@ -302,7 +302,7 @@
             y: position.y,
             width: clientRect.width,
             height: clientRect.height
-        }
+        } as Rect;
     }
 
     export function getSelected(){
@@ -430,6 +430,8 @@
     .description-text{
         font-size: 0.8em;
         color: var(--text-color);
+
+        white-space: nowrap;
     }
 
     .node-body {
@@ -483,6 +485,8 @@
         width: 15px;
         height: 15px;
         border-radius: 50%;
+
+        aspect-ratio: 1/1;
 
 
         /* transform: translate(-50%, -50%); */

@@ -33,6 +33,8 @@ export interface spriteComponent extends Component {
         sprite: PIXI.Sprite;
         width: number;
         height: number;
+        frameTime: number;
+        frame: number;
     },
 }
 

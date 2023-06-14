@@ -14,7 +14,7 @@
         type: FileTypes;
     }
 
-    let tabs: Array<ITab>;
+    let tabs: Array<ITab> = [];
     let editors: Array<any> = [];
     let selectedIndex = 0;
 

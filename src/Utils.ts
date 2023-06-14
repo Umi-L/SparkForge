@@ -97,3 +97,42 @@ export function ERORR(text: string){
     console.error(text);
     createToast(text, ToastType.Error, ToastPosition.BottomRight);
 }
+
+export function getContainingBoxOfBoxes(boundingClientRects: Array<Rect>){
+
+    // if length is 0, return box of 0
+    if (boundingClientRects.length == 0) return {
+        y: 0,
+        x: 0,
+        height: 0,
+        width: 0,
+    }
+
+    let top = boundingClientRects[0].y;
+    let left = boundingClientRects[0].x;
+    let bottom = boundingClientRects[0].height;
+    let right = boundingClientRects[0].width;
+
+    for (let i = 1; i < boundingClientRects.length; i++){
+        let box = boundingClientRects[i];
+
+        if (box.y < top) top = box.y;
+        if (box.x < left) left = box.x;
+        if (box.height > bottom) bottom = box.height;
+        if (box.width > right) right = box.width;
+    }
+
+    return {
+        y: top,
+        x: left,
+        height: bottom,
+        width: right,
+    }
+}
+
+export interface Rect {
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+}

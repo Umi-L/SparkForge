@@ -7,6 +7,8 @@
     import ObjectDisplay from "./SceneEditorComponents/ObjectDisplay.svelte";
     import { createToast } from "../../../ToastManager";
     import { ToastPosition, ToastType, type ISceneObject, type SceneFileContent } from "../../../Types";
+  import { getContainingBoxOfBoxes, type Rect } from "../../../Utils";
+  import { writable, type Writable } from "svelte/store";
 
     
     let myself = get_current_component();
@@ -16,7 +18,15 @@
     let stage: HTMLDivElement;
     
     let selecting = false;
-    let selectedItems = [];
+    let selectedItemsStore: Writable<Array<ObjectDisplay>> = writable([]);
+    let selectedItems: Array<ObjectDisplay> = []
+    let currentlySelectedBoxStyle = "";
+
+    selectedItemsStore.subscribe(value => {
+        selectedItems = value;
+        generateCurrentlySelectedBoxStyle();
+    })
+
     let dragging = false;
     let selectingStartPos = {x: 0, y: 0};
     
@@ -40,6 +50,7 @@
         registerElement(viewer, myself);
         
         window.addEventListener("mousemove", globalMouseMove);
+        window.addEventListener("mouseup", globalMouseUp);
     })
     
     export function onSelect(event){
@@ -72,15 +83,7 @@
                 return
             
             for (let object of content.objects){
-                let displayObject = new ObjectDisplay({
-                    target: stage,
-                    props: {
-                        objectPath: object.object,
-                        position: object.position,
-                        rotation: object.rotation,
-                        scale: object.scale
-                    }
-                })
+                let displayObject = makeObjectDisplay(object.object, object.position, object.rotation, object.scale);
                 
                 objects.push({
                     object: object.object,
@@ -121,9 +124,7 @@
        
         }
         
-        function viewerMouseDown(event){
-            console.log("mouse down");
-            
+        function viewerMouseDown(event){            
             if (event.button == 0){
                 // if the mouse is not over only the workspace then don't drag
                 if (event.target != viewer) {
@@ -147,7 +148,7 @@
                     //set start position of selection
                 }
                 else{
-                    selectedItems = [];
+                    selectedItemsStore.set([]);
                     // refreshSelected();
                     dragging = true;
                 }
@@ -220,6 +221,10 @@
                 return;
             }
         }
+
+        function globalMouseUp(event: MouseEvent){
+            selecting = false;
+        }
         
         function toggleSidebar(){
             pulloutOpen = !pulloutOpen;
@@ -243,15 +248,7 @@
             let filePath = FS.getPath(file);
 
             // create objectDisplay
-            let objectDisplay = new ObjectDisplay({
-                target: stage,
-                props: {
-                    objectPath: filePath,
-                    position: localPos,
-                    rotation: 0,
-                    scale: {width: gridSize, height: gridSize},
-                }
-            });
+            let objectDisplay = makeObjectDisplay(filePath, localPos, 0, {width: gridSize, height: gridSize})
 
             let objProps = {
                 object: filePath,
@@ -266,7 +263,55 @@
             save();
         }
 
-         
+        function makeObjectDisplay(objectPath: string, position: {x: number, y: number}, rotation: number, scale: {width: number, height: number}){
+            let objectDisplay = new ObjectDisplay({
+                target: stage,
+                props: {
+                    objectPath: objectPath,
+                    position: position,
+                    rotation: rotation,
+                    scale: scale,
+                }
+            });
+
+            objectDisplay.$on("click", ()=>{
+                selectedItemsStore.set([objectDisplay]);
+            })
+
+            return objectDisplay;
+        }
+
+        function getSelectedBounds(){
+            let rects: Array<Rect> = [];
+
+            // foreach selected item
+            for (let item of selectedItems){
+                // get the bounds of the item
+                rects.push(item.getBounds());
+            }
+
+            // get the bounds of all the items
+            let bounds = getContainingBoxOfBoxes(rects);
+
+            // add 10px padding
+            bounds.x -= 5;
+            bounds.y -= 5;
+            bounds.width += 10;
+            bounds.height += 10;
+
+            return bounds;
+        }
+
+        function generateCurrentlySelectedBoxStyle(){
+            let bounds = getSelectedBounds();
+
+            currentlySelectedBoxStyle = `
+                left: ${bounds.x}px;
+                top: ${bounds.y}px;
+                width: ${bounds.width}px;
+                height: ${bounds.height}px;
+            `;
+        }
     </script>
     
     
@@ -312,13 +357,24 @@
                 </div>
             </div>
         </div>
-        
-        <div class="selection-box" bind:this={selectionBox} class:visible={selecting}></div>
-        <div class="currently-selected-box" bind:this={currentlySelectedBox} class:visible={selectedItems.length > 0}></div>
+    
         
         <div class="scrollable-viewer" bind:this={viewer} on:mousedown={viewerMouseDown} on:mousemove={viewerMouseMove} on:mouseup={viewerMouseUp}>
             <div class="stage" bind:this={stage} style={`width: ${stageSize.width*gridSize}px; height: ${stageSize.height*gridSize}px; background-size: ${gridSize}px ${gridSize}px; background-color: ${backgroundColor};`}>
                 <div class="grid" style={`width: ${stageSize.width*gridSize}px; height: ${stageSize.height*gridSize}px; background-size: ${gridSize}px ${gridSize}px;`}></div>
+
+                <div class="selection-box" bind:this={selectionBox} class:visible={selecting}></div>
+                <div class="currently-selected-box" bind:this={currentlySelectedBox} style={currentlySelectedBoxStyle} class:visible={selectedItems.length > 0}>
+                    <div class="top-left-handle handle"></div>
+                    <div class="top-right-handle handle"></div>
+                    <div class="bottom-left-handle handle"></div>
+                    <div class="bottom-right-handle handle"></div>
+
+                    <div class="left-handle handle"></div>
+                    <div class="right-handle handle"></div>
+                    <div class="top-handle handle"></div>
+                    <div class="bottom-handle handle"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -423,7 +479,7 @@
         }
         
         .visible{
-            display: block;
+            display: block !important;
         }
         
         .stage{
@@ -433,6 +489,70 @@
             position: relative;
         }
         
+        .handle{
+            --handle-size: 0.5rem;
+
+            position: absolute;
+            width: var(--handle-size);
+            height: var(--handle-size);
+            background-color: var(--foreground-color);
+            border-radius: 2px;
+            border: 1px solid var(--text-color);
+            pointer-events: all;
+        }
+
+        .top-left-handle{
+            top: calc(var(--handle-size)/-2);
+            left: calc(var(--handle-size)/-2);
+            cursor: nwse-resize;
+        }
+
+        .top-right-handle{
+            top: calc(var(--handle-size)/-2);
+            right: calc(var(--handle-size)/-2);
+            cursor: nesw-resize;
+        }
+
+        .bottom-left-handle{
+            bottom: calc(var(--handle-size)/-2);
+            left: calc(var(--handle-size)/-2);
+            cursor: nesw-resize;
+        }
+
+        .bottom-right-handle{
+            bottom: calc(var(--handle-size)/-2);
+            right: calc(var(--handle-size)/-2);
+            cursor: nwse-resize;
+        }
+
+        .left-handle{
+            top: 50%;
+            left: calc(var(--handle-size)/-2);
+            transform: translateY(-50%);
+            cursor: ew-resize;
+        }
+
+        .right-handle{
+            top: 50%;
+            right: calc(var(--handle-size)/-2);
+            transform: translateY(-50%);
+            cursor: ew-resize;
+        }
+
+        .top-handle{
+            top: calc(var(--handle-size)/-2);
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: ns-resize;
+        }
+
+        .bottom-handle{
+            bottom: calc(var(--handle-size)/-2);
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: ns-resize;
+        }
+
         .sidebar{
             width: 15rem;
             height: 90%;
@@ -508,6 +628,10 @@
 
         .grid{
             opacity: 0.5;
+        }
+
+        .top-handle{
+            
         }
         
         

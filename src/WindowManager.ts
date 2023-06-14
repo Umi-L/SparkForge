@@ -323,7 +323,7 @@ function generateResizeIndicators() {
 
             // on global mouse up
             let mouseUpFunc = (e) => {
-                console.log("mouse up")
+                // console.log("mouse up")
                 div.setAttribute("dragging", "false");
                 edgesDown[i] = false;
             };

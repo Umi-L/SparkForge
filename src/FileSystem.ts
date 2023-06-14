@@ -1,5 +1,6 @@
 import type { Component } from "./PropertiesSystem"
 import { PropertyTypes, type FlowchartFileContent, NodeTypes } from "./Types"
+import { rootScene } from "./globals"
 
 export interface FSFile{
     type: "file"
@@ -202,6 +203,14 @@ class FileSystem{
         // make parent open
         parent.open = true
 
+        // if the file is a scene and there is no root scene, set it as the root scene
+        if (file.fileType == FileTypes.scene){
+            rootScene.update((current)=>{
+                if(!current) return this.getPath(file);
+                return current;
+            })
+        }
+
         this.update();
     }
 
@@ -369,7 +378,7 @@ export function loadFileSystem(root: FSDirectory){
             c.parent = dir
         })
     }
-    
+
     addParents(FS.root)
 
     // foreach flowchart file
