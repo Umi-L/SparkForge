@@ -1,4 +1,4 @@
-# Brainbox TODO list
+# SparkForge TODO list
   - [x] write a compiler
   - [x] base GUI
   - [x] Toasts (kind of buggy right now)

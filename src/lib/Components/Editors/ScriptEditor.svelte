@@ -62,7 +62,7 @@ function update(){
 		editor = Monaco.editor.create(divEl, {
 			value: content,
 			language: "javascript",
-			theme: "brainbox-theme",
+			theme: "sparkforge-theme",
 		});
 		
 		editor.onDidCompositionStart = () =>{
@@ -109,7 +109,7 @@ function update(){
 			base = 'vs-dark';
 		}
 		
-		Monaco.editor.defineTheme("brainbox-theme", {
+		Monaco.editor.defineTheme("sparkforge-theme", {
 			base: base,
 			inherit: true,
 			rules: [],
@@ -119,7 +119,7 @@ function update(){
 				
 			},
 		});
-		Monaco.editor.setTheme("brainbox-theme");
+		Monaco.editor.setTheme("sparkforge-theme");
 	}
 
 	function load(){

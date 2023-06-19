@@ -1,8 +1,8 @@
-# 🧠 BrainBox 📦
-BrainBox is a project that aims to bridge the gap between visual programming and text-based programming, making it easier for those who want to learn programming. It serves as a visual aid that can help users transition to a programming language, while keeping them engaged by allowing them to create games.
+# ⚡⚒️ SparkForge
+SparkForge is a project that aims to bridge the gap between visual programming and text-based programming, making it easier for those who want to learn programming. It serves as a visual aid that can help users transition to a programming language, while keeping them engaged by allowing them to create games.
 
 ## 🎮 Purpose
-The purpose of BrainBox is to help users learn programming by providing them with a fun and engaging tool to create games. With BrainBox, users can start with a visual interface and gradually transition to text-based programming.
+The purpose of SparkForge is to help users learn programming by providing them with a fun and engaging tool to create games. With SparkForge, users can start with a visual interface and gradually transition to text-based programming.
 
 ## TODO
 [todo markdown file](TODO.md)
